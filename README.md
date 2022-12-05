@@ -3,7 +3,8 @@ how long c++ name of class/struct can be ? i found struct with 1404 symbols in n
 ```
 struct Selector<
     ImplementsHelper<
-        RuntimeClassFlags<2>,1,
+        RuntimeClassFlags<2>,
+        1,
         ChainInterfaces<ITabletModePositioner,IBasicPositioner,Nil,Nil,Nil,Nil,Nil,Nil,Nil,Nil>,
         ChainInterfaces<IApplicationViewStatePositioner,IBasicPositioner,Nil,Nil,Nil,Nil,Nil,Nil,Nil,Nil>,
         ITabletModePositionerInternal,
