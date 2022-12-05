@@ -43,7 +43,8 @@ struct Selector<
             IImmersiveShellHookNotification,
             IMultitaskingViewVisibilityNotification,
             IShellTargetingChangeNotification,
-            IFullScreenPositionerPrivateNotification,ITransitionNotification
+            IFullScreenPositionerPrivateNotification,
+            ITransitionNotification
         > 
     > 
 >
