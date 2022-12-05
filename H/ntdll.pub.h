@@ -1,0 +1,15 @@
+_SWITCHBRANCH_CACHED_MODULE_TABLE g_SbCachedModuleTable_RTL;
+_SWITCHBRANCH_MODULE_TABLE_ENTRY g_SbTableEntry_HeapPaddingAndLFHSubsegmentCommitSwitch_RTL;
+_SWITCHBRANCH_MODULE_TABLE_ENTRY g_SbTableEntry_VerifyVersionInfoSwitch_RTL;
+int GetEntryIndex<_RESCDIRECTORY *,_RESCDENTRY *,0>(_RESCDIRECTORY *,_RESCACHEID,unsigned int);
+int GetFirstEntryIndex<_RESCDIRECTORY *,_RESCDENTRY *,0>(_RESCDIRECTORY *,_RESCACHEID);
+int RecurseValidate<_RESCDIRECTORY *>(_RESCDIRECTORY *,int,unsigned char *);
+int StackPush<int>(int,void *);
+int StackPush<unsigned int>(unsigned int,void *);
+int Validate<_RESCDIRECTORY *,_RESCDENTRY *>(_RESCDIRECTORY *);
+long InsertModuleFunctions<_IMAGE_THUNK_DATA32,unsigned long,2147483648>(_IMPORTTABLEP_IMPORTTABLEP_SORTED_LIST_ENTRY *,void *,_IMAGE_NT_HEADERS64 *,_IMAGE_IMPORT_DESCRIPTOR *);
+long InsertModuleFunctions<_IMAGE_THUNK_DATA64,unsigned __int64,-9223372036854775808>(_IMPORTTABLEP_IMPORTTABLEP_SORTED_LIST_ENTRY *,void *,_IMAGE_NT_HEADERS64 *,_IMAGE_IMPORT_DESCRIPTOR *);
+long StringCchCatW(unsigned short *,unsigned __int64,unsigned short const *);
+long StringCchPrintfW(unsigned short *,unsigned __int64,unsigned short const *,...);
+void * SbFilterProcedure_RTL(void *);
+void ReleaseStack<unsigned int>(void *);
