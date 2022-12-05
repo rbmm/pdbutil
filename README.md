@@ -4,7 +4,8 @@ how long c++ name of class/struct can be ? i found struct with 1404 symbols in n
 struct Selector<
     ImplementsHelper<
         RuntimeClassFlags<ClassicCom>,
-        1,
+        0,
+        ImplementsMarker<CImmersiveShellComponentWithSite>,
         ChainInterfaces<ITabletModePositioner, IBasicPositioner>,
         ChainInterfaces<IApplicationViewStatePositioner, IBasicPositioner>,
         ITabletModePositionerInternal,
@@ -26,8 +27,7 @@ struct Selector<
     >,
     ImplementsHelper<
         RuntimeClassFlags<ClassicCom>,
-        0,
-        ImplementsMarker<CImmersiveShellComponentWithSite>,
+        1,
         ChainInterfaces<ITabletModePositioner, IBasicPositioner>,
         ChainInterfaces<IApplicationViewStatePositioner, IBasicPositioner>,
         ITabletModePositionerInternal,
