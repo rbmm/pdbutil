@@ -321,13 +321,13 @@ BOOL AddSymbol(PSTR name)
 		return FALSE;
 	}
 
+#if 0
 	volatile static size_t msl = 0;
 	volatile size_t sl = strlen(ShortName);
 	if (msl < sl)
 	{
 		msl = sl;
 	}
-#if 0
 	
 	if (strstr(FullName, "_StandardDestroyCB(_ITEMID_CHILD *,void *)"))
 	{

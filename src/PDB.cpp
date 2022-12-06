@@ -17,24 +17,26 @@ PdbReader::PdbReader()
 
 PdbReader::~PdbReader()
 {
-	if (_pish)
+	PVOID pv;
+
+	if (pv = _pish)
 	{
-		FreeStream(_pish);
+		FreeStream(pv);
 	}
 
-	if (_pvOmapFromSrc)
+	if (pv = _pvOmapFromSrc)
 	{
-		FreeStream(_pvOmapFromSrc);
+		FreeStream(pv);
 	}
 
-	if (_pdh)
+	if (pv = _pdh)
 	{
-		FreeStream(_pdh);
+		FreeStream(pv);
 	}
 
-	if (_BaseAddress)
+	if (pv = _BaseAddress)
 	{
-		delete _BaseAddress;
+		delete [] pv;
 	}
 
 	if (_bUnmap)
@@ -124,7 +126,7 @@ NTSTATUS PdbReader::getStream(ULONG iStream, void** ppv, PULONG pcb, LONG minSiz
 			return STATUS_SUCCESS;
 		}
 
-		delete pv;
+		delete [] pv;
 
 		return STATUS_INVALID_IMAGE_FORMAT;
 	}
@@ -222,22 +224,6 @@ NTSTATUS PdbReader::Init(DbiHeader* pdh, ULONG size, ULONG Age)
 	if (a > b || b > size)
 	{
 		return STATUS_INVALID_IMAGE_FORMAT;
-	}
-
-	_pSecContrib = 0, _nSecContrib = 0;
-
-	if (secconSize > sizeof(DbiSecConArray))
-	{
-		ULONG nSC = (secconSize -= sizeof(DbiSecConArray)) / sizeof(DbiSecCon);
-		if (nSC && secconSize == nSC * sizeof(DbiSecCon))
-		{
-			DbiSecConArray* pvSecContrib = (DbiSecConArray*)RtlOffsetToPointer(pdh, a);
-			if (pvSecContrib->magic == DbiSecConArray::mgc)
-			{
-				_pSecContrib = pvSecContrib->arr;
-				_nSecContrib = nSC;
-			}
-		}
 	}
 
 	a = b, b = a + pdh->secmapSize;
@@ -343,7 +329,7 @@ NTSTATUS PdbReader::Init(PdbFileHeader* header, SIZE_T ViewSize, PGUID signature
 		return STATUS_INVALID_IMAGE_FORMAT;
 	}
 
-	ULONG nStreams = *pd++;;
+	ULONG nStreams = *pd++;
 	_nStreams = nStreams;
 	_StreamSizes = (PLONG)pd, _StreamPages = pd + _nStreams;
 

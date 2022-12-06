@@ -157,12 +157,10 @@ class PdbReader
 	PIMAGE_SECTION_HEADER _pish;
 	OMAP* _pvOmapFromSrc;
 	PVOID _BaseAddress, _PdbBase;
-	DbiSecCon* _pSecContrib;
 	PLONG _StreamSizes;
 	PULONG _StreamPages;
 	PUSHORT _pFileInfo;
-	DbiModuleInfo* _modules;
-	ULONG _pageSize, _pagesUsed, _nStreams, _nSections, _nOmapFromSrc, _nSecContrib;
+	ULONG _pageSize, _pagesUsed, _nStreams, _nSections, _nOmapFromSrc;
 	BOOLEAN _bUnmap, _Is64Bit;
 
 	PULONG GetStreamPages(ULONG iStream);
@@ -219,15 +217,9 @@ public:
 		return _pFileInfo;
 	}
 
-	DbiSecCon* getSecCon(ULONG& nSecContrib)
-	{
-		nSecContrib = _nSecContrib;
-		return _pSecContrib;
-	}
-
 	void FreeStream(PVOID pv)
 	{
-		delete pv;
+		delete [] pv;
 	}
 
 	PdbReader();
