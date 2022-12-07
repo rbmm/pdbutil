@@ -645,6 +645,7 @@ BOOL IsRvaExist(ULONG rva, RVAOFS *pSymbols, ULONG b)
 
 	return FALSE;
 }
+
 ULONG LoadSymbols(PdbReader* pdb,
 				  PVOID stream, 
 				  ULONG size, 
