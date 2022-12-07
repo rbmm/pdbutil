@@ -600,19 +600,6 @@ int __cdecl RVAOFS::compare(RVAOFS& a, RVAOFS& b)
 	return 0;
 }
 
-struct SH 
-{
-	ULONG n;
-	RVAOFS* pSymbols = new RVAOFS[n = 0x40000];
-	~SH()
-	{
-		if (PVOID pv = pSymbols)
-		{
-			delete [] pv;
-		}
-	}
-};
-
 struct MD 
 {
 	ULONG n;
@@ -658,14 +645,12 @@ BOOL IsRvaExist(ULONG rva, RVAOFS *pSymbols, ULONG b)
 
 	return FALSE;
 }
-
 ULONG LoadSymbols(PdbReader* pdb,
 				  PVOID stream, 
 				  ULONG size, 
 				  MD& md, 
-				  RVAOFS* pSymbols, 
-				  ULONG nSymbols, 
-				  ULONG nSpace, 
+				  RVAOFS* pSymbolsBase,
+				  ULONG nSymbols,
 				  BOOL bSecondLoop)
 {
 	union {
@@ -683,9 +668,8 @@ ULONG LoadSymbols(PdbReader* pdb,
 
 	PSTR name = 0;
 	MI mi;
-	RVAOFS* pSymbolsBase = pSymbols;
 
-	pSymbols += nSymbols;
+	RVAOFS* pSymbols = pSymbolsBase + nSymbols;
 
 	do 
 	{
@@ -707,11 +691,15 @@ ULONG LoadSymbols(PdbReader* pdb,
 			{
 				if (DbiModuleInfo* pm = md[pls->imod - 1])
 				{
+					name = pls->name;
+					if (!*name)
+					{
+						continue;
+					}
 					if (rva = mi.rva(pm, pdb, pls->ibSym, pls->name))
 					{
 						if (!IsRvaExist(rva, pSymbolsBase, nSymbols))
 						{
-							name = pls->name;
 							break;
 						}
 					}
@@ -720,11 +708,15 @@ ULONG LoadSymbols(PdbReader* pdb,
 			continue;
 
 		case S_PUB32:
-			if (!bSecondLoop &&IsValidSymbol(pbs, size))
+			if (!bSecondLoop && IsValidSymbol(pbs, size))
 			{
+				name = pbs->name;
+				if (!*name)
+				{
+					continue;
+				}
 				if (rva = pdb->rva(pbs->seg, pbs->off))
 				{
-					name = pbs->name;
 					break;
 				}
 			}
@@ -733,56 +725,115 @@ ULONG LoadSymbols(PdbReader* pdb,
 			continue;
 		}
 
-		// if (!c++) continue;
-		if (*name != '?')
-		{
-			continue;
-		}
-		
-		// if (??_C@_) continue;// string
-		if (name[1] == '?' && name[2] == '_' && name[3] == 'C' && name[4] == '@' && name[5] == '_')
-		{
-			continue;
-		}
-
-		if (!nSpace)
-		{
-			break;
-		}
-
 		if (AddSymbol(name))
 		{
 			pSymbols++->rva = rva;
 			n++;
 		}
 
-	} while (--nSpace, pb += len, size -= len);
+	} while (pb += len, size -= len);
+
+	return n;
+}
+
+BOOL IncludeSymbol(_In_ PCSTR name)
+{
+	// if (!c++) continue;
+	if (*name == '?')
+	{
+		// if (??_C@_) continue;// string
+		if (name[1] != '?' || name[2] != '_' || name[3] != 'C' || name[4] != '@' || name[5] != '_')
+		{
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+ULONG GetMaxSymCount(PVOID stream, ULONG size)
+{
+	union {
+		PVOID pv;
+		PBYTE pb;
+		SYM_HEADER* psh;
+		PUBSYM32* pbs;
+		REFSYM2* pls;
+	};
+
+	pv = stream;
+
+	ULONG n = 0, len;
+
+	PSTR name = 0;
+
+	do 
+	{
+		len = psh->len + sizeof(WORD);
+
+		if (size < len) 
+		{
+			return 0;
+		}
+
+		switch (psh->type)
+		{
+		case S_DATAREF:
+		case S_PROCREF:
+		case S_LPROCREF:
+			if (IsValidSymbol(pls, size))
+			{
+				name = pls->name;
+				break;
+			}
+			continue;
+
+		case S_PUB32:
+			if (IsValidSymbol(pbs, size))
+			{
+				name = pbs->name;
+				break;
+			}
+			continue;
+		default:
+			continue;
+		}
+
+		if (IncludeSymbol(name))
+		{
+			n++;
+		}
+		else
+		{
+			*name = 0;
+		}
+
+	} while (pb += len, size -= len);
 
 	return n;
 }
 
 NTSTATUS LoadPublicSymbols(PdbReader* pdb, PVOID stream, ULONG size)
 {
-	DWORD n = 0;
-
-	SH sh;
-
-	RVAOFS* pSymbols = sh.pSymbols;
-	if (!pSymbols)
+	if (ULONG n = GetMaxSymCount(stream, size))
 	{
+		if (RVAOFS* pSymbols = new RVAOFS[n])
+		{
+			MD md(pdb);
+
+			if (n = LoadSymbols(pdb, stream, size, md, pSymbols, 0, FALSE))
+			{
+				qsort(pSymbols, n, sizeof(RVAOFS), (QSORTFN)RVAOFS::compare);
+			}
+
+			n += LoadSymbols(pdb, stream, size, md, pSymbols, n, TRUE);
+
+			delete [] pSymbols;
+
+			return STATUS_SUCCESS;
+		}
+
 		return STATUS_INSUFFICIENT_RESOURCES;
-	}
-
-	MD md(pdb);
-
-	if (n = LoadSymbols(pdb, stream, size, md, pSymbols, 0, sh.n, FALSE))
-	{
-		qsort(pSymbols, n, sizeof(RVAOFS), (QSORTFN)RVAOFS::compare);
-	}
-
-	if (n += LoadSymbols(pdb, stream, size, md, pSymbols, n, sh.n -= n, TRUE))
-	{
-		return STATUS_SUCCESS;
 	}
 
 	return STATUS_NOT_FOUND;
