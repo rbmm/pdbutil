@@ -26,6 +26,12 @@ struct CMP_OFFSET_ARRAY {
 	/*0018*/
 };
 
+struct Change {
+	/*0000*/ wil_details_ServiceReportingKind kind;
+	/*0004*/ UINT count;
+	/*0008*/
+};
+
 struct DEBUG_DEVICE_ADDRESS {
 	/*0000*/ UCHAR Type;
 	/*0001*/ UCHAR Valid;
@@ -76,6 +82,38 @@ enum ETW_COMPRESSION_RESUMPTION_MODE {
 	EtwCompressionModeNoRestart = 0x2
 };
 
+enum EmptyCVariant_ExpiredFeature {
+	CVariant_ExpiredFeature_Empty = 0x0
+};
+
+enum EmptyCVariant_FeatureStaging_Boot {
+	CVariant_FeatureStaging_Boot_Empty = 0x0
+};
+
+enum EmptyCVariant_FeatureStaging_IoManager {
+	CVariant_FeatureStaging_IoManager_Empty = 0x0
+};
+
+enum EmptyCVariant_FeatureStaging_MemoryManager {
+	CVariant_FeatureStaging_MemoryManager_Empty = 0x0
+};
+
+enum EmptyCVariant_FeatureStaging_Poncherello {
+	CVariant_FeatureStaging_Poncherello_Empty = 0x0
+};
+
+enum EmptyCVariant_FeatureStaging_Updated_MSRC_GlobalSettings {
+	CVariant_FeatureStaging_Updated_MSRC_GlobalSettings_Empty = 0x0
+};
+
+enum EmptyCVariant_FeatureStaging_kernelcachemanager {
+	CVariant_FeatureStaging_kernelcachemanager_Empty = 0x0
+};
+
+enum EmptyCVariant_FeatureStaging_xfg {
+	CVariant_FeatureStaging_xfg_Empty = 0x0
+};
+
 enum FEATURE_CHANGE_TIME {
 	FEATURE_CHANGE_TIME_READ = 0x0,
 	FEATURE_CHANGE_TIME_MODULE_RELOAD = 0x1,
@@ -89,7 +127,7 @@ enum FEATURE_ENABLED_STATE {
 	FEATURE_ENABLED_STATE_DISABLED = 0x1,
 	FEATURE_ENABLED_STATE_ENABLED = 0x2,
 	FEATURE_ENABLED_STATE_HAS_NOTIFICATION = 0x80,
-	FEATURE_ENABLED_STATE_HAS_VARIANT_CONFIGURATION = 0x40
+	FEATURE_ENABLED_STATE_IS_WEXP_CONFIGURATION = 0x40
 };
 
 struct FEATURE_ERROR {
@@ -196,7 +234,7 @@ struct HAL_PRIVATE_DISPATCH {
 	/*01f8*/ LONG (* HalAllocateGsivForSecondaryInterrupt)( CHAR * , USHORT , ULONG * );
 	/*0200*/ LONG (* HalAddInterruptRemapping)( ULONG , ULONG , _PCI_BUSMASTER_DESCRIPTOR * , UCHAR , _INTERRUPT_VECTOR_DATA * , ULONG );
 	/*0208*/ void (* HalRemoveInterruptRemapping)( ULONG , ULONG , _PCI_BUSMASTER_DESCRIPTOR * , UCHAR , _INTERRUPT_VECTOR_DATA * , ULONG );
-	/*0210*/ void (* HalSaveAndDisableHvEnlightenment)();
+	/*0210*/ void (* HalSaveAndDisableHvEnlightenment)( UCHAR );
 	/*0218*/ void (* HalRestoreHvEnlightenment)();
 	/*0220*/ void (* HalFlushIoBuffersExternalCache)( _MDL * , UCHAR );
 	/*0228*/ void (* HalFlushExternalCache)( UCHAR );
@@ -264,8 +302,8 @@ struct HAL_PRIVATE_DISPATCH {
 	/*0418*/ void (* HalResumeLastBranchRecord)( UCHAR );
 	/*0420*/ LONG (* HalStartLastBranchRecord)( ULONG , ULONG * );
 	/*0428*/ LONG (* HalStopLastBranchRecord)( ULONG );
-	/*0430*/ LONG (* HalIommuBlockDevice)( void * );
-	/*0438*/ LONG (* HalIommuUnblockDevice)( _EXT_IOMMU_DEVICE_ID * , void * * );
+	/*0430*/ LONG (* HalIommuBlockDevice)( _IOMMU_DMA_DEVICE * );
+	/*0438*/ LONG (* HalIommuUnblockDevice)( _EXT_IOMMU_DEVICE_ID * , _DEVICE_OBJECT * , _IOMMU_DMA_DEVICE * * );
 	/*0440*/ LONG (* HalGetIommuInterface)( ULONG , _DMA_IOMMU_INTERFACE * );
 	/*0448*/ LONG (* HalRequestGenericErrorRecovery)( void * , ULONG * );
 	/*0450*/ LONG (* HalTimerQueryHostPerformanceCounter)( ULONGLONG * );
@@ -280,7 +318,15 @@ struct HAL_PRIVATE_DISPATCH {
 	/*0498*/ LONG (* HalRegisterHiddenProcessorIdleState)( ULONG , ULONGLONG );
 	/*04a0*/ void (* HalIommuReportIommuFault)( ULONGLONG , _FAULT_INFORMATION * );
 	/*04a8*/ UCHAR (* HalIommuDmaRemappingCapable)( _EXT_IOMMU_DEVICE_ID * , ULONG * );
-	/*04b0*/
+	/*04b0*/ LONG (* HalAllocatePmcCounterSetEx)( ULONG , _KPROFILE_SOURCE * , ULONG , ULONG * , _HAL_PMC_COUNTERS * * , ULONG * );
+	/*04b8*/ LONG (* HalStartProfileInterruptEx)( _KPROFILE_SOURCE , ULONG * , ULONG * , _HAL_PMC_COUNTERS * * );
+	/*04c0*/ LONG (* HalGetIommuInterfaceEx)( ULONG , ULONGLONG , _DMA_IOMMU_INTERFACE_EX * );
+	/*04c8*/ void (* HalNotifyIommuDomainPolicyChange)( _DEVICE_OBJECT * );
+	/*04d0*/ UCHAR (* HalPciGetDeviceLocationFromPhysicalAddress)( ULONGLONG , USHORT * , UCHAR * , UCHAR * , UCHAR * );
+	/*04d8*/ void (* HalInvokeSmc)( ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG * , ULONGLONG * , ULONGLONG * , ULONGLONG * );
+	/*04e0*/ void (* HalInvokeHvc)( ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG , ULONGLONG * , ULONGLONG * , ULONGLONG * , ULONGLONG * );
+	/*04e8*/ _LARGE_INTEGER (* HalGetSoftRebootDatabase)();
+	/*04f0*/
 };
 
 enum HSTORAGE_TYPE {
@@ -294,6 +340,35 @@ enum INTERRUPT_CONNECTION_TYPE {
 	InterruptTypeXapicMessage = 0x1,
 	InterruptTypeHypertransport = 0x2,
 	InterruptTypeMessageRequest = 0x3
+};
+
+struct IORING_BUFFER_INFO {
+	/*0000*/ void * Address;
+	/*0008*/ UINT Length;
+	/*0010*/
+};
+
+enum IORING_OP_CODE {
+	IORING_OP_NOP = 0x0,
+	IORING_OP_READ = 0x1,
+	IORING_OP_REGISTER_FILES = 0x2,
+	IORING_OP_REGISTER_BUFFERS = 0x3,
+	IORING_OP_CANCEL = 0x4,
+	IORING_OP_WRITE = 0x5,
+	IORING_OP_FLUSH = 0x6
+};
+
+struct IORING_REGISTERED_BUFFER {
+	/*0000*/ UINT BufferIndex;
+	/*0004*/ UINT Offset;
+	/*0008*/
+};
+
+enum IORING_VERSION {
+	IORING_VERSION_INVALID = 0x0,
+	IORING_VERSION_1 = 0x1,
+	IORING_VERSION_2 = 0x2,
+	IORING_VERSION_3 = 0x12c
 };
 
 enum IRPLOCK {
@@ -358,7 +433,14 @@ enum LSA_FOREST_TRUST_RECORD_TYPE {
 	ForestTrustTopLevelName = 0x0,
 	ForestTrustTopLevelNameEx = 0x1,
 	ForestTrustDomainInfo = 0x2,
-	ForestTrustRecordTypeLast = 0x2
+	ForestTrustBinaryInfo = 0x3,
+	ForestTrustScannerInfo = 0x4,
+	ForestTrustRecordTypeLast = 0x4
+};
+
+enum PCW_REGISTRATION_FLAGS {
+	PcwRegistrationNone = 0x0,
+	PcwRegistrationSiloNeutral = 0x1
 };
 
 enum PDCCLIENTID {
@@ -471,7 +553,14 @@ enum PDCCLIENTID {
 	PDC_SLEEPSTUDY_HELPER_USER_CLIENT = 0x70,
 	PDC_SLEEPSTUDY_HELPER_KERNEL_CLIENT = 0x71,
 	PDC_CONTAINER_MANAGER_CLIENT = 0x72,
-	PDC_NUMBER_OF_CLIENTS = 0x73
+	PDC_UPDATE_ORCHESTRATOR_CLIENT = 0x73,
+	PDC_UPDATE_UX_CLIENT = 0x74,
+	PDC_HOT_KEY_MANAGER_CLIENT = 0x75,
+	PDC_SERVICING_PLATFORM = 0x76,
+	PDC_TNC_CLIENT = 0x77,
+	PDC_USER_SHUTDOWN_CLIENT = 0x78,
+	PDC_KERNEL_PLUG_AND_PLAY = 0x79,
+	PDC_NUMBER_OF_CLIENTS = 0x7a
 };
 
 enum PDC_ACTIVITY_TYPE {
@@ -511,6 +600,15 @@ enum PDC_RESOURCE {
 struct PEPHANDLE__ {
 	/*0000*/ INT unused;
 	/*0004*/
+};
+
+struct PERIODIC_CAPTURE_STATE_CONTEXT {
+	/*0000*/ LONGLONG RelativeTimerDueTime;
+	/*0008*/ _EX_TIMER * Timer;
+	/*0010*/ _PERIODIC_CAPTURE_STATE_GUIDS Guids;
+	/*0020*/ _WORK_QUEUE_ITEM WorkItem;
+	/*0040*/ _ETW_PERIODIC_TIMER_STATE TimerState;
+	/*0048*/
 };
 
 struct POHANDLE__ {
@@ -582,36 +680,38 @@ struct PO_MEMORY_IMAGE {
 	/*0078*/ ULONGLONG FirstChecksumRestorePage;
 	/*0080*/ ULONGLONG NoChecksumEntries;
 	/*0088*/ _PO_HIBER_PERF PerfInfo;
-	/*0280*/ ULONG FirmwareRuntimeInformationPages;
-	/*0288*/ ULONGLONG FirmwareRuntimeInformation[0x1];
-	/*0290*/ ULONG SpareUlong;
-	/*0294*/ ULONG NoBootLoaderLogPages;
-	/*0298*/ ULONGLONG BootLoaderLogPages[0x18];
-	/*0358*/ ULONG NotUsed;
-	/*035c*/ ULONG ResumeContextCheck;
-	/*0360*/ ULONG ResumeContextPages;
-	/*0364*/ UCHAR Hiberboot;
-	/*0365*/ UCHAR SecureLaunched;
-	/*0366*/ UCHAR SecureBoot;
-	/*0368*/ ULONGLONG HvPageTableRoot;
-	/*0370*/ ULONGLONG HvEntryPoint;
-	/*0378*/ ULONGLONG HvReservedTransitionAddress;
-	/*0380*/ ULONGLONG HvReservedTransitionAddressSize;
-	/*0388*/ ULONGLONG BootFlags;
-	/*0390*/ ULONGLONG RestoreProcessorStateRoutine;
-	/*0398*/ ULONGLONG HighestPhysicalPage;
-	/*03a0*/ ULONGLONG BitlockerKeyPfns[0x4];
-	/*03c0*/ ULONG HardwareSignature;
-	/*03c8*/ _LARGE_INTEGER SMBiosTablePhysicalAddress;
-	/*03d0*/ ULONG SMBiosTableLength;
-	/*03d4*/ UCHAR SMBiosMajorVersion;
-	/*03d5*/ UCHAR SMBiosMinorVersion;
-	/*03d6*/ UCHAR HiberResumeXhciHandoffSkip;
-	/*03d7*/ UCHAR InitializeUSBCore;
-	/*03d8*/ UCHAR ValidUSBCoreId;
-	/*03d9*/ UCHAR USBCoreId;
-	/*03da*/ UCHAR SkipMemoryMapValidation;
-	/*03e0*/
+	/*02e8*/ ULONG FirmwareRuntimeInformationPages;
+	/*02f0*/ ULONGLONG FirmwareRuntimeInformation[0x1];
+	/*02f8*/ ULONG SpareUlong;
+	/*02fc*/ ULONG NoBootLoaderLogPages;
+	/*0300*/ ULONGLONG BootLoaderLogPages[0x18];
+	/*03c0*/ ULONG NotUsed;
+	/*03c4*/ ULONG ResumeContextCheck;
+	/*03c8*/ ULONG ResumeContextPages;
+	/*03cc*/ UCHAR Hiberboot;
+	/*03cd*/ UCHAR SecureLaunched;
+	/*03ce*/ UCHAR SecureBoot;
+	/*03cf*/ UCHAR Fasr;
+	/*03d0*/ ULONGLONG HvPageTableRoot;
+	/*03d8*/ ULONGLONG HvEntryPoint;
+	/*03e0*/ ULONGLONG HvReservedTransitionAddress;
+	/*03e8*/ ULONGLONG HvReservedTransitionAddressSize;
+	/*03f0*/ ULONGLONG BootFlags;
+	/*03f8*/ ULONGLONG RestoreProcessorStateRoutine;
+	/*0400*/ ULONGLONG HighestPhysicalPage;
+	/*0408*/ ULONGLONG BitlockerKeyPfns[0x4];
+	/*0428*/ ULONG HardwareSignature;
+	/*0430*/ _LARGE_INTEGER SMBiosTablePhysicalAddress;
+	/*0438*/ ULONG SMBiosTableLength;
+	/*043c*/ UCHAR SMBiosMajorVersion;
+	/*043d*/ UCHAR SMBiosMinorVersion;
+	/*043e*/ UCHAR HiberResumeXhciHandoffSkip;
+	/*043f*/ UCHAR InitializeUSBCore;
+	/*0440*/ UCHAR ValidUSBCoreId;
+	/*0441*/ UCHAR USBCoreId;
+	/*0442*/ UCHAR SkipMemoryMapValidation;
+	/*0443*/ UCHAR SuppressResumePrompt;
+	/*0448*/
 };
 
 enum PPM_IDLE_BUCKET_TIME_TYPE {
@@ -662,6 +762,40 @@ struct PROCESSOR_PERFSTATE_POLICY {
 	/*0014*/ ULONG IncreasePercent;
 	/*0018*/ ULONG DecreasePercent;
 	/*001c*/
+};
+
+struct PROCESS_PERF_COUNTERS {
+	/*0000*/ ULONGLONG ProcessorTime;
+	/*0008*/ ULONGLONG UserTime;
+	/*0010*/ ULONGLONG PrivilegedTime;
+	/*0018*/ ULONGLONG VirtualBytesPeak;
+	/*0020*/ ULONGLONG VirtualBytes;
+	/*0028*/ ULONG PageFaults;
+	/*002c*/ ULONG HandleCount;
+	/*0030*/ ULONGLONG WorkingSetPeak;
+	/*0038*/ ULONGLONG WorkingSet;
+	/*0040*/ ULONGLONG PageFileBytesPeak;
+	/*0048*/ ULONGLONG PageFileBytes;
+	/*0050*/ ULONGLONG PrivateBytes;
+	/*0058*/ ULONG ThreadCount;
+	/*005c*/ ULONG PriorityBase;
+	/*0060*/ ULONGLONG ElapsedTime;
+	/*0068*/ ULONG ProcessId;
+	/*006c*/ ULONG CreatingProcessId;
+	/*0070*/ ULONGLONG PoolPagedBytes;
+	/*0078*/ ULONGLONG PoolNonpagedBytes;
+	/*0080*/ ULONGLONG IoReadOperations;
+	/*0088*/ ULONGLONG IoWriteOperations;
+	/*0090*/ ULONGLONG IoDataOperations;
+	/*0098*/ ULONGLONG IoOtherOperations;
+	/*00a0*/ ULONGLONG IoReadBytes;
+	/*00a8*/ ULONGLONG IoWriteBytes;
+	/*00b0*/ ULONGLONG IoDataBytes;
+	/*00b8*/ ULONGLONG IoOtherBytes;
+	/*00c0*/ ULONGLONG WorkingSetPrivate;
+	/*00c8*/ ULONGLONG PerfFreq;
+	/*00d0*/ ULONGLONG PerfTime;
+	/*00d8*/
 };
 
 enum PROFILE_DEPARTURE_STYLE {
@@ -903,13 +1037,6 @@ enum UoWActionType {
 	UoWInvalid = 0xe
 };
 
-struct VACB_LEVEL_ALLOCATION_LIST {
-	/*0000*/ _LIST_ENTRY VacbLevelList;
-	/*0010*/ void * VacbLevelWithBcbListHeads;
-	/*0018*/ ULONG VacbLevelsAllocated;
-	/*0020*/
-};
-
 struct _ACCESS_REASONS {
 	/*0000*/ ULONG Data[0x20];
 	/*0080*/
@@ -996,68 +1123,68 @@ struct _ACTIVATION_CONTEXT_STACK64 {
 
 struct _ADAPTER_OBJECT {
 	/*0000*/ _HALP_DMA_ADAPTER_OBJECT AdapterObject;
-	/*0098*/ _HALP_DMA_MASTER_ADAPTER_OBJECT * MasterAdapter;
-	/*00a0*/ _LIST_ENTRY WaitQueueEntry;
-	/*00b0*/ _KDEVICE_QUEUE ChannelWaitQueue;
-	/*00b0*/ ULONGLONG ResourceWaitLock;
-	/*00b8*/ _LIST_ENTRY ResourceWaitQueue;
-	/*00c8*/ _LIST_ENTRY ChannelResourceWaitQueue;
-	/*00d8*/ UCHAR ResourceQueueBusy;
-	/*00e0*/ ULONG MapRegistersPerChannel;
-	/*00e8*/ void * MapRegisterBase;
-	/*00f0*/ ULONG NumberOfMapRegisters;
-	/*00f4*/ ULONG MaxTransferLength;
-	/*00f8*/ void * CrashDumpRegisterBase[0x2];
-	/*0108*/ ULONG NumberOfCrashDumpRegisters[0x2];
-	/*0110*/ ULONG CrashDumpRegisterRefCount[0x2];
-	/*0118*/ _LIST_ENTRY AdapterCrashDumpList;
-	/*0128*/ _MDL * MapRegisterMdl;
-	/*0130*/ ULONGLONG MapRegisterMdlLock;
-	/*0138*/ _EX_PUSH_LOCK ExpiredLock;
-	/*0140*/ void * AllocationHandle;
-	/*0148*/ void * VirtualAddress;
-	/*0150*/ UCHAR IsAllocationMdlBased;
-	/*0151*/ UCHAR NoLocalPool;
-	/*0152*/ UCHAR ExpiredFlag;
-	/*0158*/ _WAIT_CONTEXT_BLOCK * CurrentWcb;
-	/*0160*/ _DMA_TRANSFER_CONTEXT * CurrentTransferContext;
-	/*0168*/ _HALP_DMA_CONTROLLER * DmaController;
-	/*0170*/ ULONG Controller;
-	/*0174*/ ULONG ChannelNumber;
-	/*0178*/ ULONG RequestLine;
-	/*017c*/ ULONG RequestedChannelCount;
-	/*0180*/ ULONG AllocatedChannelCount;
-	/*0184*/ ULONG AllocatedChannels[0x8];
-	/*01a8*/ void * ChannelAdapter;
-	/*01b0*/ UCHAR NeedsMapRegisters;
-	/*01b1*/ UCHAR MasterDevice;
-	/*01b2*/ UCHAR ScatterGather;
-	/*01b3*/ UCHAR AutoInitialize;
-	/*01b4*/ UCHAR IgnoreCount;
-	/*01b5*/ UCHAR CacheCoherent;
-	/*01b8*/ UCHAR Dma32BitAddresses;
-	/*01b9*/ UCHAR Dma64BitAddresses;
-	/*01b8*/ ULONG DmaAddressWidth;
-	/*01bc*/ _DMA_WIDTH DmaPortWidth;
-	/*01c0*/ _LARGE_INTEGER DeviceAddress;
-	/*01c8*/ _LIST_ENTRY AdapterList;
-	/*01d8*/ _WORK_QUEUE_ITEM WorkItem;
-	/*01f8*/ _HALP_DMA_DOMAIN_OBJECT * DomainPointer;
-	/*0200*/ _EXT_IOMMU_TRANSLATION_TYPE TranslationType;
-	/*0204*/ UCHAR AdapterInUse;
-	/*0208*/ _DEVICE_OBJECT * DeviceObject;
-	/*0210*/ _EXT_IOMMU_DEVICE_ID * DeviceId;
-	/*0218*/ void * IommuDevice;
-	/*0220*/ _MDL * ScatterGatherMdl;
-	/*0228*/ ULONGLONG LowMemoryLogicalAddressBase;
-	/*0230*/ ULONGLONG LowMemoryLogicalAddressQueueLock;
-	/*0238*/ _LIST_ENTRY LowMemoryLogicalAddressQueue;
-	/*0248*/ UCHAR LowMemoryLogicalAddressQueueInUse;
-	/*0250*/ _HALP_EMERGENCY_LA_QUEUE_ENTRY LowMemoryLogicalAddressQueueEntry;
-	/*0268*/ _HALP_DMA_ADAPTER_ALLOCATION_STATE AllocationState;
-	/*026c*/ ULONG ScatterGatherBufferLength;
-	/*0270*/ _SCATTER_GATHER_LIST ScatterGatherBuffer;
-	/*0280*/
+	/*00a0*/ _HALP_DMA_MASTER_ADAPTER_OBJECT * MasterAdapter;
+	/*00a8*/ _LIST_ENTRY WaitQueueEntry;
+	/*00b8*/ _KDEVICE_QUEUE ChannelWaitQueue;
+	/*00b8*/ ULONGLONG ResourceWaitLock;
+	/*00c0*/ _LIST_ENTRY ResourceWaitQueue;
+	/*00d0*/ _LIST_ENTRY ChannelResourceWaitQueue;
+	/*00e0*/ UCHAR ResourceQueueBusy;
+	/*00e8*/ ULONG MapRegistersPerChannel;
+	/*00f0*/ void * MapRegisterBase;
+	/*00f8*/ ULONG NumberOfMapRegisters;
+	/*00fc*/ ULONG MaxTransferLength;
+	/*0100*/ void * CrashDumpRegisterBase[0x2];
+	/*0110*/ ULONG NumberOfCrashDumpRegisters[0x2];
+	/*0118*/ ULONG CrashDumpRegisterRefCount[0x2];
+	/*0120*/ _LIST_ENTRY AdapterCrashDumpList;
+	/*0130*/ _MDL * MapRegisterMdl;
+	/*0138*/ ULONGLONG MapRegisterMdlLock;
+	/*0140*/ _EX_PUSH_LOCK ExpiredLock;
+	/*0148*/ void * AllocationHandle;
+	/*0150*/ void * VirtualAddress;
+	/*0158*/ UCHAR IsAllocationMdlBased;
+	/*0159*/ UCHAR NoLocalPool;
+	/*015a*/ UCHAR ExpiredFlag;
+	/*0160*/ _WAIT_CONTEXT_BLOCK * CurrentWcb;
+	/*0168*/ _DMA_TRANSFER_CONTEXT * CurrentTransferContext;
+	/*0170*/ _HALP_DMA_CONTROLLER * DmaController;
+	/*0178*/ ULONG Controller;
+	/*017c*/ ULONG ChannelNumber;
+	/*0180*/ ULONG RequestLine;
+	/*0184*/ ULONG RequestedChannelCount;
+	/*0188*/ ULONG AllocatedChannelCount;
+	/*018c*/ ULONG AllocatedChannels[0x8];
+	/*01b0*/ void * ChannelAdapter;
+	/*01b8*/ UCHAR NeedsMapRegisters;
+	/*01b9*/ UCHAR MasterDevice;
+	/*01ba*/ UCHAR ScatterGather;
+	/*01bb*/ UCHAR AutoInitialize;
+	/*01bc*/ UCHAR IgnoreCount;
+	/*01bd*/ UCHAR CacheCoherent;
+	/*01c0*/ UCHAR Dma32BitAddresses;
+	/*01c1*/ UCHAR Dma64BitAddresses;
+	/*01c0*/ ULONG DmaAddressWidth;
+	/*01c4*/ _DMA_WIDTH DmaPortWidth;
+	/*01c8*/ _LARGE_INTEGER DeviceAddress;
+	/*01d0*/ _LIST_ENTRY AdapterList;
+	/*01e0*/ _WORK_QUEUE_ITEM WorkItem;
+	/*0200*/ _HALP_DMA_DOMAIN_OBJECT * DomainPointer;
+	/*0208*/ _HALP_DMA_TRANSLATION_TYPE TranslationType;
+	/*020c*/ UCHAR AdapterInUse;
+	/*0210*/ _DEVICE_OBJECT * DeviceObject;
+	/*0218*/ _EXT_IOMMU_DEVICE_ID * DeviceId;
+	/*0220*/ _IOMMU_DMA_DEVICE * IommuDevice;
+	/*0228*/ _MDL * ScatterGatherMdl;
+	/*0230*/ _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN * LowMemoryLogicalAddressToken;
+	/*0238*/ ULONGLONG LowMemoryLogicalAddressQueueLock;
+	/*0240*/ _LIST_ENTRY LowMemoryLogicalAddressQueue;
+	/*0250*/ UCHAR LowMemoryLogicalAddressQueueInUse;
+	/*0258*/ _HALP_EMERGENCY_LA_QUEUE_ENTRY LowMemoryLogicalAddressQueueEntry;
+	/*0270*/ _HALP_DMA_ADAPTER_ALLOCATION_STATE AllocationState;
+	/*0274*/ ULONG ScatterGatherBufferLength;
+	/*0278*/ _SCATTER_GATHER_LIST ScatterGatherBuffer;
+	/*0288*/
 };
 
 enum _ADD_DRIVER_STAGE {
@@ -1132,8 +1259,8 @@ struct _ALPC_COMMUNICATION_INFO {
 	/*0010*/ _ALPC_PORT * ClientCommunicationPort;
 	/*0018*/ _LIST_ENTRY CommunicationList;
 	/*0028*/ _ALPC_HANDLE_TABLE HandleTable;
-	/*0040*/ _KALPC_MESSAGE * CloseMessage;
-	/*0048*/
+	/*0048*/ _KALPC_MESSAGE * CloseMessage;
+	/*0050*/
 };
 
 struct _ALPC_COMPLETION_LIST {
@@ -1205,7 +1332,7 @@ struct _ALPC_COMPLETION_PACKET_LOOKASIDE {
 	/*0014*/ ULONG PendingCheckCompletionListCount;
 	/*0018*/ ULONG PendingDelete;
 	/*0020*/ _SINGLE_LIST_ENTRY FreeListHead;
-	/*0028*/ void * CompletionPort;
+	/*0028*/ _KQUEUE * CompletionPort;
 	/*0030*/ void * CompletionKey;
 	/*0038*/ _ALPC_COMPLETION_PACKET_LOOKASIDE_ENTRY Entry[0x1];
 	/*0050*/
@@ -1241,10 +1368,10 @@ struct _ALPC_HANDLE_ENTRY {
 
 struct _ALPC_HANDLE_TABLE {
 	/*0000*/ _ALPC_HANDLE_ENTRY * Handles;
-	/*0008*/ ULONG TotalHandles;
-	/*000c*/ ULONG Flags;
-	/*0010*/ _EX_PUSH_LOCK Lock;
-	/*0018*/
+	/*0008*/ _EX_PUSH_LOCK Lock;
+	/*0010*/ ULONGLONG TotalHandles;
+	/*0018*/ ULONG Flags;
+	/*0020*/
 };
 
 struct _ALPC_MESSAGE_ATTRIBUTES {
@@ -1257,7 +1384,7 @@ struct _ALPC_PORT {
 	/*0000*/ _LIST_ENTRY PortListEntry;
 	/*0010*/ _ALPC_COMMUNICATION_INFO * CommunicationInfo;
 	/*0018*/ _EPROCESS * OwnerProcess;
-	/*0020*/ void * CompletionPort;
+	/*0020*/ _KQUEUE * CompletionPort;
 	/*0028*/ void * CompletionKey;
 	/*0030*/ _ALPC_COMPLETION_PACKET_LOOKASIDE * CompletionPacketLookaside;
 	/*0038*/ void * PortContext;
@@ -1358,6 +1485,36 @@ struct _AMD64_DBGKD_CONTROL_SET {
 	/*000c*/ ULONGLONG CurrentSymbolStart;
 	/*0014*/ ULONGLONG CurrentSymbolEnd;
 	/*001c*/
+};
+
+union _AMD64_MXCSR_REG {
+	/*0000*/ ULONG Value;
+	/*0000*/ ULONG IE : 01; // 0x00000001;
+	/*0000*/ ULONG DE : 01; // 0x00000002;
+	/*0000*/ ULONG ZE : 01; // 0x00000004;
+	/*0000*/ ULONG OE : 01; // 0x00000008;
+	/*0000*/ ULONG UE : 01; // 0x00000010;
+	/*0000*/ ULONG PE : 01; // 0x00000020;
+	/*0000*/ ULONG DAZ : 01; // 0x00000040;
+	/*0000*/ ULONG IM : 01; // 0x00000080;
+	/*0000*/ ULONG DM : 01; // 0x00000100;
+	/*0000*/ ULONG ZM : 01; // 0x00000200;
+	/*0000*/ ULONG OM : 01; // 0x00000400;
+	/*0000*/ ULONG UM : 01; // 0x00000800;
+	/*0000*/ ULONG PM : 01; // 0x00001000;
+	/*0000*/ ULONG RC : 02; // 0x00006000;
+	/*0000*/ ULONG FZ : 01; // 0x00008000;
+	/*0000*/ ULONG res : 16; // 0xffff0000;
+	/*0004*/
+};
+
+union _AMD_MCA_IPID {
+	/*0000*/ ULONGLONG InstanceId : 32; // 0x00000000ffffffff;
+	/*0000*/ ULONGLONG HardwareId : 12; // 0x00000fff00000000;
+	/*0000*/ ULONGLONG Reserved : 04; // 0x0000f00000000000;
+	/*0000*/ ULONGLONG McaType : 16; // 0xffff000000000000;
+	/*0000*/ ULONGLONG AsUINT64;
+	/*0008*/
 };
 
 enum _ARBITER_ACTION {
@@ -1579,6 +1736,45 @@ struct _ARM64_DBGKD_CONTROL_SET {
 	/*0018*/
 };
 
+union _ARM64_FPCR_REG {
+	/*0000*/ ULONG Value;
+	/*0000*/ ULONG res0_1 : 08; // 0x000000ff;
+	/*0000*/ ULONG IOE : 01; // 0x00000100;
+	/*0000*/ ULONG DZE : 01; // 0x00000200;
+	/*0000*/ ULONG OFE : 01; // 0x00000400;
+	/*0000*/ ULONG UFE : 01; // 0x00000800;
+	/*0000*/ ULONG IXE : 01; // 0x00001000;
+	/*0000*/ ULONG res0_2 : 02; // 0x00006000;
+	/*0000*/ ULONG IDE : 01; // 0x00008000;
+	/*0000*/ ULONG Len : 03; // 0x00070000;
+	/*0000*/ ULONG FZ16 : 01; // 0x00080000;
+	/*0000*/ ULONG Stride : 02; // 0x00300000;
+	/*0000*/ ULONG RMode : 02; // 0x00c00000;
+	/*0000*/ ULONG FZ : 01; // 0x01000000;
+	/*0000*/ ULONG DN : 01; // 0x02000000;
+	/*0000*/ ULONG AHP : 01; // 0x04000000;
+	/*0000*/ ULONG res0_3 : 05; // 0xf8000000;
+	/*0004*/
+};
+
+union _ARM64_FPSR_REG {
+	/*0000*/ ULONG Value;
+	/*0000*/ ULONG IOC : 01; // 0x00000001;
+	/*0000*/ ULONG DZC : 01; // 0x00000002;
+	/*0000*/ ULONG OFC : 01; // 0x00000004;
+	/*0000*/ ULONG UFC : 01; // 0x00000008;
+	/*0000*/ ULONG IXC : 01; // 0x00000010;
+	/*0000*/ ULONG res0_1 : 02; // 0x00000060;
+	/*0000*/ ULONG IDC : 01; // 0x00000080;
+	/*0000*/ ULONG res0_2 : 19; // 0x07ffff00;
+	/*0000*/ ULONG QC : 01; // 0x08000000;
+	/*0000*/ ULONG V : 01; // 0x10000000;
+	/*0000*/ ULONG C : 01; // 0x20000000;
+	/*0000*/ ULONG Z : 01; // 0x40000000;
+	/*0000*/ ULONG N : 01; // 0x80000000;
+	/*0004*/
+};
+
 struct _ARMCE_DBGKD_CONTROL_SET {
 	/*0000*/ ULONG Continue;
 	/*0004*/ ULONG CurrentSymbolStart;
@@ -1599,6 +1795,11 @@ struct _ARM_LOADER_BLOCK {
 };
 
 struct _ASSEMBLY_STORAGE_MAP;
+
+struct _ASYNC_LAZYWRITE_THREAD_STATS {
+	/*0000*/ ULONG CurrentLoad[0xb];
+	/*002c*/
+};
 
 struct _ASYNC_READ_THREAD_STATS {
 	/*0000*/ ULONG CurrentLoad[0x65];
@@ -1643,7 +1844,24 @@ struct _AUX_ACCESS_DATA {
 	/*00e0*/
 };
 
-struct _AWEINFO;
+struct _BCB {
+	/*0000*/ _MBCB Dummy;
+	/*0000*/ SHORT NodeTypeCode;
+	/*0002*/ UCHAR Dirty;
+	/*0003*/ UCHAR Reserved;
+	/*0004*/ ULONG ByteLength;
+	/*0008*/ _LARGE_INTEGER FileOffset;
+	/*0010*/ _LIST_ENTRY BcbLinks;
+	/*0020*/ _LARGE_INTEGER BeyondLastByte;
+	/*0028*/ _LARGE_INTEGER OldestLsn;
+	/*0030*/ _LARGE_INTEGER NewestLsn;
+	/*0038*/ _VACB * Vacb;
+	/*0040*/ ULONG PinCount;
+	/*0048*/ _ERESOURCE Resource;
+	/*00b0*/ _SHARED_CACHE_MAP * SharedCacheMap;
+	/*00b8*/ void * BaseAddress;
+	/*00c0*/
+};
 
 struct _BITMAP_RANGE {
 	/*0000*/ _LIST_ENTRY Links;
@@ -1752,11 +1970,20 @@ enum _BOOT_ENTROPY_SOURCE_RESULT_CODE {
 	BootEntropySourceSuccess = 0x4
 };
 
+struct _BOOT_FIRMWARE_RAMDISK_INFO {
+	/*0000*/ ULONG Version;
+	/*0004*/ ULONG BlockSize;
+	/*0008*/ ULONGLONG BaseAddress;
+	/*0010*/ ULONGLONG Size;
+	/*0018*/
+};
+
 enum _BUGCHECK_RECOVERY_LOG_EVENT {
 	RecoveryEventStart = 0x0,
 	RecoveryEventPhase1Status = 0x1,
 	RecoveryEventPhase2Status = 0x2,
-	RecoveryEventMax = 0x3
+	RecoveryEventMultipleBugcheckStatus = 0x3,
+	RecoveryEventMax = 0x4
 };
 
 enum _BUS_DATA_TYPE {
@@ -1814,7 +2041,9 @@ struct _CACHED_KSTACK_LIST {
 	/*0010*/ LONG MinimumFree;
 	/*0014*/ ULONG Misses;
 	/*0018*/ ULONG MissesLast;
-	/*001c*/ ULONG AllStacksInUse;
+	/*001c*/ UCHAR AllStacksInUse;
+	/*001d*/ UCHAR NonIdealStacksPresent;
+	/*001e*/ UCHAR Spare[0x2];
 	/*0020*/
 };
 
@@ -1829,6 +2058,21 @@ struct _CACHE_DESCRIPTOR {
 
 struct _CACHE_MANAGER_CALLBACKS {
 	/*0000*/ UCHAR (* AcquireForLazyWrite)( void * , UCHAR );
+	/*0008*/ void (* ReleaseFromLazyWrite)( void * );
+	/*0010*/ UCHAR (* AcquireForReadAhead)( void * , UCHAR );
+	/*0018*/ void (* ReleaseFromReadAhead)( void * );
+	/*0020*/
+};
+
+struct _CACHE_MANAGER_CALLBACKS_EX {
+	/*0000*/ USHORT Version;
+	/*0002*/ USHORT Size;
+	/*0008*/ _CACHE_MANAGER_CALLBACK_FUNCTIONS Functions;
+	/*0028*/
+};
+
+struct _CACHE_MANAGER_CALLBACK_FUNCTIONS {
+	/*0000*/ UCHAR (* AcquireForLazyWriteEx)( void * , ULONG , ULONG * );
 	/*0008*/ void (* ReleaseFromLazyWrite)( void * );
 	/*0010*/ UCHAR (* AcquireForReadAhead)( void * , UCHAR );
 	/*0018*/ void (* ReleaseFromReadAhead)( void * );
@@ -1866,90 +2110,284 @@ struct _CC_ASYNC_READ_CONTEXT {
 	/*0020*/
 };
 
-struct _CC_EXTERNAL_CACHE_INFO {
-	/*0000*/ void (* Callback)( void * , ULONGLONG , ULONG );
-	/*0008*/ _DIRTY_PAGE_STATISTICS DirtyPageStatistics;
-	/*0020*/ _LIST_ENTRY Links;
-	/*0030*/
+struct _CC_FILE_SIZES {
+	/*0000*/ _LARGE_INTEGER AllocationSize;
+	/*0008*/ _LARGE_INTEGER FileSize;
+	/*0010*/ _LARGE_INTEGER ValidDataLength;
+	/*0018*/
+};
+
+struct _CC_FLUSH_PACKET {
+	/*0000*/ _CC_PARTITION * Partition;
+	/*0008*/ _PRIVATE_VOLUME_CACHEMAP * PrivateVolumeCacheMap;
+	/*0010*/ _SHARED_CACHE_MAP * SharedCacheMap;
+	/*0018*/ _SECTION_OBJECT_POINTERS * SectionObjectPointer;
+	/*0020*/ _LARGE_INTEGER TargetOffset;
+	/*0028*/ _LARGE_INTEGER NextFileOffset;
+	/*0030*/ ULONG NextLength;
+	/*0034*/ ULONG BytesWritten;
+	/*0038*/ ULONG MmFlushFlags;
+	/*003c*/ ULONG HotSpot;
+	/*0040*/ ULONG VerifyRequired;
+	/*0048*/ _KEVENT * FlushEvent;
+	/*0050*/ _LARGE_INTEGER FlushLargestLsn;
+	/*0058*/ _LARGE_INTEGER * LargestLsn;
+	/*0060*/ _LARGE_INTEGER * CallersFileOffset;
+	/*0068*/ ULONG CallersLength;
+	/*006c*/ UCHAR MarkWritethrough;
+	/*0070*/ _IO_STATUS_BLOCK * CallersIoStatus;
+	/*0078*/ _BCB * FirstBcb;
+	/*0080*/ LONG FirstFailureStatus;
+	/*0084*/ UCHAR IsLazyWriter;
+	/*0085*/ UCHAR FastLazyWrite;
+	/*0086*/ UCHAR ForceFullFlush;
+	/*0087*/ UCHAR PerformedFlushForMemMapped;
+	/*0088*/ UCHAR TeardownFlagBeforeFlush;
+	/*0089*/ UCHAR ShouldRetryTeardown;
+	/*008a*/ UCHAR FlushForImageSection;
+	/*008b*/ UCHAR ForceSynchronousLazyWrite;
+	/*008c*/ ULONG AcquireForLazyWriteOutFlags;
+	/*0090*/ _LARGE_INTEGER StartTick;
+	/*0098*/ _LARGE_INTEGER EndTick;
+	/*00a0*/ _FSRTL_COMMON_FCB_HEADER * FsContext;
+	/*00a8*/ _WORK_QUEUE_ENTRY * WorkEntry;
+	/*00b0*/ _LIST_ENTRY * DeferredWritesList;
+	/*00b8*/ UCHAR * CoalescingState;
+	/*00c0*/ UCHAR DoSinglePassFlush;
+	/*00c1*/ UCHAR RecordedSinglePassStartOffset;
+	/*00c8*/ _LARGE_INTEGER SinglePassStartOffset;
+	/*00d0*/ ULONGLONG DirtyPagesAtStart;
+	/*00d8*/ ULONGLONG TotalBytesWritten;
+	/*00e0*/ _LARGE_INTEGER LwFlushStart;
+	/*00e8*/ _LARGE_INTEGER LwFlushEnd;
+	/*00f0*/ ULONG TotalPagesFlushed;
+	/*00f4*/ ULONG PagesToWrite;
+	/*00f8*/ ULONG RequeueToHeadCount;
+	/*0100*/ _WORK_QUEUE_ENTRY * WorkQueueEntry;
+	/*0108*/
+};
+
+struct _CC_LWS_PACKET {
+	/*0000*/ _CC_LWS_PACKET_TYPE Type;
+	/*0004*/ UCHAR Active;
+	union {
+		/*0008*/ _CC_PARTITION * Partition;
+		/*0008*/ _PRIVATE_VOLUME_CACHEMAP * PrivateVolumeCacheMap;
+		/*0010*/
+	} Overlay;
+	/*0010*/
+};
+
+enum _CC_LWS_PACKET_TYPE {
+	LWSPacket_Invalid = 0x0,
+	LWSPacket_Partition = 0x1,
+	LWSPacket_PrivateVCM = 0x2,
+	LWSPacket_Max = 0x3
+};
+
+struct _CC_NUMA_NODE {
+	/*0000*/ SHORT NodeTypeCode;
+	/*0002*/ SHORT NodeByteSize;
+	/*0004*/ _CC_NUMA_TYPE NumaNodeType;
+	/*0008*/ _CC_PARTITION * Partition;
+	/*0010*/ _PRIVATE_VOLUME_CACHEMAP * PrivateVolumeCacheMap;
+	/*0018*/ ULONG NodeNumber;
+	/*0020*/ _LIST_ENTRY NodeList;
+	/*0030*/ ULONG NumberActiveWorkerThreads;
+	/*0038*/ _LIST_ENTRY IdleWorkerThreadList;
+	/*0048*/ _LIST_ENTRY FastTeardownWorkQueue;
+	/*0058*/ _LIST_ENTRY ExpressWorkQueue;
+	/*0068*/ _LIST_ENTRY RegularWorkQueue;
+	/*0078*/ _LIST_ENTRY CleanCachemapUninitWorkQueue;
+	/*0088*/ _LIST_ENTRY IdleExtraWriteBehindThreadList;
+	/*0098*/ ULONG ActiveExtraWriteBehindThreads;
+	/*00a0*/ _LIST_ENTRY IdleCacheMapUninitThreadList;
+	/*00b0*/ ULONG ActiveCacheMapUninitThreads;
+	/*00b4*/ ULONG ThreadsActiveBeforeThrottle;
+	/*00b8*/ ULONG ExtraWBThreadsActiveBeforeThrottle;
+	/*00bc*/ ULONG ExecutingWriteBehindWorkItems;
+	/*00c0*/ ULONG ExecutingHighPriorityWorkItem;
+	/*00c4*/ LONG ThroughputTrend;
+	/*00c8*/ _LARGE_INTEGER PrevRegularQueueItemRunTime;
+	/*00d0*/ _LARGE_INTEGER PrevExtraWBThreadCheckTime;
+	/*00d8*/ UCHAR AddExtraWriteBehindThreads;
+	/*00d9*/ UCHAR RemoveExtraThreadPending;
+	/*00e0*/ _LIST_ENTRY * IdleAsyncReadWorkerThreadList;
+	/*00e8*/ ULONG * NumberActiveAsyncReadWorkerThreads;
+	/*00f0*/ ULONG * NumberActiveCompleteAsyncReadWorkItems;
+	/*00f8*/ _LIST_ENTRY * AsyncReadWorkQueue;
+	/*0100*/ _LIST_ENTRY * AsyncReadCompletionWorkQueue;
+	/*0108*/ _KEVENT * NewAsyncReadRequestEvent;
+	/*0110*/ _ASYNC_READ_THREAD_STATS * ReaderThreadsStats;
+	/*0118*/ _LIST_ENTRY IdleAsyncLazywriteWorkerThreadList;
+	/*0128*/ ULONG NumberActiveAsyncLazywriteWorkerThreads;
+	/*0130*/ _LIST_ENTRY AsyncLazywriteWorkQueue;
+	/*0140*/ _KEVENT NewAsyncLazywriteRequestEvent;
+	/*0158*/ _ASYNC_LAZYWRITE_THREAD_STATS LazywriterThreadsStats;
+	/*0188*/ _LIST_ENTRY IdleCompleteAsyncLazywriteWorkerThreadList;
+	/*0198*/ ULONG NumberActiveCompleteAsyncLazywriteWorkers;
+	/*01a0*/ _LIST_ENTRY AsyncLazywriteCompletionWorkQueue;
+	/*01b0*/
+};
+
+enum _CC_NUMA_TYPE {
+	InvalidNumaNodeType = 0x0,
+	PartitionNumaNode = 0x1,
+	VolumeNumaNode = 0x2,
+	MaxNumaNodeType = 0x3
 };
 
 struct _CC_PARTITION {
 	/*0000*/ SHORT NodeTypeCode;
 	/*0002*/ SHORT NodeByteSize;
 	/*0008*/ _EPARTITION * PartitionObject;
-	/*0010*/ _LIST_ENTRY CleanSharedCacheMapList;
-	/*0020*/ _LIST_ENTRY CleanSharedCacheMapWithLogHandleList;
-	/*0030*/ _SHARED_CACHE_MAP_LIST_CURSOR DirtySharedCacheMapList;
-	/*0048*/ _SHARED_CACHE_MAP_LIST_CURSOR LazyWriteCursor;
-	/*0060*/ _LIST_ENTRY DirtySharedCacheMapWithLogHandleList;
-	/*0080*/ ULONGLONG PrivateLock;
-	/*0088*/ ULONG ConsecutiveWorklessLazyScanCount;
-	/*008c*/ UCHAR ForcedDisableLazywriteScan;
-	/*00c0*/ ULONGLONG WorkQueueLock;
-	/*00c8*/ ULONG NumberWorkerThreads;
-	/*00cc*/ ULONG NumberActiveWorkerThreads;
-	/*00d0*/ _LIST_ENTRY IdleWorkerThreadList;
-	/*00e0*/ _LIST_ENTRY FastTeardownWorkQueue;
-	/*00f0*/ _LIST_ENTRY ExpressWorkQueue;
-	/*0100*/ _LIST_ENTRY RegularWorkQueue;
-	/*0110*/ _LIST_ENTRY PostTickWorkQueue;
-	/*0120*/ _LIST_ENTRY CleanCachemapUninitWorkQueue;
-	/*0130*/ _LIST_ENTRY IdleExtraWriteBehindThreadList;
-	/*0140*/ ULONG ActiveExtraWriteBehindThreads;
-	/*0144*/ ULONG MaxExtraWriteBehindThreads;
-	/*0148*/ _LIST_ENTRY IdleCacheMapUninitThreadList;
-	/*0158*/ ULONG ActiveCacheMapUninitThreads;
-	/*015c*/ ULONG MaxCacheMapUninitThreads;
-	/*0160*/ UCHAR QueueThrottle;
-	/*0164*/ ULONG PostTickWorkItemCount;
-	/*0168*/ ULONG ThreadsActiveBeforeThrottle;
-	/*016c*/ ULONG ExtraWBThreadsActiveBeforeThrottle;
-	/*0170*/ ULONG ExecutingWriteBehindWorkItems;
-	/*0174*/ ULONG ExecutingHighPriorityWorkItem;
-	/*0178*/ _KEVENT LowMemoryEvent;
-	/*0190*/ _KEVENT PowerEvent;
-	/*01a8*/ _KEVENT PeriodicEvent;
-	/*01c0*/ _KEVENT WaitingForTeardownEvent;
-	/*01d8*/ _KEVENT CoalescingFlushEvent;
-	/*01f0*/ ULONG PagesYetToWrite;
-	/*01f8*/ _LAZY_WRITER LazyWriter;
-	/*0280*/ _DIRTY_PAGE_STATISTICS DirtyPageStatistics;
-	/*0298*/ _DIRTY_PAGE_THRESHOLDS DirtyPageThresholds;
-	/*02d0*/ _WRITE_BEHIND_THROUGHPUT * ThroughputStats;
-	/*02d8*/ LONG ThroughputTrend;
-	/*02e0*/ ULONGLONG AverageAvailablePages;
-	/*02e8*/ ULONGLONG AverageDirtyPages;
-	/*02f0*/ ULONGLONG PagesSkippedDueToHotSpot;
-	/*02f8*/ _LARGE_INTEGER PrevRegularQueueItemRunTime;
-	/*0300*/ _LARGE_INTEGER PrevExtraWBThreadCheckTime;
-	/*0308*/ UCHAR AddExtraWriteBehindThreads;
-	/*0309*/ UCHAR RemoveExtraThreadPending;
-	/*0310*/ _LIST_ENTRY DeferredWrites;
-	/*0340*/ ULONGLONG DeferredWriteSpinLock;
-	/*0348*/ _LIST_ENTRY * IdleAsyncReadWorkerThreadList;
-	/*0350*/ ULONG * NumberActiveAsyncReadWorkerThreads;
-	/*0358*/ ULONG * NumberActiveCompleteAsyncReadWorkItems;
-	/*0360*/ _LIST_ENTRY * AsyncReadWorkQueue;
-	/*0368*/ _LIST_ENTRY * AsyncReadCompletionWorkQueue;
-	/*0370*/ _KEVENT * NewAsyncReadRequestEvent;
-	/*0378*/ _ASYNC_READ_THREAD_STATS * ReaderThreadsStats;
-	/*0380*/ _EX_PUSH_LOCK AsyncReadWorkQueueLock;
-	/*0388*/ _LIST_ENTRY VacbFreeHighPriorityList;
-	/*0398*/ ULONG NumberOfFreeHighPriorityVacbs;
-	/*03a0*/ _ETHREAD * LowPriWorkerThread;
-	/*03a8*/ _SHARED_CACHE_MAP * LowPriSharedCacheMap;
-	/*03b0*/ LONG LowPriOldCpuPriority;
-	/*03b4*/ _IO_PRIORITY_HINT LowPriOldIoPriority;
-	/*03b8*/ _EX_PUSH_LOCK LowPriorityWorkerThreadLock;
-	/*03c0*/ ULONG MaxNumberOfWriteBehindThreads;
-	/*03c4*/ UCHAR CoalescingState;
-	/*03c5*/ UCHAR ActivePartition;
-	/*03c6*/ UCHAR RundownPhase;
-	/*03c8*/ LONGLONG RefCount;
-	/*03d0*/ _KEVENT ExitEvent;
-	/*03e8*/ _KEVENT FinalDereferenceEvent;
-	/*0400*/ void * LazyWriteScanThreadHandle;
-	/*0440*/
+	/*0010*/ _LIST_ENTRY NumaNodeList;
+	/*0020*/ _LIST_ENTRY VolumeList;
+	/*0030*/ ULONG VolumeCount;
+	/*0038*/ _KEVENT LastVolumeEvent;
+	/*0050*/ _LIST_ENTRY DeletedVolumeList;
+	/*0060*/ _LIST_ENTRY DeletePVCMWorkerThreadList;
+	/*0070*/ _CC_NUMA_NODE * NumaNodeBlock[0x40];
+	/*0270*/ _LIST_ENTRY CleanSharedCacheMapList;
+	/*0280*/ _LIST_ENTRY CleanSharedCacheMapWithLogHandleList;
+	/*0290*/ _SHARED_CACHE_MAP_LIST_CURSOR DirtySharedCacheMapList;
+	/*02a8*/ _SHARED_CACHE_MAP_LIST_CURSOR LazyWriteCursor;
+	/*02c0*/ _LIST_ENTRY DirtySharedCacheMapWithLogHandleList;
+	/*0300*/ ULONGLONG PrivateLock;
+	/*0308*/ ULONG ConsecutiveWorklessLazyScanCount;
+	/*030c*/ UCHAR ForcedDisableLazywriteScan;
+	/*0340*/ ULONGLONG WorkQueueLock;
+	/*0348*/ ULONG NumberWorkerThreads;
+	/*0350*/ _LIST_ENTRY PostTickWorkQueue;
+	/*0360*/ ULONG MaxExtraWriteBehindThreads;
+	/*0364*/ ULONG MaxCacheMapUninitThreads;
+	/*0368*/ UCHAR QueueThrottle;
+	/*036c*/ ULONG PostTickWorkItemCount;
+	/*0370*/ _KEVENT LowMemoryEvent;
+	/*0388*/ _KEVENT PowerEvent;
+	/*03a0*/ _KEVENT WaitingForTeardownEvent;
+	/*03b8*/ _KEVENT CoalescingFlushEvent;
+	/*03d0*/ ULONG PagesYetToWrite;
+	/*03d8*/ _LAZY_WRITER LazyWriter;
+	/*0420*/ _DIRTY_PAGE_STATISTICS DirtyPageStatistics;
+	/*0438*/ _DIRTY_PAGE_THRESHOLDS DirtyPageThresholds;
+	/*0470*/ _WRITE_BEHIND_THROUGHPUT * ThroughputStats;
+	/*0478*/ ULONGLONG AverageAvailablePages;
+	/*0480*/ ULONGLONG AverageDirtyPages;
+	/*0488*/ ULONGLONG PagesSkippedDueToHotSpot;
+	/*0490*/ _LIST_ENTRY DeferredWrites;
+	/*04c0*/ ULONGLONG DeferredWriteSpinLock;
+	/*04c8*/ _EX_PUSH_LOCK AsyncReadWorkQueueLock;
+	/*04d0*/ _LIST_ENTRY VacbFreeHighPriorityList;
+	/*04e0*/ ULONG NumberOfFreeHighPriorityVacbs;
+	/*04e8*/ _ETHREAD * LowPriWorkerThread;
+	/*04f0*/ _SHARED_CACHE_MAP * LowPriSharedCacheMap;
+	/*04f8*/ LONG LowPriOldCpuPriority;
+	/*04fc*/ _IO_PRIORITY_HINT LowPriOldIoPriority;
+	/*0500*/ _EX_PUSH_LOCK LowPriorityWorkerThreadLock;
+	/*0508*/ ULONG MaxNumberOfWriteBehindThreads;
+	/*050c*/ UCHAR CoalescingState;
+	/*050d*/ UCHAR ActivePartition;
+	/*050e*/ UCHAR RundownPhase;
+	/*0510*/ LONGLONG RefCount;
+	/*0518*/ _KEVENT ExitEvent;
+	/*0530*/ _KEVENT FinalDereferenceEvent;
+	/*0548*/ void * LazyWriteScanThreadHandle;
+	/*0550*/ _CC_LWS_PACKET LWSPacket;
+	/*0580*/
+};
+
+struct _CC_VOLUME_TELEMETRY {
+	/*0000*/ _GUID DeviceGuid;
+	/*0010*/ ULONGLONG TotalDirtyPages;
+	/*0018*/ ULONGLONG MaxDirtyPages;
+	/*0020*/ ULONGLONG TotalDirtyPageThreshold;
+	/*0028*/ ULONGLONG TopDirtyPageThreshold;
+	/*0030*/ ULONGLONG BottomDirtyPageThreshold;
+	/*0038*/ ULONGLONG DirtyPageSamples;
+	/*0040*/ ULONGLONG TotalPagesQueuedToDisk;
+	/*0048*/ ULONGLONG MaxPagesQueuedToDisk;
+	/*0050*/ ULONGLONG PagesQueuedToDiskSamples;
+	/*0058*/ ULONGLONG TotalLoggedPagesQueuedToDisk;
+	/*0060*/ ULONGLONG MaxLoggedPagesQueuedToDisk;
+	/*0068*/ ULONGLONG LoggedPagesQueuedToDiskSamples;
+	/*0070*/ ULONGLONG ReadTotalBytes;
+	/*0078*/ ULONGLONG ReadPagedInTotalBytes;
+	/*0080*/ ULONGLONG ReadAheadTotalBytes;
+	/*0088*/ ULONGLONG TotalSynchronousReadIoCount;
+	/*0090*/ ULONGLONG TotalSynchronousNonBlockingReadIoCount;
+	/*0098*/ ULONGLONG TotalFailedSynchronousNonBlockingReadIoCount;
+	/*00a0*/ ULONGLONG TotalWrites;
+	/*00a8*/ ULONGLONG TotalHardThrottleWrites;
+	/*00b0*/ ULONGLONG TotalSoftThrottleWrites;
+	/*00b8*/ ULONGLONG TotalLazyWriterCalls;
+	/*00c0*/ ULONGLONG TotalLazyWriterLatency;
+	/*00c8*/ ULONGLONG TotalLazyWriterPagesFlushed;
+	/*00d0*/ ULONGLONG TotalLazyWriterAvgPagesPerSecond;
+	/*00d8*/ ULONGLONG SynchronousReadIoMaxLatency;
+	/*00e0*/ ULONGLONG SynchronousReadIoNonBlockingMaxLatency;
+	/*00e8*/ ULONGLONG SynchronousReadIoCounts[0xc];
+	/*0148*/ ULONGLONG SynchronousReadTotalLatency[0xc];
+	/*01a8*/ ULONGLONG SynchronousReadNonBlockingIoCounts[0xc];
+	/*0208*/ ULONGLONG SynchronousReadNonBlockingTotalLatency[0xc];
+	/*0268*/ ULONGLONG TotalSynchronousWriteIoCount;
+	/*0270*/ ULONGLONG TotalSynchronousNonBlockingWriteIoCount;
+	/*0278*/ ULONGLONG TotalFailedSynchronousNonBlockingWriteIoCount;
+	/*0280*/ ULONGLONG SynchronousWriteIoMaxLatency;
+	/*0288*/ ULONGLONG SynchronousWriteIoNonBlockingMaxLatency;
+	/*0290*/ ULONGLONG SynchronousWriteIoCounts[0xc];
+	/*02f0*/ ULONGLONG SynchronousWriteTotalLatency[0xc];
+	/*0350*/ ULONGLONG SynchronousWriteNonBlockingIoCounts[0xc];
+	/*03b0*/ ULONGLONG SynchronousWriteNonBlockingTotalLatency[0xc];
+	/*0410*/ ULONGLONG TotalAsynchronousReadIoCount;
+	/*0418*/ ULONGLONG AsynchronousReadIoMaxLatency;
+	/*0420*/ ULONGLONG AsynchronousReadIoCounts[0xc];
+	/*0480*/ ULONGLONG AsynchronousReadTotalLatency[0xc];
+	/*04e0*/ ULONGLONG CumulativeTotalDirtyPages;
+	/*04e8*/ ULONGLONG CumulativeMaxDirtyPages;
+	/*04f0*/ ULONGLONG CumulativeDirtyPageThreshold;
+	/*04f8*/ ULONGLONG CumulativeTopDirtyPageThreshold;
+	/*0500*/ ULONGLONG CumulativeBottomDirtyPageThreshold;
+	/*0508*/ ULONGLONG CumulativeDirtyPageSamples;
+	/*0510*/ ULONGLONG CumulativeTotalPagesQueuedToDisk;
+	/*0518*/ ULONGLONG CumulativeMaxPagesQueuedToDisk;
+	/*0520*/ ULONGLONG CumulativePagesQueuedToDiskSamples;
+	/*0528*/ ULONGLONG CumulativeTotalLoggedPagesQueuedToDisk;
+	/*0530*/ ULONGLONG CumulativeMaxLoggedPagesQueuedToDisk;
+	/*0538*/ ULONGLONG CumulativeLoggedPagesQueuedToDiskSamples;
+	/*0540*/ ULONGLONG CumulativeReadTotalBytes;
+	/*0548*/ ULONGLONG CumulativeReadPagedInTotalBytes;
+	/*0550*/ ULONGLONG CumulativeReadAheadTotalBytes;
+	/*0558*/ ULONGLONG CumulativeTotalSynchronousReadIoCount;
+	/*0560*/ ULONGLONG CumulativeTotalSynchronousNonBlockingReadIoCount;
+	/*0568*/ ULONGLONG CumulativeTotalFailedSynchronousNonBlockingReadIoCount;
+	/*0570*/ ULONGLONG CumulativeTotalWrites;
+	/*0578*/ ULONGLONG CumulativeTotalHardThrottleWrites;
+	/*0580*/ ULONGLONG CumulativeTotalSoftThrottleWrites;
+	/*0588*/ ULONGLONG CumulativeLazyWriterCalls;
+	/*0590*/ ULONGLONG CumulativeLazyWriterLatency;
+	/*0598*/ ULONGLONG CumulativeLazyWriterPagesFlushed;
+	/*05a0*/ ULONGLONG CumulativeLazyWriterAvgPagesPerSecond;
+	/*05a8*/ ULONGLONG CumulativeSynchronousReadIoMaxLatency;
+	/*05b0*/ ULONGLONG CumulativeSynchronousReadIoNonBlockingMaxLatency;
+	/*05b8*/ ULONGLONG CumulativeSynchronousReadIoCounts[0xc];
+	/*0618*/ ULONGLONG CumulativeSynchronousReadTotalLatency[0xc];
+	/*0678*/ ULONGLONG CumulativeSynchronousReadNonBlockingIoCounts[0xc];
+	/*06d8*/ ULONGLONG CumulativeSynchronousReadNonBlockingTotalLatency[0xc];
+	/*0738*/ ULONGLONG CumulativeTotalSynchronousWriteIoCount;
+	/*0740*/ ULONGLONG CumulativeTotalSynchronousNonBlockingWriteIoCount;
+	/*0748*/ ULONGLONG CumulativeTotalFailedSynchronousNonBlockingWriteIoCount;
+	/*0750*/ ULONGLONG CumulativeSynchronousWriteIoMaxLatency;
+	/*0758*/ ULONGLONG CumulativeSynchronousWriteIoNonBlockingMaxLatency;
+	/*0760*/ ULONGLONG CumulativeSynchronousWriteIoCounts[0xc];
+	/*07c0*/ ULONGLONG CumulativeSynchronousWriteTotalLatency[0xc];
+	/*0820*/ ULONGLONG CumulativeSynchronousWriteNonBlockingIoCounts[0xc];
+	/*0880*/ ULONGLONG CumulativeSynchronousWriteNonBlockingTotalLatency[0xc];
+	/*08e0*/ ULONGLONG CumulativeTotalAsynchronousReadIoCount;
+	/*08e8*/ ULONGLONG CumulativeAsynchronousReadIoMaxLatency;
+	/*08f0*/ ULONGLONG CumulativeAsynchronousReadIoCounts[0xc];
+	/*0950*/ ULONGLONG CumulativeAsynchronousReadTotalLatency[0xc];
+	/*09b0*/
 };
 
 struct _CELL_DATA {
@@ -1962,6 +2400,10 @@ struct _CHILD_LIST {
 	/*0004*/ ULONG List;
 	/*0008*/
 };
+
+struct _CHPEV2_CPUAREA_INFO;
+
+struct _CHPEV2_PROCESS_INFO;
 
 struct _CI_NGEN_PATHS;
 
@@ -1995,76 +2437,83 @@ union _CLS_LSN {
 
 struct _CMHIVE {
 	/*0000*/ _HHIVE Hive;
-	/*0600*/ void * FileHandles[0x6];
-	/*0630*/ _LIST_ENTRY NotifyList;
-	/*0640*/ _LIST_ENTRY HiveList;
-	/*0650*/ _LIST_ENTRY PreloadedHiveList;
-	/*0660*/ _EX_RUNDOWN_REF HiveRundown;
-	/*0668*/ _CM_KEY_HASH_TABLE_ENTRY * KcbCacheTable;
-	/*0670*/ ULONG KcbCacheTableSize;
-	/*0678*/ _CM_KEY_HASH_TABLE_ENTRY * DeletedKcbTable;
-	/*0680*/ ULONG DeletedKcbTableSize;
-	/*0684*/ ULONG Identity;
-	/*0688*/ _CMSI_RW_LOCK HiveLock;
-	/*0690*/ _RTL_BITMAP FlushDirtyVector;
-	/*06a0*/ ULONG FlushDirtyVectorSize;
-	/*06a8*/ CMP_OFFSET_ARRAY * FlushLogEntryOffsetArray;
-	/*06b0*/ ULONG FlushLogEntryOffsetArrayCount;
-	/*06b4*/ ULONG FlushLogEntrySize;
-	/*06b8*/ ULONG FlushHiveTruncated;
-	/*06bc*/ UCHAR FlushBaseBlockDirty;
-	/*06c0*/ _RTL_BITMAP CapturedUnreconciledVector;
-	/*06d0*/ ULONG CapturedUnreconciledVectorSize;
-	/*06d8*/ CMP_OFFSET_ARRAY * UnreconciledOffsetArray;
-	/*06e0*/ ULONG UnreconciledOffsetArrayCount;
-	/*06e8*/ _HBASE_BLOCK * UnreconciledBaseBlock;
-	/*06f0*/ _EX_PUSH_LOCK SecurityLock;
-	/*06f8*/ ULONG LastShrinkHiveSize;
-	/*0700*/ _LARGE_INTEGER ActualFileSize;
-	/*0708*/ _LARGE_INTEGER LogFileSizes[0x2];
-	/*0718*/ _UNICODE_STRING FileFullPath;
-	/*0728*/ _UNICODE_STRING FileUserName;
-	/*0738*/ _UNICODE_STRING HiveRootPath;
-	/*0748*/ ULONG SecurityCount;
-	/*074c*/ ULONG SecurityCacheSize;
-	/*0750*/ LONG SecurityHitHint;
-	/*0758*/ _CM_KEY_SECURITY_CACHE_ENTRY * SecurityCache;
-	/*0760*/ _LIST_ENTRY SecurityHash[0x40];
-	/*0b60*/ ULONG UnloadEventCount;
-	/*0b68*/ _KEVENT * * UnloadEventArray;
-	/*0b70*/ _CM_KEY_CONTROL_BLOCK * RootKcb;
-	/*0b78*/ UCHAR Frozen;
-	/*0b80*/ _CM_WORKITEM * UnloadWorkItem;
-	/*0b88*/ _CM_WORKITEM UnloadWorkItemHolder;
-	/*0bb0*/ _CM_DIRTY_VECTOR_LOG DirtyVectorLog;
-	/*1038*/ ULONG Flags;
-	/*1040*/ _LIST_ENTRY TrustClassEntry;
-	/*1050*/ ULONGLONG DirtyTime;
-	/*1058*/ ULONGLONG UnreconciledTime;
-	/*1060*/ _CM_RM * CmRm;
-	/*1068*/ ULONG CmRmInitFailPoint;
-	/*106c*/ LONG CmRmInitFailStatus;
-	/*1070*/ _KTHREAD * CreatorOwner;
-	/*1078*/ _KTHREAD * RundownThread;
-	/*1080*/ _LARGE_INTEGER LastWriteTime;
-	/*1088*/ _HIVE_WRITE_WAIT_QUEUE FlushQueue;
-	/*1098*/ _HIVE_WRITE_WAIT_QUEUE ReconcileQueue;
-	/*10a8*/ ULONG FlushFlags;
-	/*10a8*/ ULONG PrimaryFilePurged : 01; // 0x00000001;
-	/*10a8*/ ULONG DiskFileBad : 01; // 0x00000002;
-	/*10ac*/ ULONG PrimaryFileSizeBeforeLastFlush;
-	/*10b0*/ LONG volatile ReferenceCount;
-	/*10b4*/ LONG UnloadHistoryIndex;
-	/*10b8*/ ULONG UnloadHistory[0x80];
-	/*12b8*/ ULONG BootStart;
-	/*12bc*/ ULONG UnaccessedStart;
-	/*12c0*/ ULONG UnaccessedEnd;
-	/*12c4*/ ULONG LoadedKeyCount;
-	/*12c8*/ ULONG volatile HandleClosePending;
-	/*12d0*/ _EX_PUSH_LOCK HandleClosePendingEvent;
-	/*12d8*/ UCHAR FinalFlushSucceeded;
-	/*12e0*/ _CMP_VOLUME_CONTEXT * VolumeContext;
-	/*12e8*/
+	/*0608*/ void * FileHandles[0x6];
+	/*0638*/ _LIST_ENTRY NotifyList;
+	/*0648*/ _LIST_ENTRY HiveList;
+	/*0658*/ _LIST_ENTRY PreloadedHiveList;
+	/*0668*/ _EX_RUNDOWN_REF HiveRundown;
+	/*0670*/ _CM_KEY_HASH_TABLE_ENTRY * KcbCacheTable;
+	/*0678*/ ULONG KcbCacheTableSize;
+	/*0680*/ _CM_KEY_HASH_TABLE_ENTRY * DeletedKcbTable;
+	/*0688*/ ULONG DeletedKcbTableSize;
+	/*068c*/ ULONG Identity;
+	/*0690*/ _CMSI_RW_LOCK HiveLock;
+	/*0698*/ _RTL_BITMAP FlushDirtyVector;
+	/*06a8*/ ULONG FlushDirtyVectorSize;
+	/*06b0*/ CMP_OFFSET_ARRAY * FlushLogEntryOffsetArray;
+	/*06b8*/ ULONG FlushLogEntryOffsetArrayCount;
+	/*06bc*/ ULONG FlushLogEntrySize;
+	/*06c0*/ ULONG FlushHiveTruncated;
+	/*06c4*/ UCHAR FlushBaseBlockDirty;
+	/*06c8*/ _RTL_BITMAP CapturedUnreconciledVector;
+	/*06d8*/ ULONG CapturedUnreconciledVectorSize;
+	/*06e0*/ CMP_OFFSET_ARRAY * UnreconciledOffsetArray;
+	/*06e8*/ ULONG UnreconciledOffsetArrayCount;
+	/*06f0*/ _HBASE_BLOCK * UnreconciledBaseBlock;
+	/*06f8*/ _EX_PUSH_LOCK SecurityLock;
+	/*0700*/ ULONG LastShrinkHiveSize;
+	/*0708*/ _LARGE_INTEGER ActualFileSize;
+	/*0710*/ _LARGE_INTEGER LogFileSizes[0x2];
+	/*0720*/ _UNICODE_STRING FileFullPath;
+	/*0730*/ _UNICODE_STRING FileUserName;
+	/*0740*/ _UNICODE_STRING HiveRootPath;
+	/*0750*/ ULONG SecurityCount;
+	/*0754*/ ULONG SecurityCacheSize;
+	/*0758*/ LONG SecurityHitHint;
+	/*0760*/ _CM_KEY_SECURITY_CACHE_ENTRY * SecurityCache;
+	/*0768*/ _LIST_ENTRY SecurityHash[0x40];
+	/*0b68*/ ULONG UnloadEventCount;
+	/*0b70*/ _KEVENT * * UnloadEventArray;
+	/*0b78*/ _CM_KEY_CONTROL_BLOCK * RootKcb;
+	/*0b80*/ UCHAR Frozen;
+	/*0b88*/ _CM_DIRTY_VECTOR_LOG DirtyVectorLog;
+	/*1010*/ ULONG Flags;
+	/*1018*/ _LIST_ENTRY TrustClassEntry;
+	/*1028*/ ULONGLONG DirtyTime;
+	/*1030*/ ULONGLONG UnreconciledTime;
+	/*1038*/ _CM_RM * CmRm;
+	/*1040*/ ULONG CmRmInitFailPoint;
+	/*1044*/ LONG CmRmInitFailStatus;
+	/*1048*/ _KTHREAD * CreatorOwner;
+	/*1050*/ _KTHREAD * RundownThread;
+	/*1058*/ _LARGE_INTEGER LastWriteTime;
+	/*1060*/ _HIVE_WRITE_WAIT_QUEUE FlushQueue;
+	/*1070*/ _HIVE_WRITE_WAIT_QUEUE ReconcileQueue;
+	/*1080*/ ULONG FlushFlags;
+	/*1080*/ ULONG PrimaryFilePurged : 01; // 0x00000001;
+	/*1080*/ ULONG DiskFileBad : 01; // 0x00000002;
+	/*1084*/ ULONG PrimaryFileSizeBeforeLastFlush;
+	/*1088*/ LONG volatile ReferenceCount;
+	/*108c*/ LONG UnloadHistoryIndex;
+	/*1090*/ ULONG UnloadHistory[0x80];
+	/*1290*/ ULONG BootStart;
+	/*1294*/ ULONG UnaccessedStart;
+	/*1298*/ ULONG UnaccessedEnd;
+	/*129c*/ ULONG LoadedKeyCount;
+	/*12a0*/ ULONG volatile HandleClosePending;
+	/*12a8*/ _EX_PUSH_LOCK HandleClosePendingEvent;
+	/*12b0*/ UCHAR FinalFlushSucceeded;
+	/*12b8*/ _CMP_VOLUME_CONTEXT * VolumeContext;
+	/*12c0*/ ULONG LateUnloadWorkItemState;
+	/*12c8*/ _EX_PUSH_LOCK LateUnloadFinishedEvent;
+	/*12d0*/ _WORK_QUEUE_ITEM * LateUnloadWorkItem;
+	/*12d8*/
+};
+
+enum _CMP_COPY_TYPE {
+	Copy = 0x0,
+	Sync = 0x1,
+	Merge = 0x2
 };
 
 struct _CMP_DISCARD_AND_REPLACE_KCB_CONTEXT {
@@ -2076,30 +2525,36 @@ struct _CMP_DISCARD_AND_REPLACE_KCB_CONTEXT {
 
 enum _CMP_FAILURE_INJECTION_POINT {
 	CmpFailurePointPoolAllocation = 0x0,
-	CmpFailurePointViewMapping = 0x1,
-	CmpFailurePointViewPinning = 0x2,
-	CmpFailurePointResourceCharging = 0x3,
-	CmpFailurePointFileWrite = 0x4,
-	CmpFailurePointFileRead = 0x5,
-	CmpFailurePointCacheFlush = 0x6,
-	CmpFailurePointFlush = 0x7,
-	CmpFailurePointFlushAndPurge = 0x8,
-	CmpFailurePointForceLargeBin = 0x9,
-	CmpFailurePointDontFixAlignment = 0xa,
-	CmpFailurePointAllocateCell = 0xb,
-	CmpFailurePointMarkDirty = 0xc,
-	CmpFailurePointForceMultiLevelMap = 0xd,
-	CmpFailurePointAllocateContiguousLogEntry = 0xe,
-	CmpFailurePointAllocateKcb = 0xf,
-	CmpFailurePointCreateKeyBody = 0x10,
-	CmpFailurePointForceFreeKcb = 0x11,
-	CmpFailurePointKcbLockUpgrade = 0x12,
-	CmpFailurePointKcbLockUpgradeDelay = 0x13,
-	CmpFailurePointKeyEnumResumeContextVerification = 0x14,
-	CmpFailurePointKeyEnumForceRetry = 0x15,
-	CmpFailurePointForceReorganization = 0x16,
-	CmpFailurePointForceLazyCOWByPolicy = 0x17,
-	CmpFailureInjectionPointCount = 0x18
+	CmpFailurePointFileWrite = 0x1,
+	CmpFailurePointFileRead = 0x2,
+	CmpFailurePointFlush = 0x3,
+	CmpFailurePointFlushAndPurge = 0x4,
+	CmpFailurePointForceLargeBin = 0x5,
+	CmpFailurePointDontFixAlignment = 0x6,
+	CmpFailurePointAllocateCell = 0x7,
+	CmpFailurePointMarkDirty = 0x8,
+	CmpFailurePointForceMultiLevelMap = 0x9,
+	CmpFailurePointAllocateContiguousLogEntry = 0xa,
+	CmpFailurePointAllocateKcb = 0xb,
+	CmpFailurePointCreateKeyBody = 0xc,
+	CmpFailurePointForceFreeKcb = 0xd,
+	CmpFailurePointKcbLockUpgrade = 0xe,
+	CmpFailurePointKcbLockUpgradeDelay = 0xf,
+	CmpFailurePointKeyEnumResumeContextVerification = 0x10,
+	CmpFailurePointKeyEnumForceRetry = 0x11,
+	CmpFailurePointForceReorganization = 0x12,
+	CmpFailurePointForceLazyCOWByPolicy = 0x13,
+	CmpFailurePointForceBugcheckRecoveryEnabled = 0x14,
+	CmpFailurePointCreateHiveCacheEntry = 0x15,
+	CmpFailurePointClaimHiveCacheEntry = 0x16,
+	CmpFailurePointSubscribePnpNotifications = 0x17,
+	CmpFailurePointCreateOplockMonitoringThread = 0x18,
+	CmpFailurePointOpenHiveFile = 0x19,
+	CmpFailurePointRequestOplockOnPrimary = 0x1a,
+	CmpFailurePointRequestOplockOnLog1 = 0x1b,
+	CmpFailurePointRequestOplockOnLog2 = 0x1c,
+	CmpFailurePointCreateHive = 0x1d,
+	CmpFailureInjectionPointCount = 0x1e
 };
 
 struct _CMP_VOLUME_CONTEXT {
@@ -2122,7 +2577,11 @@ struct _CMP_VOLUME_MANAGER {
 struct _CMSI_PROCESS_TUPLE {
 	/*0000*/ void * ProcessHandle;
 	/*0008*/ void * ProcessReference;
-	/*0010*/
+	/*0010*/ _CMSI_RW_LOCK WorkingSetLock;
+	/*0018*/ ULONGLONG LockedPageCharges;
+	/*0020*/ ULONGLONG WorkingSetMinimum;
+	/*0028*/ ULONGLONG WorkingSetMaximum;
+	/*0030*/
 };
 
 struct _CMSI_RW_LOCK {
@@ -2191,6 +2650,24 @@ struct _CM_FULL_RESOURCE_DESCRIPTOR {
 	/*0004*/ ULONG BusNumber;
 	/*0008*/ _CM_PARTIAL_RESOURCE_LIST PartialResourceList;
 	/*0024*/
+};
+
+enum _CM_HIVE_CACHE_OPLOCK_EVENT_TYPE {
+	OplockEventOnPrimary = 0x0,
+	OplockEventOnLog1 = 0x1,
+	OplockEventOnLog2 = 0x2,
+	OplockBreakThreadKillEvent = 0x3,
+	OplockBreakThreadEndEvent = 0x4,
+	OplockBreakThreadSyncEvent = 0x5,
+	OplockBreakThreadWaitEventsMax = 0x4,
+	OplockRelatedEventsMax = 0x6
+};
+
+enum _CM_HIVE_CACHE_OPLOCK_FILE_TYPE {
+	OplockOnPrimary = 0x0,
+	OplockOnLog1 = 0x1,
+	OplockOnLog2 = 0x2,
+	OplocksOnFilesMax = 0x3
 };
 
 struct _CM_INDEX {
@@ -2265,7 +2742,9 @@ struct _CM_KEY_BODY {
 	/*0048*/ _LIST_ENTRY ContextListHead;
 	/*0058*/ void * EnumerationResumeContext;
 	/*0060*/ ULONG RestrictedAccessMask;
-	/*0068*/
+	/*0064*/ ULONG LastSearchedIndex;
+	/*0068*/ void * LockedMemoryMdls;
+	/*0070*/
 };
 
 struct _CM_KEY_CONTROL_BLOCK {
@@ -2425,42 +2904,6 @@ struct _CM_KEY_VALUE {
 	/*0018*/
 };
 
-enum _CM_LOAD_FAILURE_TYPE {
-	_None = 0x0,
-	_CmpCreateHive = 0x1,
-	_HvpBuildMap = 0x3,
-	_HvpBuildMapForLoaderHive = 0x4,
-	_HvpInitMap = 0x5,
-	_HvLoadHive = 0x6,
-	_HvpMapHiveImage = 0x7,
-	_HvpRecoverData = 0x8,
-	_CmpValidateHiveSecurityDescriptors = 0x9,
-	_HvpEnlistBinInMap = 0xa,
-	_CmCheckRegistry = 0xb,
-	_CmRegistryIO = 0xc,
-	_CmCheckRegistry2 = 0xd,
-	_CmpCheckKey = 0xe,
-	_CmpCheckValueList = 0xf,
-	_HvCheckHive = 0x10,
-	_HvCheckBin = 0x11,
-	_HvpGetLogEntryDirtyVector = 0x12,
-	_HvpReadLogEntryHeader = 0x13,
-	_HvpReadLogEntry = 0x14,
-	_CmpMountPreloadedHives = 0x15,
-	_CmpLoadHiveThread = 0x16,
-	_CmpCheckLeaf = 0x17,
-	_HvHiveStartFileBacked = 0x18,
-	_HvStartHiveMemoryBacked = 0x19,
-	_HvpEnlistFreeCells = 0x1a,
-	_HvpPerformLogFileRecovery = 0x1b,
-	_CmpInitHiveFromFile = 0x1c,
-	_CmpLoadKeyCommon = 0x1d,
-	_CmpLinkHiveToMaster = 0x1e,
-	_CmLoadKey = 0x1f,
-	_CmLoadAppKey = 0x20,
-	_CmpResolveHiveLoadConflict = 0x21
-};
-
 struct _CM_NAME_CONTROL_BLOCK {
 	/*0000*/ ULONG Compressed : 01; // 0x00000001;
 	/*0000*/ ULONG RefCount : 31; // 0xfffffffe;
@@ -2490,23 +2933,6 @@ struct _CM_NOTIFY_BLOCK {
 	/*0030*/ ULONG NotifyPending : 01; // 0x80000000;
 	/*0038*/ _SECURITY_SUBJECT_CONTEXT SubjectContext;
 	/*0058*/
-};
-
-struct _CM_PARSE_DEBUG_INFO {
-	/*0000*/ _CM_KEY_CONTROL_BLOCK * SymlinkCachedKcb;
-	/*0008*/ _CM_KEY_CONTROL_BLOCK * StartingKcb;
-	/*0010*/ _CM_KEY_CONTROL_BLOCK * KcbCacheResult;
-	/*0018*/ _CM_KEY_CONTROL_BLOCK * WalkResult;
-	/*0020*/ _CM_KEY_CONTROL_BLOCK * DeepestKcbFound;
-	/*0028*/ UCHAR KcbCacheLevels;
-	/*0029*/ UCHAR WalkLevels;
-	/*002a*/ UCHAR FailureCount;
-	struct {
-		/*0000*/ LONG Status;
-		/*0004*/ ULONG Point;
-		/*0008*/
-	} FailurePoints[0x4];
-	/*0050*/
 };
 
 struct _CM_PARTIAL_RESOURCE_DESCRIPTOR {
@@ -2719,14 +3145,6 @@ struct _CM_UOW_SET_VALUE_LIST_DATA {
 	/*0000*/ ULONG RefCount;
 	/*0004*/ _CHILD_LIST ValueList;
 	/*000c*/
-};
-
-struct _CM_WORKITEM {
-	/*0000*/ _LIST_ENTRY ListEntry;
-	/*0010*/ ULONG Private;
-	/*0018*/ void (* WorkerRoutine)( void * );
-	/*0020*/ void * Parameter;
-	/*0028*/
 };
 
 struct _COMPRESSED_DATA_INFO {
@@ -2952,12 +3370,34 @@ struct _CONTROL_AREA {
 	/*0080*/
 };
 
+struct _COPY_INFORMATION {
+	/*0000*/ _FILE_OBJECT * SourceFileObject;
+	/*0008*/ LONGLONG SourceFileOffset;
+	/*0010*/
+};
+
 struct _COUNTER_READING {
 	/*0000*/ _HARDWARE_COUNTER_TYPE Type;
 	/*0004*/ ULONG Index;
 	/*0008*/ ULONGLONG Start;
 	/*0010*/ ULONGLONG Total;
 	/*0018*/
+};
+
+struct _CPTABLEINFO {
+	/*0000*/ USHORT CodePage;
+	/*0002*/ USHORT MaximumCharacterSize;
+	/*0004*/ USHORT DefaultChar;
+	/*0006*/ USHORT UniDefaultChar;
+	/*0008*/ USHORT TransDefaultChar;
+	/*000a*/ USHORT TransUniDefaultChar;
+	/*000c*/ USHORT DBCSCodePage;
+	/*000e*/ UCHAR LeadByte[0xc];
+	/*0020*/ USHORT * MultiByteTable;
+	/*0028*/ void * WideCharTable;
+	/*0030*/ USHORT * DBCSRanges;
+	/*0038*/ USHORT * DBCSOffsets;
+	/*0040*/
 };
 
 union _CPU_INFO {
@@ -3399,6 +3839,8 @@ struct _DEBUG_DEVICE_DESCRIPTOR {
 	/*0011*/ UCHAR DbgHalScratchAllocated : 01; // 0x01;
 	/*0011*/ UCHAR DbgBarsMapped : 01; // 0x02;
 	/*0011*/ UCHAR DbgScratchAllocated : 01; // 0x04;
+	/*0011*/ UCHAR DbgUncachedMemory : 01; // 0x08;
+	/*0011*/ UCHAR DbgSynthetic : 01; // 0x10;
 	/*0012*/ UCHAR Initialized;
 	/*0013*/ UCHAR Configured;
 	/*0018*/ DEBUG_DEVICE_ADDRESS BaseAddress[0x6];
@@ -3413,15 +3855,23 @@ struct _DEBUG_DEVICE_DESCRIPTOR {
 	/*00e8*/ ULONG NameSpacePathLength;
 	/*00ec*/ ULONG TransportType;
 	/*00f0*/ _DEBUG_TRANSPORT_DATA TransportData;
-	/*00f8*/
+	/*0100*/ _DEBUG_IOMMU_EFI_DATA EfiIoMmuData;
+	/*0110*/
+};
+
+struct _DEBUG_IOMMU_EFI_DATA {
+	/*0000*/ void * PciIoProtocolHandle;
+	/*0008*/ void * Mapping;
+	/*0010*/
 };
 
 struct _DEBUG_TRANSPORT_DATA {
 	/*0000*/ ULONG HwContextSize;
-	/*0004*/ UCHAR UseSerialFraming;
-	/*0005*/ UCHAR ValidUSBCoreId;
-	/*0006*/ UCHAR USBCoreId;
-	/*0008*/
+	/*0004*/ ULONG SharedVisibleDataSize;
+	/*0008*/ UCHAR UseSerialFraming;
+	/*0009*/ UCHAR ValidUSBCoreId;
+	/*000a*/ UCHAR USBCoreId;
+	/*000c*/
 };
 
 struct _DEFERRED_WRITE {
@@ -3435,9 +3885,10 @@ struct _DEFERRED_WRITE {
 	/*0038*/ void * Context1;
 	/*0040*/ void * Context2;
 	/*0048*/ _CC_PARTITION * Partition;
-	/*0050*/ UCHAR SoftThrottle;
-	/*0058*/ _LARGE_INTEGER TimeAdded;
-	/*0060*/
+	/*0050*/ _PRIVATE_VOLUME_CACHEMAP * PrivateVolumeCacheMap;
+	/*0058*/ UCHAR SoftThrottle;
+	/*0060*/ _LARGE_INTEGER TimeAdded;
+	/*0068*/
 };
 
 struct _DELAY_ACK_FO {
@@ -3582,12 +4033,14 @@ struct _DEVICE_MANAGE_DATA_SET_ATTRIBUTES_OUTPUT {
 struct _DEVICE_MAP {
 	/*0000*/ _OBJECT_DIRECTORY * DosDevicesDirectory;
 	/*0008*/ _OBJECT_DIRECTORY * GlobalDosDevicesDirectory;
-	/*0010*/ void * DosDevicesDirectoryHandle;
-	/*0018*/ LONG volatile ReferenceCount;
-	/*001c*/ ULONG DriveMap;
-	/*0020*/ UCHAR DriveType[0x20];
-	/*0040*/ _EJOB * ServerSilo;
-	/*0048*/
+	/*0010*/ _EJOB * ServerSilo;
+	/*0018*/ _DEVICE_MAP * GlobalDeviceMap;
+	/*0020*/ _EX_FAST_REF DriveObject[0x1a];
+	/*00f0*/ LONGLONG ReferenceCount;
+	/*00f8*/ void * DosDevicesDirectoryHandle;
+	/*0100*/ ULONG DriveMap;
+	/*0104*/ UCHAR DriveType[0x20];
+	/*0128*/
 };
 
 struct _DEVICE_NODE {
@@ -3673,7 +4126,11 @@ struct _DEVICE_NODE {
 	/*02c8*/ _PNP_REBALANCE_TRACE_CONTEXT * RebalanceContext;
 	/*02d0*/ _DEVICE_NODE_IOMMU_EXTENSION * IommuExtension;
 	/*02d8*/ _PO_DIRECTED_DRIPS_STATE DirectedDripsState;
-	/*0310*/
+	/*0310*/ _PNP_PROBLEM_CODE_LOG_ENTRY ProblemCodeLog[0x4];
+	/*0370*/ ULONG ProblemCodeLogNextIndex;
+	/*0378*/ _LARGE_INTEGER StateTimestamp;
+	/*0380*/ _LARGE_INTEGER PreviousStateTimestamp;
+	/*0388*/
 };
 
 struct _DEVICE_NODE_IOMMU_EXTENSION;
@@ -3898,7 +4355,9 @@ struct _DIAGNOSTIC_CONTEXT {
 
 enum _DIRECTORY_NOTIFY_INFORMATION_CLASS {
 	DirectoryNotifyInformation = 0x1,
-	DirectoryNotifyExtendedInformation = 0x2
+	DirectoryNotifyExtendedInformation = 0x2,
+	DirectoryNotifyFullInformation = 0x3,
+	DirectoryNotifyMaximumInformation = 0x4
 };
 
 struct _DIRTY_PAGE_STATISTICS {
@@ -3977,8 +4436,8 @@ struct _DISPATCHER_HEADER {
 	/*0003*/ UCHAR Minimal : 01; // 0x04;
 	/*0003*/ UCHAR Reserved4 : 02; // 0x18;
 	/*0003*/ UCHAR AltSyscall : 01; // 0x20;
-	/*0003*/ UCHAR UmsScheduled : 01; // 0x40;
-	/*0003*/ UCHAR UmsPrimary : 01; // 0x80;
+	/*0003*/ UCHAR Emulation : 01; // 0x40;
+	/*0003*/ UCHAR Reserved5 : 01; // 0x80;
 	/*0000*/ UCHAR MutantType;
 	/*0001*/ UCHAR MutantSize;
 	/*0002*/ UCHAR DpcActive;
@@ -3987,6 +4446,8 @@ struct _DISPATCHER_HEADER {
 	/*0008*/ _LIST_ENTRY WaitListHead;
 	/*0018*/
 };
+
+struct _DMAR_PAGE_TABLE_STATE;
 
 struct _DMA_ADAPTER {
 	/*0000*/ USHORT Version;
@@ -3997,8 +4458,16 @@ struct _DMA_ADAPTER {
 
 struct _DMA_ADAPTER_INFO {
 	/*0000*/ ULONG Version;
-	/*0004*/ _DMA_ADAPTER_INFO_V1 V1;
-	/*0018*/
+	/*0008*/ _DMA_ADAPTER_INFO_V1 V1;
+	/*0008*/ _DMA_ADAPTER_INFO_CRASHDUMP Crashdump;
+	/*0058*/
+};
+
+struct _DMA_ADAPTER_INFO_CRASHDUMP {
+	/*0000*/ _DEVICE_DESCRIPTION DeviceDescription;
+	/*0040*/ ULONGLONG DeviceIdSize;
+	/*0048*/ void * DeviceId;
+	/*0050*/
 };
 
 struct _DMA_ADAPTER_INFO_V1 {
@@ -4016,6 +4485,37 @@ struct _DMA_COMMON_BUFFER_ENTRY {
 	/*0010*/
 };
 
+struct _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION {
+	/*0000*/ _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE ConfigType;
+	struct {
+		/*0008*/ _LARGE_INTEGER MinimumAddress;
+		/*0010*/ _LARGE_INTEGER MaximumAddress;
+		/*0018*/
+	} LogicalAddressLimits;
+	struct {
+		/*0008*/ ULONGLONG Offset;
+		/*0010*/ ULONG Length;
+		/*0018*/
+	} SubSection;
+	/*0008*/ _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_ACCESS_TYPE HardwareAccessType;
+	/*0008*/ ULONGLONG Reserved[0x4];
+	/*0028*/
+};
+
+enum _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_ACCESS_TYPE {
+	CommonBufferHardwareAccessReadOnly = 0x0,
+	CommonBufferHardwareAccessWriteOnly = 0x1,
+	CommonBufferHardwareAccessReadWrite = 0x2,
+	CommonBufferHardwareAccessMax = 0x3
+};
+
+enum _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE {
+	CommonBufferConfigTypeLogicalAddressLimits = 0x0,
+	CommonBufferConfigTypeSubSection = 0x1,
+	CommonBufferConfigTypeHardwareAccessPermissions = 0x2,
+	CommonBufferConfigTypeMax = 0x3
+};
+
 struct _DMA_COMMON_BUFFER_VECTOR {
 	/*0000*/ _LIST_ENTRY ListEntry;
 	/*0010*/ ULONGLONG SizeOfEntries;
@@ -4025,7 +4525,8 @@ struct _DMA_COMMON_BUFFER_VECTOR {
 	/*0030*/ void * BaseAddress;
 	/*0038*/ ULONGLONG BaseLogicalAddress;
 	/*0040*/ _DMA_COMMON_BUFFER_ENTRY * Entries;
-	/*0048*/
+	/*0048*/ UCHAR LogicalAddressMapped;
+	/*0050*/
 };
 
 struct _DMA_FUNCTION_TABLE {
@@ -4064,6 +4565,57 @@ struct _DMA_IOMMU_INTERFACE {
 	/*0060*/ LONG (* SetDeviceFaultReporting)( _DEVICE_OBJECT * , ULONG , UCHAR , _DEVICE_FAULT_CONFIGURATION * );
 	/*0068*/ LONG (* ConfigureDomain)( _IOMMU_DMA_DOMAIN * , _DOMAIN_CONFIGURATION * );
 	/*0070*/
+};
+
+struct _DMA_IOMMU_INTERFACE_EX {
+	/*0000*/ ULONGLONG Size;
+	/*0008*/ ULONG Version;
+	/*0010*/ _DMA_IOMMU_INTERFACE_V1 V1;
+	/*0010*/ _DMA_IOMMU_INTERFACE_V2 V2;
+	/*00c0*/
+};
+
+struct _DMA_IOMMU_INTERFACE_V1 {
+	/*0000*/ LONG (* CreateDomain)( UCHAR , _IOMMU_DMA_DOMAIN * * );
+	/*0008*/ LONG (* DeleteDomain)( _IOMMU_DMA_DOMAIN * );
+	/*0010*/ LONG (* AttachDevice)( _IOMMU_DMA_DOMAIN * , _DEVICE_OBJECT * , ULONG , ULONG );
+	/*0018*/ LONG (* DetachDevice)( _IOMMU_DMA_DOMAIN * , _DEVICE_OBJECT * , ULONG );
+	/*0020*/ LONG (* FlushDomain)( _IOMMU_DMA_DOMAIN * );
+	/*0028*/ LONG (* FlushDomainByVaList)( _IOMMU_DMA_DOMAIN * , UCHAR , ULONG , void * );
+	/*0030*/ LONG (* QueryInputMappings)( _DEVICE_OBJECT * , _INPUT_MAPPING_ELEMENT * , ULONG , ULONG * );
+	/*0038*/ LONG (* MapLogicalRange)( _IOMMU_DMA_DOMAIN * , ULONG , _MDL * , ULONGLONG );
+	/*0040*/ LONG (* UnmapLogicalRange)( _IOMMU_DMA_DOMAIN * , ULONGLONG , ULONGLONG );
+	/*0048*/ LONG (* MapIdentityRange)( _IOMMU_DMA_DOMAIN * , ULONG , _MDL * );
+	/*0050*/ LONG (* UnmapIdentityRange)( _IOMMU_DMA_DOMAIN * , _MDL * );
+	/*0058*/ LONG (* SetDeviceFaultReporting)( _DEVICE_OBJECT * , ULONG , UCHAR , _DEVICE_FAULT_CONFIGURATION * );
+	/*0060*/ LONG (* ConfigureDomain)( _IOMMU_DMA_DOMAIN * , _DOMAIN_CONFIGURATION * );
+	/*0068*/
+};
+
+struct _DMA_IOMMU_INTERFACE_V2 {
+	/*0000*/ LONG (* CreateDomainEx)( _IOMMU_DMA_DOMAIN_TYPE , _IOMMU_DMA_DOMAIN_CREATION_FLAGS , _IOMMU_DMA_LOGICAL_ALLOCATOR_CONFIG * , _IOMMU_DMA_RESERVED_REGION * , _IOMMU_DMA_DOMAIN * * );
+	/*0008*/ LONG (* DeleteDomain)( _IOMMU_DMA_DOMAIN * );
+	/*0010*/ LONG (* AttachDeviceEx)( _IOMMU_DMA_DOMAIN * , _IOMMU_DMA_DEVICE * );
+	/*0018*/ LONG (* DetachDeviceEx)( _IOMMU_DMA_DEVICE * );
+	/*0020*/ LONG (* FlushDomain)( _IOMMU_DMA_DOMAIN * );
+	/*0028*/ LONG (* FlushDomainByVaList)( _IOMMU_DMA_DOMAIN * , UCHAR , ULONG , void * );
+	/*0030*/ LONG (* QueryInputMappings)( _DEVICE_OBJECT * , _INPUT_MAPPING_ELEMENT * , ULONG , ULONG * );
+	/*0038*/ LONG (* MapLogicalRangeEx)( _IOMMU_DMA_DOMAIN * , ULONG , _IOMMU_MAP_PHYSICAL_ADDRESS * , ULONGLONG * , ULONGLONG * , ULONGLONG * , ULONGLONG * );
+	/*0040*/ LONG (* UnmapLogicalRange)( _IOMMU_DMA_DOMAIN * , ULONGLONG , ULONGLONG );
+	/*0048*/ LONG (* MapIdentityRangeEx)( _IOMMU_DMA_DOMAIN * , ULONG , _IOMMU_MAP_PHYSICAL_ADDRESS * );
+	/*0050*/ LONG (* UnmapIdentityRangeEx)( _IOMMU_DMA_DOMAIN * , _IOMMU_MAP_PHYSICAL_ADDRESS * );
+	/*0058*/ LONG (* SetDeviceFaultReportingEx)( _IOMMU_DMA_DEVICE * , ULONG , UCHAR , _DEVICE_FAULT_CONFIGURATION * );
+	/*0060*/ LONG (* ConfigureDomain)( _IOMMU_DMA_DOMAIN * , _DOMAIN_CONFIGURATION * );
+	/*0068*/ void (* QueryAvailableDomainTypes)( _IOMMU_DMA_DEVICE * , ULONG * );
+	/*0070*/ LONG (* RegisterInterfaceStateChangeCallback)( void (* )( _IOMMU_INTERFACE_STATE_CHANGE * , void * ), void * , _IOMMU_DMA_DEVICE * , _IOMMU_INTERFACE_STATE_CHANGE_FIELDS * );
+	/*0078*/ LONG (* UnregisterInterfaceStateChangeCallback)( void (* )( _IOMMU_INTERFACE_STATE_CHANGE * , void * ), _IOMMU_DMA_DEVICE * );
+	/*0080*/ LONG (* ReserveLogicalAddressRange)( _IOMMU_DMA_DOMAIN * , ULONGLONG , ULONGLONG * , ULONGLONG * , ULONGLONG * , _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN * * );
+	/*0088*/ LONG (* FreeReservedLogicalAddressRange)( _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN * );
+	/*0090*/ LONG (* MapReservedLogicalRange)( _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN * , ULONGLONG , ULONG , _IOMMU_MAP_PHYSICAL_ADDRESS * , _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN_MAPPED_SEGMENT * );
+	/*0098*/ LONG (* UnmapReservedLogicalRange)( _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN_MAPPED_SEGMENT * );
+	/*00a0*/ LONG (* CreateDevice)( _DEVICE_OBJECT * , _IOMMU_DEVICE_CREATION_CONFIGURATION * , _IOMMU_DMA_DEVICE * * );
+	/*00a8*/ LONG (* DeleteDevice)( _IOMMU_DMA_DEVICE * );
+	/*00b0*/
 };
 
 struct _DMA_OPERATIONS {
@@ -4106,7 +4658,8 @@ struct _DMA_OPERATIONS {
 	/*0120*/ void (* GetCommonBufferFromVectorByIndex)( _DMA_ADAPTER * , _DMA_COMMON_BUFFER_VECTOR * , ULONG , void * * , _LARGE_INTEGER * );
 	/*0128*/ void (* FreeCommonBufferFromVector)( _DMA_ADAPTER * , _DMA_COMMON_BUFFER_VECTOR * , ULONG );
 	/*0130*/ void (* FreeCommonBufferVector)( _DMA_ADAPTER * , _DMA_COMMON_BUFFER_VECTOR * );
-	/*0138*/
+	/*0138*/ LONG (* CreateCommonBufferFromMdl)( _DMA_ADAPTER * , _MDL * , _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION * , ULONG , _LARGE_INTEGER * );
+	/*0140*/
 };
 
 struct _DMA_REQUEST_LINE_BINDING_DESCRIPTION {
@@ -4179,12 +4732,14 @@ enum _DMA_WIDTH {
 struct _DOMAIN_CONFIGURATION {
 	/*0000*/ _DOMAIN_CONFIGURATION_ARCH Type;
 	/*0008*/ _DOMAIN_CONFIGURATION_ARM64 Arm64;
+	/*0008*/ _DOMAIN_CONFIGURATION_X64 X64;
 	/*0028*/
 };
 
 enum _DOMAIN_CONFIGURATION_ARCH {
 	DomainConfigurationArm64 = 0x0,
-	DomainConfigurationInvalid = 0x1
+	DomainConfigurationX64 = 0x1,
+	DomainConfigurationInvalid = 0x2
 };
 
 struct _DOMAIN_CONFIGURATION_ARM64 {
@@ -4197,6 +4752,12 @@ struct _DOMAIN_CONFIGURATION_ARM64 {
 	/*001a*/ UCHAR CoherentTableWalks;
 	/*001b*/ UCHAR TranslationEnabled;
 	/*0020*/
+};
+
+struct _DOMAIN_CONFIGURATION_X64 {
+	/*0000*/ _LARGE_INTEGER FirstLevelPageTableRoot;
+	/*0008*/ UCHAR TranslationEnabled;
+	/*0010*/
 };
 
 struct _DRIVER_EXTENSION {
@@ -4372,141 +4933,145 @@ struct _EJOB {
 	/*0100*/ ULONG LimitFlags;
 	/*0104*/ ULONG ActiveProcessLimit;
 	/*0108*/ _KAFFINITY_EX Affinity;
-	/*01b0*/ _JOB_ACCESS_STATE * AccessState;
-	/*01b8*/ void * AccessStateQuotaReference;
-	/*01c0*/ ULONG UIRestrictionsClass;
-	/*01c4*/ ULONG EndOfJobTimeAction;
-	/*01c8*/ void * CompletionPort;
-	/*01d0*/ void * CompletionKey;
-	/*01d8*/ ULONGLONG CompletionCount;
-	/*01e0*/ ULONG SessionId;
-	/*01e4*/ ULONG SchedulingClass;
-	/*01e8*/ ULONGLONG ReadOperationCount;
-	/*01f0*/ ULONGLONG WriteOperationCount;
-	/*01f8*/ ULONGLONG OtherOperationCount;
-	/*0200*/ ULONGLONG ReadTransferCount;
-	/*0208*/ ULONGLONG WriteTransferCount;
-	/*0210*/ ULONGLONG OtherTransferCount;
-	/*0218*/ _PROCESS_DISK_COUNTERS DiskIoInfo;
-	/*0240*/ ULONGLONG ProcessMemoryLimit;
-	/*0248*/ ULONGLONG JobMemoryLimit;
-	/*0250*/ ULONGLONG JobTotalMemoryLimit;
-	/*0258*/ ULONGLONG PeakProcessMemoryUsed;
-	/*0260*/ ULONGLONG PeakJobMemoryUsed;
-	/*0268*/ _KAFFINITY_EX EffectiveAffinity;
-	/*0310*/ _LARGE_INTEGER EffectivePerProcessUserTimeLimit;
-	/*0318*/ ULONGLONG EffectiveMinimumWorkingSetSize;
-	/*0320*/ ULONGLONG EffectiveMaximumWorkingSetSize;
-	/*0328*/ ULONGLONG EffectiveProcessMemoryLimit;
-	/*0330*/ _EJOB * EffectiveProcessMemoryLimitJob;
-	/*0338*/ _EJOB * EffectivePerProcessUserTimeLimitJob;
-	/*0340*/ _EJOB * EffectiveNetIoRateLimitJob;
-	/*0348*/ _EJOB * EffectiveHeapAttributionJob;
-	/*0350*/ ULONG EffectiveLimitFlags;
-	/*0354*/ ULONG EffectiveSchedulingClass;
-	/*0358*/ ULONG EffectiveFreezeCount;
-	/*035c*/ ULONG EffectiveBackgroundCount;
-	/*0360*/ ULONG EffectiveSwapCount;
-	/*0364*/ ULONG EffectiveNotificationLimitCount;
-	/*0368*/ UCHAR EffectivePriorityClass;
-	/*0369*/ UCHAR PriorityClass;
-	/*036a*/ UCHAR NestingDepth;
-	/*036b*/ UCHAR Reserved1[0x1];
-	/*036c*/ ULONG CompletionFilter;
-	/*0370*/ _WNF_STATE_NAME WakeChannel;
-	/*0370*/ _PS_JOB_WAKE_INFORMATION WakeInfo;
-	/*03b8*/ _JOBOBJECT_WAKE_FILTER WakeFilter;
-	/*03c0*/ ULONG LowEdgeLatchFilter;
-	/*03c8*/ _EJOB * NotificationLink;
-	/*03d0*/ ULONGLONG CurrentJobMemoryUsed;
-	/*03d8*/ _JOB_NOTIFICATION_INFORMATION * NotificationInfo;
-	/*03e0*/ void * NotificationInfoQuotaReference;
-	/*03e8*/ _IO_MINI_COMPLETION_PACKET_USER * NotificationPacket;
-	/*03f0*/ _JOB_CPU_RATE_CONTROL * CpuRateControl;
-	/*03f8*/ void * EffectiveSchedulingGroup;
-	/*0400*/ ULONGLONG ReadyTime;
-	/*0408*/ _EX_PUSH_LOCK MemoryLimitsLock;
-	/*0410*/ _LIST_ENTRY SiblingJobLinks;
-	/*0420*/ _LIST_ENTRY ChildJobListHead;
-	/*0430*/ _EJOB * ParentJob;
-	/*0438*/ _EJOB * volatile RootJob;
-	/*0440*/ _LIST_ENTRY IteratorListHead;
-	/*0450*/ ULONGLONG AncestorCount;
-	/*0458*/ _EJOB * * Ancestors;
-	/*0458*/ void * SessionObject;
-	/*0460*/ _EPROCESS_VALUES Accounting;
-	/*04c8*/ ULONG ShadowActiveProcessCount;
-	/*04cc*/ ULONG ActiveAuxiliaryProcessCount;
-	/*04d0*/ ULONG SequenceNumber;
-	/*04d4*/ ULONG JobId;
-	/*04d8*/ _GUID ContainerId;
-	/*04e8*/ _GUID ContainerTelemetryId;
-	/*04f8*/ _ESERVERSILO_GLOBALS * ServerSiloGlobals;
-	/*0500*/ _PS_PROPERTY_SET PropertySet;
-	/*0518*/ _PSP_STORAGE * Storage;
-	/*0520*/ _JOB_NET_RATE_CONTROL * NetRateControl;
-	/*0528*/ ULONG JobFlags;
-	/*0528*/ ULONG CloseDone : 01; // 0x00000001;
-	/*0528*/ ULONG MultiGroup : 01; // 0x00000002;
-	/*0528*/ ULONG OutstandingNotification : 01; // 0x00000004;
-	/*0528*/ ULONG NotificationInProgress : 01; // 0x00000008;
-	/*0528*/ ULONG UILimits : 01; // 0x00000010;
-	/*0528*/ ULONG CpuRateControlActive : 01; // 0x00000020;
-	/*0528*/ ULONG OwnCpuRateControl : 01; // 0x00000040;
-	/*0528*/ ULONG Terminating : 01; // 0x00000080;
-	/*0528*/ ULONG WorkingSetLock : 01; // 0x00000100;
-	/*0528*/ ULONG JobFrozen : 01; // 0x00000200;
-	/*0528*/ ULONG Background : 01; // 0x00000400;
-	/*0528*/ ULONG WakeNotificationAllocated : 01; // 0x00000800;
-	/*0528*/ ULONG WakeNotificationEnabled : 01; // 0x00001000;
-	/*0528*/ ULONG WakeNotificationPending : 01; // 0x00002000;
-	/*0528*/ ULONG LimitNotificationRequired : 01; // 0x00004000;
-	/*0528*/ ULONG ZeroCountNotificationRequired : 01; // 0x00008000;
-	/*0528*/ ULONG CycleTimeNotificationRequired : 01; // 0x00010000;
-	/*0528*/ ULONG CycleTimeNotificationPending : 01; // 0x00020000;
-	/*0528*/ ULONG TimersVirtualized : 01; // 0x00040000;
-	/*0528*/ ULONG JobSwapped : 01; // 0x00080000;
-	/*0528*/ ULONG ViolationDetected : 01; // 0x00100000;
-	/*0528*/ ULONG EmptyJobNotified : 01; // 0x00200000;
-	/*0528*/ ULONG NoSystemCharge : 01; // 0x00400000;
-	/*0528*/ ULONG DropNoWakeCharges : 01; // 0x00800000;
-	/*0528*/ ULONG NoWakeChargePolicyDecided : 01; // 0x01000000;
-	/*0528*/ ULONG NetRateControlActive : 01; // 0x02000000;
-	/*0528*/ ULONG OwnNetRateControl : 01; // 0x04000000;
-	/*0528*/ ULONG IoRateControlActive : 01; // 0x08000000;
-	/*0528*/ ULONG OwnIoRateControl : 01; // 0x10000000;
-	/*0528*/ ULONG DisallowNewProcesses : 01; // 0x20000000;
-	/*0528*/ ULONG Silo : 01; // 0x40000000;
-	/*0528*/ ULONG ContainerTelemetryIdSet : 01; // 0x80000000;
-	/*052c*/ ULONG JobFlags2;
-	/*052c*/ ULONG ParentLocked : 01; // 0x00000001;
-	/*052c*/ ULONG EnableUsermodeSiloThreadImpersonation : 01; // 0x00000002;
-	/*052c*/ ULONG DisallowUsermodeSiloThreadImpersonation : 01; // 0x00000004;
-	/*0530*/ _PROCESS_EXTENDED_ENERGY_VALUES * EnergyValues;
-	/*0538*/ ULONGLONG volatile SharedCommitCharge;
-	/*0540*/ ULONG DiskIoAttributionUserRefCount;
-	/*0544*/ ULONG DiskIoAttributionRefCount;
-	/*0548*/ void * DiskIoAttributionContext;
-	/*0548*/ _EJOB * DiskIoAttributionOwnerJob;
-	/*0550*/ _JOB_RATE_CONTROL_HEADER IoRateControlHeader;
-	/*0578*/ _PS_IO_CONTROL_ENTRY GlobalIoControl;
-	/*05b0*/ LONG volatile IoControlStateLock;
-	/*05b8*/ _RTL_RB_TREE VolumeIoControlTree;
-	/*05c8*/ ULONGLONG IoRateOverQuotaHistory;
-	/*05d0*/ ULONG IoRateCurrentGeneration;
-	/*05d4*/ ULONG IoRateLastQueryGeneration;
-	/*05d8*/ ULONG IoRateGenerationLength;
-	/*05dc*/ ULONG IoRateOverQuotaNotifySequenceId;
-	/*05e0*/ ULONGLONG LastThrottledIoTime;
-	/*05e8*/ _EX_PUSH_LOCK IoControlLock;
-	/*05f0*/ LONGLONG SiloHardReferenceCount;
-	/*05f8*/ _WORK_QUEUE_ITEM RundownWorkItem;
-	/*0618*/ void * PartitionObject;
-	/*0620*/ _EJOB * PartitionOwnerJob;
-	/*0628*/ _JOBOBJECT_ENERGY_TRACKING_STATE EnergyTrackingState;
-	/*0630*/ ULONGLONG KernelWaitTime;
-	/*0638*/ ULONGLONG UserWaitTime;
-	/*0640*/
+	/*0210*/ _JOB_ACCESS_STATE * AccessState;
+	/*0218*/ void * AccessStateQuotaReference;
+	/*0220*/ ULONG UIRestrictionsClass;
+	/*0224*/ ULONG EndOfJobTimeAction;
+	/*0228*/ void * CompletionPort;
+	/*0230*/ void * CompletionKey;
+	/*0238*/ ULONGLONG CompletionCount;
+	/*0240*/ ULONG SessionId;
+	/*0244*/ ULONG SchedulingClass;
+	/*0248*/ ULONGLONG ReadOperationCount;
+	/*0250*/ ULONGLONG WriteOperationCount;
+	/*0258*/ ULONGLONG OtherOperationCount;
+	/*0260*/ ULONGLONG ReadTransferCount;
+	/*0268*/ ULONGLONG WriteTransferCount;
+	/*0270*/ ULONGLONG OtherTransferCount;
+	/*0278*/ _PROCESS_DISK_COUNTERS DiskIoInfo;
+	/*02a0*/ ULONGLONG ProcessMemoryLimit;
+	/*02a8*/ ULONGLONG JobMemoryLimit;
+	/*02b0*/ ULONGLONG JobTotalMemoryLimit;
+	/*02b8*/ ULONGLONG PeakProcessMemoryUsed;
+	/*02c0*/ ULONGLONG PeakJobMemoryUsed;
+	/*02c8*/ _KAFFINITY_EX EffectiveAffinity;
+	/*03d0*/ _LARGE_INTEGER EffectivePerProcessUserTimeLimit;
+	/*03d8*/ ULONGLONG EffectiveMinimumWorkingSetSize;
+	/*03e0*/ ULONGLONG EffectiveMaximumWorkingSetSize;
+	/*03e8*/ ULONGLONG EffectiveProcessMemoryLimit;
+	/*03f0*/ _EJOB * EffectiveProcessMemoryLimitJob;
+	/*03f8*/ _EJOB * EffectivePerProcessUserTimeLimitJob;
+	/*0400*/ _EJOB * EffectiveNetIoRateLimitJob;
+	/*0408*/ _EJOB * EffectiveHeapAttributionJob;
+	/*0410*/ ULONG EffectiveLimitFlags;
+	/*0414*/ ULONG EffectiveSchedulingClass;
+	/*0418*/ ULONG EffectiveFreezeCount;
+	/*041c*/ ULONG EffectiveBackgroundCount;
+	/*0420*/ ULONG EffectiveSwapCount;
+	/*0424*/ ULONG EffectiveNotificationLimitCount;
+	/*0428*/ ULONG EffectiveIoPriorityLimit;
+	/*042c*/ ULONG IoPriorityLimit;
+	/*0430*/ ULONG EffectivePagePriorityLimit;
+	/*0434*/ ULONG PagePriorityLimit;
+	/*0438*/ UCHAR EffectivePriorityClass;
+	/*0439*/ UCHAR PriorityClass;
+	/*043a*/ UCHAR NestingDepth;
+	/*043b*/ UCHAR Reserved1[0x1];
+	/*043c*/ ULONG CompletionFilter;
+	/*0440*/ _WNF_STATE_NAME WakeChannel;
+	/*0440*/ _PS_JOB_WAKE_INFORMATION WakeInfo;
+	/*0488*/ _JOBOBJECT_WAKE_FILTER WakeFilter;
+	/*0490*/ ULONG LowEdgeLatchFilter;
+	/*0498*/ _EJOB * NotificationLink;
+	/*04a0*/ ULONGLONG CurrentJobMemoryUsed;
+	/*04a8*/ _JOB_NOTIFICATION_INFORMATION * NotificationInfo;
+	/*04b0*/ void * NotificationInfoQuotaReference;
+	/*04b8*/ _IO_MINI_COMPLETION_PACKET_USER * NotificationPacket;
+	/*04c0*/ _JOB_CPU_RATE_CONTROL * CpuRateControl;
+	/*04c8*/ void * EffectiveSchedulingGroup;
+	/*04d0*/ ULONGLONG ReadyTime;
+	/*04d8*/ _EX_PUSH_LOCK MemoryLimitsLock;
+	/*04e0*/ _LIST_ENTRY SiblingJobLinks;
+	/*04f0*/ _LIST_ENTRY ChildJobListHead;
+	/*0500*/ _EJOB * ParentJob;
+	/*0508*/ _EJOB * volatile RootJob;
+	/*0510*/ _LIST_ENTRY IteratorListHead;
+	/*0520*/ ULONGLONG AncestorCount;
+	/*0528*/ _EJOB * * Ancestors;
+	/*0528*/ void * SessionObject;
+	/*0530*/ _EPROCESS_VALUES Accounting;
+	/*0598*/ ULONG ShadowActiveProcessCount;
+	/*059c*/ ULONG ActiveAuxiliaryProcessCount;
+	/*05a0*/ ULONG SequenceNumber;
+	/*05a4*/ ULONG JobId;
+	/*05a8*/ _GUID ContainerId;
+	/*05b8*/ _GUID ContainerTelemetryId;
+	/*05c8*/ _ESERVERSILO_GLOBALS * ServerSiloGlobals;
+	/*05d0*/ _PS_PROPERTY_SET PropertySet;
+	/*05e8*/ _PSP_STORAGE * Storage;
+	/*05f0*/ _JOB_NET_RATE_CONTROL * NetRateControl;
+	/*05f8*/ ULONG JobFlags;
+	/*05f8*/ ULONG CloseDone : 01; // 0x00000001;
+	/*05f8*/ ULONG MultiGroup : 01; // 0x00000002;
+	/*05f8*/ ULONG OutstandingNotification : 01; // 0x00000004;
+	/*05f8*/ ULONG NotificationInProgress : 01; // 0x00000008;
+	/*05f8*/ ULONG UILimits : 01; // 0x00000010;
+	/*05f8*/ ULONG CpuRateControlActive : 01; // 0x00000020;
+	/*05f8*/ ULONG OwnCpuRateControl : 01; // 0x00000040;
+	/*05f8*/ ULONG Terminating : 01; // 0x00000080;
+	/*05f8*/ ULONG WorkingSetLock : 01; // 0x00000100;
+	/*05f8*/ ULONG JobFrozen : 01; // 0x00000200;
+	/*05f8*/ ULONG Background : 01; // 0x00000400;
+	/*05f8*/ ULONG WakeNotificationAllocated : 01; // 0x00000800;
+	/*05f8*/ ULONG WakeNotificationEnabled : 01; // 0x00001000;
+	/*05f8*/ ULONG WakeNotificationPending : 01; // 0x00002000;
+	/*05f8*/ ULONG LimitNotificationRequired : 01; // 0x00004000;
+	/*05f8*/ ULONG ZeroCountNotificationRequired : 01; // 0x00008000;
+	/*05f8*/ ULONG CycleTimeNotificationRequired : 01; // 0x00010000;
+	/*05f8*/ ULONG CycleTimeNotificationPending : 01; // 0x00020000;
+	/*05f8*/ ULONG TimersVirtualized : 01; // 0x00040000;
+	/*05f8*/ ULONG JobSwapped : 01; // 0x00080000;
+	/*05f8*/ ULONG ViolationDetected : 01; // 0x00100000;
+	/*05f8*/ ULONG EmptyJobNotified : 01; // 0x00200000;
+	/*05f8*/ ULONG NoSystemCharge : 01; // 0x00400000;
+	/*05f8*/ ULONG DropNoWakeCharges : 01; // 0x00800000;
+	/*05f8*/ ULONG NoWakeChargePolicyDecided : 01; // 0x01000000;
+	/*05f8*/ ULONG NetRateControlActive : 01; // 0x02000000;
+	/*05f8*/ ULONG OwnNetRateControl : 01; // 0x04000000;
+	/*05f8*/ ULONG IoRateControlActive : 01; // 0x08000000;
+	/*05f8*/ ULONG OwnIoRateControl : 01; // 0x10000000;
+	/*05f8*/ ULONG DisallowNewProcesses : 01; // 0x20000000;
+	/*05f8*/ ULONG Silo : 01; // 0x40000000;
+	/*05f8*/ ULONG ContainerTelemetryIdSet : 01; // 0x80000000;
+	/*05fc*/ ULONG JobFlags2;
+	/*05fc*/ ULONG ParentLocked : 01; // 0x00000001;
+	/*05fc*/ ULONG EnableUsermodeSiloThreadImpersonation : 01; // 0x00000002;
+	/*05fc*/ ULONG DisallowUsermodeSiloThreadImpersonation : 01; // 0x00000004;
+	/*0600*/ _PROCESS_EXTENDED_ENERGY_VALUES * EnergyValues;
+	/*0608*/ ULONGLONG volatile SharedCommitCharge;
+	/*0610*/ ULONG DiskIoAttributionUserRefCount;
+	/*0614*/ ULONG DiskIoAttributionRefCount;
+	/*0618*/ void * DiskIoAttributionContext;
+	/*0618*/ _EJOB * DiskIoAttributionOwnerJob;
+	/*0620*/ _JOB_RATE_CONTROL_HEADER IoRateControlHeader;
+	/*0648*/ _PS_IO_CONTROL_ENTRY GlobalIoControl;
+	/*0680*/ LONG volatile IoControlStateLock;
+	/*0688*/ _RTL_RB_TREE VolumeIoControlTree;
+	/*0698*/ ULONGLONG IoRateOverQuotaHistory;
+	/*06a0*/ ULONG IoRateCurrentGeneration;
+	/*06a4*/ ULONG IoRateLastQueryGeneration;
+	/*06a8*/ ULONG IoRateGenerationLength;
+	/*06ac*/ ULONG IoRateOverQuotaNotifySequenceId;
+	/*06b0*/ ULONGLONG LastThrottledIoTime;
+	/*06b8*/ _EX_PUSH_LOCK IoControlLock;
+	/*06c0*/ LONGLONG SiloHardReferenceCount;
+	/*06c8*/ _WORK_QUEUE_ITEM RundownWorkItem;
+	/*06e8*/ void * PartitionObject;
+	/*06f0*/ _EJOB * PartitionOwnerJob;
+	/*06f8*/ _JOBOBJECT_ENERGY_TRACKING_STATE EnergyTrackingState;
+	/*0700*/ ULONGLONG KernelWaitTime;
+	/*0708*/ ULONGLONG UserWaitTime;
+	/*0710*/
 };
 
 union _ENERGY_STATE_DURATION {
@@ -4519,25 +5084,26 @@ union _ENERGY_STATE_DURATION {
 
 struct _ENODE {
 	/*0000*/ _KNODE Ncb;
-	/*0180*/ _WORK_QUEUE_ITEM HotAddProcessorWorkItem;
-	/*01c0*/
+	/*0130*/ _WORK_QUEUE_ITEM HotAddProcessorWorkItem;
+	/*0180*/
 };
 
 struct _EPARTITION {
 	/*0000*/ void * MmPartition;
 	/*0008*/ void * CcPartition;
 	/*0010*/ void * ExPartition;
-	/*0018*/ LONGLONG HardReferenceCount;
-	/*0020*/ LONGLONG OpenHandleCount;
-	/*0028*/ _LIST_ENTRY ActivePartitionLinks;
-	/*0038*/ _EPARTITION * ParentPartition;
-	/*0040*/ _WORK_QUEUE_ITEM TeardownWorkItem;
-	/*0060*/ _EX_PUSH_LOCK TeardownLock;
-	/*0068*/ _EPROCESS * SystemProcess;
-	/*0070*/ void * SystemProcessHandle;
-	/*0078*/ ULONG PartitionFlags;
-	/*0078*/ ULONG PairedWithJob : 01; // 0x00000001;
-	/*0080*/
+	/*0018*/ void * SmPartition;
+	/*0020*/ LONGLONG HardReferenceCount;
+	/*0028*/ LONGLONG OpenHandleCount;
+	/*0030*/ _LIST_ENTRY ActivePartitionLinks;
+	/*0040*/ _EPARTITION * ParentPartition;
+	/*0048*/ _WORK_QUEUE_ITEM TeardownWorkItem;
+	/*0068*/ _EX_PUSH_LOCK TeardownLock;
+	/*0070*/ _EPROCESS * SystemProcess;
+	/*0078*/ void * SystemProcessHandle;
+	/*0080*/ ULONG PartitionFlags;
+	/*0080*/ ULONG PairedWithJob : 01; // 0x00000001;
+	/*0088*/
 };
 
 struct _EPROCESS {
@@ -4595,7 +5161,7 @@ struct _EPROCESS {
 	/*0464*/ ULONG OverrideAddressSpace : 01; // 0x00020000;
 	/*0464*/ ULONG HasAddressSpace : 01; // 0x00040000;
 	/*0464*/ ULONG LaunchPrefetched : 01; // 0x00080000;
-	/*0464*/ ULONG Background : 01; // 0x00100000;
+	/*0464*/ ULONG Reserved : 01; // 0x00100000;
 	/*0464*/ ULONG VmTopDown : 01; // 0x00200000;
 	/*0464*/ ULONG ImageNotifyDone : 01; // 0x00400000;
 	/*0464*/ ULONG PdeUpdateNeeded : 01; // 0x00800000;
@@ -4640,7 +5206,7 @@ struct _EPROCESS {
 	/*0570*/ _HANDLE_TABLE * ObjectTable;
 	/*0578*/ void * DebugPort;
 	/*0580*/ _EWOW64PROCESS * WoW64Process;
-	/*0588*/ void * DeviceMap;
+	/*0588*/ _EX_FAST_REF DeviceMap;
 	/*0590*/ void * EtwDataSource;
 	/*0598*/ ULONGLONG PageDirectoryPte;
 	/*05a0*/ _FILE_OBJECT * ImageFilePointer;
@@ -4681,7 +5247,7 @@ struct _EPROCESS {
 	/*0838*/ ULONG RequestedTimerResolution;
 	/*083c*/ ULONG SmallestTimerResolution;
 	/*0840*/ _LARGE_INTEGER ExitTime;
-	/*0848*/ _INVERTED_FUNCTION_TABLE * InvertedFunctionTable;
+	/*0848*/ _INVERTED_FUNCTION_TABLE_KERNEL_MODE * InvertedFunctionTable;
 	/*0850*/ _EX_PUSH_LOCK InvertedFunctionTableLock;
 	/*0858*/ ULONG ActiveThreadsHighWatermark;
 	/*085c*/ ULONG LargePrivateVadCount;
@@ -4723,6 +5289,9 @@ struct _EPROCESS {
 	/*087c*/ ULONG AltSyscall : 01; // 0x02000000;
 	/*087c*/ ULONG TimerResolutionIgnore : 01; // 0x04000000;
 	/*087c*/ ULONG DisallowUserTerminate : 01; // 0x08000000;
+	/*087c*/ ULONG EnableProcessRemoteExecProtectVmLogging : 01; // 0x10000000;
+	/*087c*/ ULONG EnableProcessLocalExecProtectVmLogging : 01; // 0x20000000;
+	/*087c*/ ULONG MemoryCompressionProcess : 01; // 0x40000000;
 	/*0880*/ LONG DeviceAsid;
 	/*0888*/ void * SvmData;
 	/*0890*/ _EX_PUSH_LOCK SvmProcessLock;
@@ -4754,6 +5323,8 @@ struct _EPROCESS {
 	/*0958*/ void * DiskIoAttribution;
 	/*0960*/ void * DxgProcess;
 	/*0968*/ ULONG Win32KFilterSet;
+	/*096c*/ USHORT Machine;
+	/*096e*/ USHORT Spare0;
 	/*0970*/ _PS_INTERLOCKED_TIMER_DELAY_VALUES volatile ProcessTimerDelay;
 	/*0978*/ ULONG volatile KTimerSets;
 	/*097c*/ ULONG volatile KTimer2Sets;
@@ -4825,11 +5396,11 @@ struct _EPROCESS {
 		/*09d4*/ ULONG BlockNonCetBinariesNonEhcont : 01; // 0x00400000;
 		/*09d4*/ ULONG AuditBlockNonCetBinaries : 01; // 0x00800000;
 		/*09d4*/ ULONG AuditBlockNonCetBinariesLogged : 01; // 0x01000000;
-		/*09d4*/ ULONG Reserved1 : 01; // 0x02000000;
-		/*09d4*/ ULONG Reserved2 : 01; // 0x04000000;
-		/*09d4*/ ULONG Reserved3 : 01; // 0x08000000;
-		/*09d4*/ ULONG Reserved4 : 01; // 0x10000000;
-		/*09d4*/ ULONG Reserved5 : 01; // 0x20000000;
+		/*09d4*/ ULONG XtendedControlFlowGuard : 01; // 0x02000000;
+		/*09d4*/ ULONG AuditXtendedControlFlowGuard : 01; // 0x04000000;
+		/*09d4*/ ULONG PointerAuthUserIp : 01; // 0x08000000;
+		/*09d4*/ ULONG AuditPointerAuthUserIp : 01; // 0x10000000;
+		/*09d4*/ ULONG AuditPointerAuthUserIpLogged : 01; // 0x20000000;
 		/*09d4*/ ULONG CetDynamicApisOutOfProcOnly : 01; // 0x40000000;
 		/*09d4*/ ULONG UserCetSetContextIpValidationRelaxedMode : 01; // 0x80000000;
 		/*09d8*/
@@ -4839,10 +5410,24 @@ struct _EPROCESS {
 	/*09e8*/ ULONGLONG ParentSecurityDomain;
 	/*09f0*/ void * CoverageSamplerContext;
 	/*09f8*/ void * MmHotPatchContext;
-	/*0a00*/ _RTL_AVL_TREE DynamicEHContinuationTargetsTree;
-	/*0a08*/ _EX_PUSH_LOCK DynamicEHContinuationTargetsLock;
-	/*0a10*/ _PS_DYNAMIC_ENFORCED_ADDRESS_RANGES DynamicEnforcedCetCompatibleRanges;
-	/*0a40*/
+	/*0a00*/ _KE_IDEAL_PROCESSOR_ASSIGNMENT_BLOCK IdealProcessorAssignmentBlock;
+	/*0b18*/ _RTL_AVL_TREE DynamicEHContinuationTargetsTree;
+	/*0b20*/ _EX_PUSH_LOCK DynamicEHContinuationTargetsLock;
+	/*0b28*/ _PS_DYNAMIC_ENFORCED_ADDRESS_RANGES DynamicEnforcedCetCompatibleRanges;
+	/*0b38*/ ULONG DisabledComponentFlags;
+	/*0b3c*/ LONG volatile PageCombineSequence;
+	/*0b40*/ _EX_PUSH_LOCK EnableOptionalXStateFeaturesLock;
+	/*0b48*/ ULONG * volatile PathRedirectionHashes;
+	/*0b50*/ _PS_SYSCALL_PROVIDER * SyscallProvider;
+	/*0b58*/ _LIST_ENTRY SyscallProviderProcessLinks;
+	/*0b68*/ _PSP_SYSCALL_PROVIDER_DISPATCH_CONTEXT SyscallProviderDispatchContext;
+	/*0b70*/ ULONG MitigationFlags3;
+	struct {
+		/*0b70*/ ULONG RestrictCoreSharing : 01; // 0x00000001;
+		/*0b70*/ ULONG MitigationFlags3Spare : 31; // 0xfffffffe;
+		/*0b74*/
+	} MitigationFlags3Values;
+	/*0b80*/
 };
 
 struct _EPROCESS_QUOTA_BLOCK;
@@ -4902,143 +5487,155 @@ struct _ESERVERSILO_GLOBALS {
 	/*0408*/ void * ApiSetSection;
 	/*0410*/ void * ApiSetSchema;
 	/*0418*/ UCHAR OneCoreForwardersEnabled;
-	/*0419*/ UCHAR TzVirtualizationSupported;
-	/*0420*/ _EX_TIMEZONE_STATE * ExTimeZoneState;
-	/*0428*/ _UNICODE_STRING NtSystemRoot;
-	/*0438*/ _UNICODE_STRING SiloRootDirectoryName;
-	/*0448*/ _PSP_STORAGE * Storage;
-	/*0450*/ _SERVERSILO_STATE State;
-	/*0454*/ LONG ExitStatus;
-	/*0458*/ _KEVENT * DeleteEvent;
-	/*0460*/ _SILO_USER_SHARED_DATA * UserSharedData;
-	/*0468*/ void * UserSharedSection;
-	/*0470*/ _WORK_QUEUE_ITEM TerminateWorkItem;
-	/*0490*/ UCHAR IsDownlevelContainer;
-	/*0498*/
+	/*0420*/ _NLS_STATE * NlsState;
+	/*0428*/ _RTL_NLS_STATE RtlNlsState;
+	/*04e0*/ void * ImgFileExecOptions;
+	/*04e8*/ _EX_TIMEZONE_STATE * ExTimeZoneState;
+	/*04f0*/ _UNICODE_STRING NtSystemRoot;
+	/*0500*/ _UNICODE_STRING SiloRootDirectoryName;
+	/*0510*/ _PSP_STORAGE * Storage;
+	/*0518*/ _SERVERSILO_STATE State;
+	/*051c*/ LONG ExitStatus;
+	/*0520*/ _KEVENT * DeleteEvent;
+	/*0528*/ _SILO_USER_SHARED_DATA * UserSharedData;
+	/*0530*/ void * UserSharedSection;
+	/*0538*/ _WORK_QUEUE_ITEM TerminateWorkItem;
+	/*0558*/ UCHAR IsDownlevelContainer;
+	/*0560*/
 };
 
 struct _ETHREAD {
 	/*0000*/ _KTHREAD Tcb;
-	/*0430*/ _LARGE_INTEGER CreateTime;
-	/*0438*/ _LARGE_INTEGER ExitTime;
-	/*0438*/ _LIST_ENTRY KeyedWaitChain;
-	/*0448*/ _LIST_ENTRY PostBlockList;
-	/*0448*/ void * ForwardLinkShadow;
-	/*0450*/ void * StartAddress;
-	/*0458*/ _TERMINATION_PORT * TerminationPort;
-	/*0458*/ _ETHREAD * ReaperLink;
-	/*0458*/ void * KeyedWaitValue;
-	/*0460*/ ULONGLONG ActiveTimerListLock;
-	/*0468*/ _LIST_ENTRY ActiveTimerListHead;
-	/*0478*/ _CLIENT_ID Cid;
-	/*0488*/ _KSEMAPHORE KeyedWaitSemaphore;
-	/*0488*/ _KSEMAPHORE AlpcWaitSemaphore;
-	/*04a8*/ _PS_CLIENT_SECURITY_CONTEXT ClientSecurity;
-	/*04b0*/ _LIST_ENTRY IrpList;
-	/*04c0*/ ULONGLONG TopLevelIrp;
-	/*04c8*/ _DEVICE_OBJECT * DeviceToVerify;
-	/*04d0*/ void * Win32StartAddress;
-	/*04d8*/ void * ChargeOnlySession;
-	/*04e0*/ void * LegacyPowerObject;
-	/*04e8*/ _LIST_ENTRY ThreadListEntry;
-	/*04f8*/ _EX_RUNDOWN_REF RundownProtect;
-	/*0500*/ _EX_PUSH_LOCK ThreadLock;
-	/*0508*/ ULONG ReadClusterSize;
-	/*050c*/ LONG volatile MmLockOrdering;
-	/*0510*/ ULONG CrossThreadFlags;
-	/*0510*/ ULONG Terminated : 01; // 0x00000001;
-	/*0510*/ ULONG ThreadInserted : 01; // 0x00000002;
-	/*0510*/ ULONG HideFromDebugger : 01; // 0x00000004;
-	/*0510*/ ULONG ActiveImpersonationInfo : 01; // 0x00000008;
-	/*0510*/ ULONG HardErrorsAreDisabled : 01; // 0x00000010;
-	/*0510*/ ULONG BreakOnTermination : 01; // 0x00000020;
-	/*0510*/ ULONG SkipCreationMsg : 01; // 0x00000040;
-	/*0510*/ ULONG SkipTerminationMsg : 01; // 0x00000080;
-	/*0510*/ ULONG CopyTokenOnOpen : 01; // 0x00000100;
-	/*0510*/ ULONG ThreadIoPriority : 03; // 0x00000e00;
-	/*0510*/ ULONG ThreadPagePriority : 03; // 0x00007000;
-	/*0510*/ ULONG RundownFail : 01; // 0x00008000;
-	/*0510*/ ULONG UmsForceQueueTermination : 01; // 0x00010000;
-	/*0510*/ ULONG IndirectCpuSets : 01; // 0x00020000;
-	/*0510*/ ULONG DisableDynamicCodeOptOut : 01; // 0x00040000;
-	/*0510*/ ULONG ExplicitCaseSensitivity : 01; // 0x00080000;
-	/*0510*/ ULONG PicoNotifyExit : 01; // 0x00100000;
-	/*0510*/ ULONG DbgWerUserReportActive : 01; // 0x00200000;
-	/*0510*/ ULONG ForcedSelfTrimActive : 01; // 0x00400000;
-	/*0510*/ ULONG SamplingCoverage : 01; // 0x00800000;
-	/*0510*/ ULONG ReservedCrossThreadFlags : 08; // 0xff000000;
-	/*0514*/ ULONG SameThreadPassiveFlags;
-	/*0514*/ ULONG ActiveExWorker : 01; // 0x00000001;
-	/*0514*/ ULONG MemoryMaker : 01; // 0x00000002;
-	/*0514*/ ULONG StoreLockThread : 02; // 0x0000000c;
-	/*0514*/ ULONG ClonedThread : 01; // 0x00000010;
-	/*0514*/ ULONG KeyedEventInUse : 01; // 0x00000020;
-	/*0514*/ ULONG SelfTerminate : 01; // 0x00000040;
-	/*0514*/ ULONG RespectIoPriority : 01; // 0x00000080;
-	/*0514*/ ULONG ActivePageLists : 01; // 0x00000100;
-	/*0514*/ ULONG SecureContext : 01; // 0x00000200;
-	/*0514*/ ULONG ZeroPageThread : 01; // 0x00000400;
-	/*0514*/ ULONG WorkloadClass : 01; // 0x00000800;
-	/*0514*/ ULONG ReservedSameThreadPassiveFlags : 20; // 0xfffff000;
-	/*0518*/ ULONG SameThreadApcFlags;
-	/*0518*/ UCHAR OwnsProcessAddressSpaceExclusive : 01; // 0x01;
-	/*0518*/ UCHAR OwnsProcessAddressSpaceShared : 01; // 0x02;
-	/*0518*/ UCHAR HardFaultBehavior : 01; // 0x04;
-	/*0518*/ UCHAR volatile StartAddressInvalid : 01; // 0x08;
-	/*0518*/ UCHAR EtwCalloutActive : 01; // 0x10;
-	/*0518*/ UCHAR SuppressSymbolLoad : 01; // 0x20;
-	/*0518*/ UCHAR Prefetching : 01; // 0x40;
-	/*0518*/ UCHAR OwnsVadExclusive : 01; // 0x80;
-	/*0519*/ UCHAR SystemPagePriorityActive : 01; // 0x01;
-	/*0519*/ UCHAR SystemPagePriority : 03; // 0x0e;
-	/*0519*/ UCHAR AllowUserWritesToExecutableMemory : 01; // 0x10;
-	/*0519*/ UCHAR AllowKernelWritesToExecutableMemory : 01; // 0x20;
-	/*0519*/ UCHAR OwnsVadShared : 01; // 0x40;
-	/*051c*/ UCHAR CacheManagerActive;
-	/*051d*/ UCHAR DisablePageFaultClustering;
-	/*051e*/ UCHAR ActiveFaultCount;
-	/*051f*/ UCHAR LockOrderState;
-	/*0520*/ ULONG PerformanceCountLowReserved;
-	/*0524*/ LONG PerformanceCountHighReserved;
-	/*0528*/ ULONGLONG AlpcMessageId;
-	/*0530*/ void * AlpcMessage;
-	/*0530*/ ULONG AlpcReceiveAttributeSet;
-	/*0538*/ _LIST_ENTRY AlpcWaitListEntry;
-	/*0548*/ LONG ExitStatus;
-	/*054c*/ ULONG CacheManagerCount;
-	/*0550*/ ULONG IoBoostCount;
-	/*0554*/ ULONG IoQoSBoostCount;
-	/*0558*/ ULONG IoQoSThrottleCount;
-	/*055c*/ ULONG KernelStackReference;
-	/*0560*/ _LIST_ENTRY BoostList;
-	/*0570*/ _LIST_ENTRY DeboostList;
-	/*0580*/ ULONGLONG BoostListLock;
-	/*0588*/ ULONGLONG IrpListLock;
-	/*0590*/ void * ReservedForSynchTracking;
-	/*0598*/ _SINGLE_LIST_ENTRY CmCallbackListHead;
-	/*05a0*/ _GUID const * ActivityId;
-	/*05a8*/ _SINGLE_LIST_ENTRY SeLearningModeListHead;
-	/*05b0*/ void * VerifierContext;
-	/*05b8*/ void * AdjustedClientToken;
-	/*05c0*/ void * WorkOnBehalfThread;
-	/*05c8*/ _PS_PROPERTY_SET PropertySet;
-	/*05e0*/ void * PicoContext;
-	/*05e8*/ ULONGLONG UserFsBase;
-	/*05f0*/ ULONGLONG UserGsBase;
-	/*05f8*/ _THREAD_ENERGY_VALUES * EnergyValues;
-	/*0600*/ ULONGLONG SelectedCpuSets;
-	/*0600*/ ULONGLONG * SelectedCpuSetsIndirect;
-	/*0608*/ _EJOB * Silo;
-	/*0610*/ _UNICODE_STRING * ThreadName;
-	/*0618*/ _CONTEXT * SetContextState;
-	/*0620*/ ULONG LastExpectedRunTime;
-	/*0624*/ ULONG HeapData;
-	/*0628*/ _LIST_ENTRY OwnerEntryListHead;
-	/*0638*/ ULONGLONG DisownedOwnerEntryListLock;
-	/*0640*/ _LIST_ENTRY DisownedOwnerEntryListHead;
-	/*0650*/ _KLOCK_ENTRY LockEntries[0x6];
-	/*0890*/ void * CmDbgInfo;
-	/*0898*/
+	/*0480*/ _LARGE_INTEGER CreateTime;
+	/*0488*/ _LARGE_INTEGER ExitTime;
+	/*0488*/ _LIST_ENTRY KeyedWaitChain;
+	/*0498*/ _LIST_ENTRY PostBlockList;
+	/*0498*/ void * ForwardLinkShadow;
+	/*04a0*/ void * StartAddress;
+	/*04a8*/ _TERMINATION_PORT * TerminationPort;
+	/*04a8*/ _ETHREAD * ReaperLink;
+	/*04a8*/ void * KeyedWaitValue;
+	/*04b0*/ ULONGLONG ActiveTimerListLock;
+	/*04b8*/ _LIST_ENTRY ActiveTimerListHead;
+	/*04c8*/ _CLIENT_ID Cid;
+	/*04d8*/ _KSEMAPHORE KeyedWaitSemaphore;
+	/*04d8*/ _KSEMAPHORE AlpcWaitSemaphore;
+	/*04f8*/ _PS_CLIENT_SECURITY_CONTEXT ClientSecurity;
+	/*0500*/ _LIST_ENTRY IrpList;
+	/*0510*/ ULONGLONG TopLevelIrp;
+	/*0518*/ _DEVICE_OBJECT * DeviceToVerify;
+	/*0520*/ void * Win32StartAddress;
+	/*0528*/ void * ChargeOnlySession;
+	/*0530*/ void * LegacyPowerObject;
+	/*0538*/ _LIST_ENTRY ThreadListEntry;
+	/*0548*/ _EX_RUNDOWN_REF RundownProtect;
+	/*0550*/ _EX_PUSH_LOCK ThreadLock;
+	/*0558*/ ULONG ReadClusterSize;
+	/*055c*/ LONG volatile MmLockOrdering;
+	/*0560*/ ULONG CrossThreadFlags;
+	/*0560*/ ULONG Terminated : 01; // 0x00000001;
+	/*0560*/ ULONG ThreadInserted : 01; // 0x00000002;
+	/*0560*/ ULONG HideFromDebugger : 01; // 0x00000004;
+	/*0560*/ ULONG ActiveImpersonationInfo : 01; // 0x00000008;
+	/*0560*/ ULONG HardErrorsAreDisabled : 01; // 0x00000010;
+	/*0560*/ ULONG BreakOnTermination : 01; // 0x00000020;
+	/*0560*/ ULONG SkipCreationMsg : 01; // 0x00000040;
+	/*0560*/ ULONG SkipTerminationMsg : 01; // 0x00000080;
+	/*0560*/ ULONG CopyTokenOnOpen : 01; // 0x00000100;
+	/*0560*/ ULONG ThreadIoPriority : 03; // 0x00000e00;
+	/*0560*/ ULONG ThreadPagePriority : 03; // 0x00007000;
+	/*0560*/ ULONG RundownFail : 01; // 0x00008000;
+	/*0560*/ ULONG UmsForceQueueTermination : 01; // 0x00010000;
+	/*0560*/ ULONG IndirectCpuSets : 01; // 0x00020000;
+	/*0560*/ ULONG DisableDynamicCodeOptOut : 01; // 0x00040000;
+	/*0560*/ ULONG ExplicitCaseSensitivity : 01; // 0x00080000;
+	/*0560*/ ULONG PicoNotifyExit : 01; // 0x00100000;
+	/*0560*/ ULONG DbgWerUserReportActive : 01; // 0x00200000;
+	/*0560*/ ULONG ForcedSelfTrimActive : 01; // 0x00400000;
+	/*0560*/ ULONG SamplingCoverage : 01; // 0x00800000;
+	/*0560*/ ULONG ReservedCrossThreadFlags : 08; // 0xff000000;
+	/*0564*/ ULONG SameThreadPassiveFlags;
+	/*0564*/ ULONG ActiveExWorker : 01; // 0x00000001;
+	/*0564*/ ULONG MemoryMaker : 01; // 0x00000002;
+	/*0564*/ ULONG StoreLockThread : 02; // 0x0000000c;
+	/*0564*/ ULONG ClonedThread : 01; // 0x00000010;
+	/*0564*/ ULONG KeyedEventInUse : 01; // 0x00000020;
+	/*0564*/ ULONG SelfTerminate : 01; // 0x00000040;
+	/*0564*/ ULONG RespectIoPriority : 01; // 0x00000080;
+	/*0564*/ ULONG ActivePageLists : 01; // 0x00000100;
+	/*0564*/ ULONG SecureContext : 01; // 0x00000200;
+	/*0564*/ ULONG ZeroPageThread : 01; // 0x00000400;
+	/*0564*/ ULONG WorkloadClass : 01; // 0x00000800;
+	/*0564*/ ULONG GenerateDumpOnBadHandleAccess : 01; // 0x00001000;
+	/*0564*/ ULONG ReservedSameThreadPassiveFlags : 19; // 0xffffe000;
+	/*0568*/ ULONG SameThreadApcFlags;
+	/*0568*/ UCHAR OwnsProcessAddressSpaceExclusive : 01; // 0x01;
+	/*0568*/ UCHAR OwnsProcessAddressSpaceShared : 01; // 0x02;
+	/*0568*/ UCHAR HardFaultBehavior : 01; // 0x04;
+	/*0568*/ UCHAR volatile StartAddressInvalid : 01; // 0x08;
+	/*0568*/ UCHAR EtwCalloutActive : 01; // 0x10;
+	/*0568*/ UCHAR SuppressSymbolLoad : 01; // 0x20;
+	/*0568*/ UCHAR Prefetching : 01; // 0x40;
+	/*0568*/ UCHAR OwnsVadExclusive : 01; // 0x80;
+	/*0569*/ UCHAR SystemPagePriorityActive : 01; // 0x01;
+	/*0569*/ UCHAR SystemPagePriority : 03; // 0x0e;
+	/*0569*/ UCHAR AllowUserWritesToExecutableMemory : 01; // 0x10;
+	/*0569*/ UCHAR AllowKernelWritesToExecutableMemory : 01; // 0x20;
+	/*0569*/ UCHAR OwnsVadShared : 01; // 0x40;
+	/*0569*/ UCHAR SessionAttachActive : 01; // 0x80;
+	/*056a*/ UCHAR PasidMsrValid : 01; // 0x01;
+	/*056c*/ UCHAR CacheManagerActive;
+	/*056d*/ UCHAR DisablePageFaultClustering;
+	/*056e*/ UCHAR ActiveFaultCount;
+	/*056f*/ UCHAR LockOrderState;
+	/*0570*/ ULONG PerformanceCountLowReserved;
+	/*0574*/ LONG PerformanceCountHighReserved;
+	/*0578*/ ULONGLONG AlpcMessageId;
+	/*0580*/ void * AlpcMessage;
+	/*0580*/ ULONG AlpcReceiveAttributeSet;
+	/*0588*/ _LIST_ENTRY AlpcWaitListEntry;
+	/*0598*/ LONG ExitStatus;
+	/*059c*/ ULONG CacheManagerCount;
+	/*05a0*/ ULONG IoBoostCount;
+	/*05a4*/ ULONG IoQoSBoostCount;
+	/*05a8*/ ULONG IoQoSThrottleCount;
+	/*05ac*/ ULONG KernelStackReference;
+	/*05b0*/ _LIST_ENTRY BoostList;
+	/*05c0*/ _LIST_ENTRY DeboostList;
+	/*05d0*/ ULONGLONG BoostListLock;
+	/*05d8*/ ULONGLONG IrpListLock;
+	/*05e0*/ void * ReservedForSynchTracking;
+	/*05e8*/ _SINGLE_LIST_ENTRY CmCallbackListHead;
+	/*05f0*/ _GUID const * ActivityId;
+	/*05f8*/ _SINGLE_LIST_ENTRY SeLearningModeListHead;
+	/*0600*/ void * VerifierContext;
+	/*0608*/ void * AdjustedClientToken;
+	/*0610*/ void * WorkOnBehalfThread;
+	/*0618*/ _PS_PROPERTY_SET PropertySet;
+	/*0630*/ void * PicoContext;
+	/*0638*/ ULONGLONG UserFsBase;
+	/*0640*/ ULONGLONG UserGsBase;
+	/*0648*/ _THREAD_ENERGY_VALUES * EnergyValues;
+	/*0650*/ ULONGLONG SelectedCpuSets;
+	/*0650*/ ULONGLONG * SelectedCpuSetsIndirect;
+	/*0658*/ _EJOB * Silo;
+	/*0660*/ _UNICODE_STRING * ThreadName;
+	/*0668*/ _CONTEXT * SetContextState;
+	/*0670*/ UCHAR LastSoftParkElectionQos;
+	/*0671*/ UCHAR LastSoftParkElectionWorkloadType;
+	/*0672*/ UCHAR LastSoftParkElectionRunningType;
+	/*0673*/ UCHAR Spare1;
+	/*0674*/ ULONG HeapData;
+	/*0678*/ _LIST_ENTRY OwnerEntryListHead;
+	/*0688*/ ULONGLONG DisownedOwnerEntryListLock;
+	/*0690*/ _LIST_ENTRY DisownedOwnerEntryListHead;
+	/*06a0*/ _KLOCK_ENTRY LockEntries[0x6];
+	/*08e0*/ void * CmThreadInfo;
+	/*08e8*/ void * FlsData;
+	/*08f0*/ ULONG LastExpectedRunTime;
+	/*08f4*/ ULONG LastSoftParkElectionRunTime;
+	/*08f8*/ ULONGLONG LastSoftParkElectionGeneration;
+	/*0900*/
 };
 
 struct _ETIMER {
@@ -5083,10 +5680,10 @@ struct _ETWP_NOTIFICATION_HEADER {
 	/*0048*/
 };
 
-struct _ETW_APC_ENTRY {
-	/*0000*/ _SLIST_ENTRY SListEntry;
-	/*0000*/ _KAPC Apc;
-	/*0060*/
+struct _ETW_BOOT_CONFIG {
+	/*0000*/ ULONG MaxLoggers;
+	/*0008*/ _LIST_ENTRY BootLoggersList;
+	/*0018*/
 };
 
 struct _ETW_BUFFER_CONTEXT {
@@ -5216,12 +5813,6 @@ struct _ETW_HASH_BUCKET {
 	/*0038*/
 };
 
-enum _ETW_HEADER_TYPE {
-	EtwHeaderTypeNative = 0x0,
-	EtwHeaderTypeWow = 0x1,
-	EtwHeaderTypeMax = 0x2
-};
-
 struct _ETW_HW_TRACE_EXT_INTERFACE {
 	/*0000*/ LONG (* StartProcessorTraceOnEachCore)( ULONGLONG , void * * );
 	/*0008*/ LONG (* StopProcessorTraceOnEachCore)( void * );
@@ -5287,12 +5878,6 @@ struct _ETW_PAYLOAD_FILTER {
 };
 
 struct _ETW_PERFECT_HASH_FUNCTION;
-
-enum _ETW_PERFECT_HASH_FUNCTION_TYPE {
-	ETW_PHF_EVENT_ID = 0x0,
-	ETW_PHF_STACK_WALK = 0x1,
-	ETW_PHF_MAX_COUNT = 0x2
-};
 
 struct _ETW_PERF_COUNTERS {
 	/*0000*/ LONG TotalActiveSessions;
@@ -5449,20 +6034,23 @@ struct _ETW_SILODRIVERSTATE {
 	/*0fe4*/ LONG EtwpShutdownInProgress;
 	/*0fe8*/ ULONG EtwpSecurityProviderPID;
 	/*0ff0*/ _ETW_PRIV_HANDLE_DEMUX_TABLE PrivHandleDemuxTable;
-	/*1010*/ _ETW_COUNTERS EtwpCounters;
-	/*1020*/ _LARGE_INTEGER LogfileBytesWritten;
-	/*1028*/ _ETW_SILO_TRACING_BLOCK * ProcessorBlocks;
-	/*1030*/ _EX_WNF_SUBSCRIPTION * ContainerRestoreWnfSubscription;
-	/*1038*/ _GUID PartitionId;
-	/*1048*/ _GUID ParentId;
-	/*1058*/ _LARGE_INTEGER QpcOffsetFromRoot;
-	/*1060*/ CHAR * PartitionName;
-	/*1068*/ USHORT PartitionNameSize;
-	/*106a*/ USHORT UnusedPadding;
-	/*106c*/ ULONG PartitionType;
-	/*1070*/ _ETW_SYSTEM_LOGGER_SETTINGS SystemLoggerSettings;
-	/*11e8*/ _KMUTANT EtwpStartTraceMutex;
-	/*1220*/
+	/*1010*/ WCHAR * RTBacklogFileRoot;
+	/*1018*/ _ETW_COUNTERS EtwpCounters;
+	/*1028*/ _LARGE_INTEGER LogfileBytesWritten;
+	/*1030*/ _ETW_SILO_TRACING_BLOCK * ProcessorBlocks;
+	/*1038*/ _EX_WNF_SUBSCRIPTION * ContainerStateWnfSubscription;
+	/*1040*/ ULONG ContainerStateWnfCallbackCalled;
+	/*1048*/ _WORK_QUEUE_ITEM * UnsubscribeWorkItem;
+	/*1050*/ _GUID PartitionId;
+	/*1060*/ _GUID ParentId;
+	/*1070*/ _LARGE_INTEGER QpcOffsetFromRoot;
+	/*1078*/ CHAR * PartitionName;
+	/*1080*/ USHORT PartitionNameSize;
+	/*1082*/ USHORT UnusedPadding;
+	/*1084*/ ULONG PartitionType;
+	/*1088*/ _ETW_SYSTEM_LOGGER_SETTINGS SystemLoggerSettings;
+	/*1200*/ _KMUTANT EtwpStartTraceMutex;
+	/*1238*/
 };
 
 struct _ETW_SILO_TRACING_BLOCK {
@@ -5480,21 +6068,16 @@ struct _ETW_STACK_TRACE_BLOCK {
 	/*0000*/ _LARGE_INTEGER RelatedTimestamp;
 	/*0008*/ _ETHREAD * Thread;
 	/*0010*/ _KDPC StackWalkDpc;
-	/*0050*/ _SLIST_HEADER ApcListHead;
-	/*0060*/ _ETW_APC_ENTRY * ApcEntry;
-	/*0068*/ ULONG ApcEntryCount;
-	/*006c*/ LONG Flags;
-	/*0070*/ LONG ApcCount;
-	/*0074*/ LONG MaxApcCount;
-	/*0080*/
-};
-
-enum _ETW_STRING_TOKEN_TYPE {
-	ETW_STRING_TOKEN_EXE = 0x0,
-	ETW_STRING_TOKEN_PACKAGE_ID = 0x1,
-	ETW_STRING_TOKEN_PKG_APP_ID = 0x2,
-	ETW_STRING_TOKEN_CONTAINER = 0x3,
-	ETW_STRING_TOKEN_MAX_COUNT = 0x4
+	/*0050*/ ULONGLONG ApcSpinLock;
+	/*0060*/ _SLIST_HEADER ApcFreeListHead;
+	/*0070*/ _SLIST_HEADER ApcGlobalListHead;
+	/*0080*/ LONG ApcCount;
+	/*0084*/ ULONG MinimumApcCount;
+	/*0088*/ ULONG MaximumApcCount;
+	/*008c*/ LONG Flags;
+	/*0090*/ LONG OutstandingApcCount;
+	/*0094*/ LONG MaxOutstandingApcCount;
+	/*00a0*/
 };
 
 struct _ETW_SYSTEMTIME {
@@ -5649,8 +6232,7 @@ enum _EVENT_TYPE {
 
 struct _EWOW64PROCESS {
 	/*0000*/ void * Peb;
-	/*0008*/ USHORT Machine;
-	/*000c*/ _SYSTEM_DLL_TYPE NtdllType;
+	/*0008*/ _SYSTEM_DLL_TYPE NtdllType;
 	/*0010*/
 };
 
@@ -5714,6 +6296,13 @@ struct _EXHANDLE {
 
 struct _EXP_LICENSE_STATE;
 
+struct _EXP_PULLED_FILE_TABLE {
+	/*0000*/ LONG NumberOfFiles;
+	/*0004*/ LONG TableSize;
+	/*0008*/ ULONGLONG Hashes[0x1];
+	/*0010*/
+};
+
 enum _EXQUEUEINDEX {
 	ExPoolUntrusted = 0x0,
 	IoPoolUntrusted = 0x1,
@@ -5728,8 +6317,68 @@ struct _EXT_DELETE_PARAMETERS {
 	/*0018*/
 };
 
+struct _EXT_ENV_SPINLOCK {
+	/*0000*/ _LIST_ENTRY ListEntry;
+	/*0010*/ ULONGLONG Lock;
+	/*0018*/ UCHAR OldIrql;
+	/*0020*/
+};
+
+struct _EXT_IOMMU {
+	/*0000*/ void * Context;
+	/*0008*/ _EXT_IOMMU_KNOWN_IOMMU_TYPE Type;
+	/*0010*/ _EXT_IOMMU_CAPABILITIES Capabilities;
+	/*0018*/ UINT MaxOutputAddressWidth;
+	struct {
+		/*001c*/ USHORT PciSegment : 01; // 0x0001;
+		/*001e*/
+	} Flags;
+	/*001e*/ USHORT PciSegmentNumber;
+	/*0020*/ _EXT_IOMMU_FUNCTION_TABLE FunctionTable;
+	/*00b8*/
+};
+
+enum _EXT_IOMMU_ADDRESS_TRANSLATION_POLICY {
+	ExtIommuAddressTranslationPolicyDisable = 0x0,
+	ExtIommuAddressTranslationPolicyEnableDefaultBypass = 0x1,
+	ExtIommuAddressTranslationPolicyEnableDefaultBlock = 0x2,
+	ExtIommuAddressTranslationPolicyEnableDefaultTranslate = 0x3
+};
+
+union _EXT_IOMMU_CAPABILITIES {
+	/*0000*/ ULONGLONG AsUINT64;
+	/*0000*/ ULONGLONG GeneratesMsiInterrupts : 01; // 0x0000000000000001;
+	/*0000*/ ULONGLONG CoherentTableWalks : 01; // 0x0000000000000002;
+	/*0000*/ ULONGLONG InterruptsNotSubjectToRemapping : 01; // 0x0000000000000004;
+	/*0000*/ ULONGLONG InterruptRemapping : 01; // 0x0000000000000008;
+	/*0000*/ ULONGLONG Stage2DmaRemapping : 01; // 0x0000000000000010;
+	/*0000*/ ULONGLONG Svm : 01; // 0x0000000000000020;
+	/*0000*/ ULONGLONG PcieFunctionBased : 01; // 0x0000000000000040;
+	/*0008*/
+};
+
+union _EXT_IOMMU_CREATE_DEVICE_FLAGS {
+	/*0000*/ UINT AsUINT32;
+	/*0000*/ UINT WildCard : 01; // 0x00000001;
+	/*0000*/ UINT ForceCreate : 01; // 0x00000002;
+	/*0000*/ UINT LiveTraffic : 01; // 0x00000004;
+	/*0000*/ UINT Reserved : 29; // 0xfffffff8;
+	/*0004*/
+};
+
+struct _EXT_IOMMU_DEVICE {
+	/*0000*/ void * Context;
+	/*0008*/ _EXT_IOMMU * Iommu;
+	/*0010*/ _EXT_IOMMU_DOMAIN * Domain;
+	/*0018*/ ULONGLONG AssociatedDomainId;
+	/*0020*/ USHORT FirmwareDomainId;
+	/*0022*/ UCHAR FaultReportingEnabled;
+	/*0028*/
+};
+
 struct _EXT_IOMMU_DEVICE_ID {
 	/*0000*/ _EXT_IOMMU_DEVICE_TYPE DeviceType;
+	/*0004*/ _EXT_IOMMU_DEVICE_ID_FLAGS Flags;
 	/*0008*/ _EXT_IOMMU_DEVICE_ID_PCI Pci;
 	/*0008*/ _EXT_IOMMU_DEVICE_ID_ACPI Acpi;
 	/*0008*/ UCHAR IoApicId;
@@ -5744,6 +6393,13 @@ struct _EXT_IOMMU_DEVICE_ID_ACPI {
 	/*0008*/
 };
 
+union _EXT_IOMMU_DEVICE_ID_FLAGS {
+	/*0000*/ USHORT AsUSHORT;
+	/*0000*/ USHORT IsAliased : 01; // 0x0001;
+	/*0000*/ USHORT Reserved : 15; // 0xfffe;
+	/*0002*/
+};
+
 struct _EXT_IOMMU_DEVICE_ID_GIC {
 	/*0000*/ UINT LineNumber;
 	/*0004*/
@@ -5753,14 +6409,11 @@ struct _EXT_IOMMU_DEVICE_ID_PCI {
 	/*0000*/ ULONGLONG AsUINT64;
 	/*0000*/ USHORT PciSegmentNumber;
 	/*0002*/ USHORT PhantomFunctionBits : 02; // 0x0003;
-	/*0002*/ USHORT BusRange : 01; // 0x0004;
-	/*0002*/ USHORT Reserved : 05; // 0x00f8;
+	/*0002*/ USHORT Reserved : 06; // 0x00fc;
 	/*0002*/ USHORT StartBusNumber : 08; // 0xff00;
 	/*0004*/ USHORT Bdf;
-	/*0004*/ UCHAR SubordinateBus;
-	/*0005*/ UCHAR SecondaryBus;
 	/*0006*/ USHORT DevicePathLength;
-	/*0008*/ WCHAR * DevicePath;
+	/*0008*/ USHORT * DevicePath;
 	/*0010*/
 };
 
@@ -5780,12 +6433,160 @@ enum _EXT_IOMMU_DEVICE_TYPE {
 	EXT_IOMMU_DEVICE_TYPE_MAX = 0x7
 };
 
+struct _EXT_IOMMU_DOMAIN {
+	/*0000*/ _EXT_IOMMU_DOMAIN_TYPE DomainType;
+	/*0004*/ _EXT_IOMMU_TRANSLATION_TYPE TranslationType;
+	struct {
+		/*0008*/ UCHAR DefaultDomain : 01; // 0x01;
+		/*0008*/ UCHAR FirmwareDomain : 01; // 0x02;
+		/*0009*/
+	} Flags;
+	/*000a*/ USHORT FirmwareDomainId;
+	/*0010*/ _EXT_IOMMU_DOMAIN_SETTINGS Settings;
+	/*0030*/ UINT ContextId;
+	/*0034*/ UINT DeviceCount;
+	/*0038*/ _LIST_ENTRY Devices;
+	/*0048*/ _EXT_ENV_SPINLOCK Lock;
+	/*0068*/ _EXT_IOMMU_DOMAIN * S2Domain;
+	/*0070*/
+};
+
+struct _EXT_IOMMU_DOMAIN_SETTINGS {
+	/*0000*/ _EXT_IOMMU_S1_X64_DOMAIN_SETTINGS S1;
+	struct {
+		/*0010*/ UCHAR PageTableRootLevel;
+		/*0011*/ UCHAR InputSize;
+		/*0018*/ ULONGLONG PageTableRoot;
+		/*0020*/
+	} S2;
+	/*0020*/
+};
+
+enum _EXT_IOMMU_DOMAIN_TYPE {
+	ExtIommuDomainTypeS1 = 0x0,
+	ExtIommuDomainTypeS2 = 0x1,
+	ExtIommuDomainTypeInvalid = 0x2
+};
+
+struct _EXT_IOMMU_FLUSH_CONTEXT {
+	struct {
+		/*0000*/ UINT Status;
+		/*0008*/ ULONGLONG PhysicalAddress;
+		/*0010*/
+	} Intel;
+	struct {
+		/*0000*/ ULONGLONG * StatusAddr;
+		/*0008*/ ULONGLONG OldStatus;
+		/*0010*/
+	} Amd;
+	/*0010*/
+};
+
+struct _EXT_IOMMU_FUNCTION_TABLE {
+	/*0000*/ LONG (* ConfigureSettings)( _EXT_IOMMU * , _EXT_IOMMU_SETTINGS * );
+	/*0008*/ LONG (* Initialize)( _EXT_IOMMU * , ULONG , UCHAR );
+	/*0010*/ LONG (* AllocateDomain)( _EXT_IOMMU * , _EXT_IOMMU_DOMAIN * , _EXT_IOMMU_DOMAIN * , void * );
+	/*0018*/ void (* FreeDomain)( _EXT_IOMMU * , _EXT_IOMMU_DOMAIN * , void * );
+	/*0020*/ LONG (* CreateDevice)( _EXT_IOMMU * , _EXT_IOMMU_DEVICE_ID * , _EXT_IOMMU_CREATE_DEVICE_FLAGS , void * , _EXT_IOMMU_DEVICE * * , void * );
+	/*0028*/ void (* DeleteDevice)( _EXT_IOMMU * , _EXT_IOMMU_DEVICE * , void * );
+	/*0030*/ UCHAR (* OwnDevice)( _EXT_IOMMU * , _EXT_IOMMU_DEVICE_ID * );
+	/*0038*/ void (* ConfigureDeviceFaultReporting)( _EXT_IOMMU * , _EXT_IOMMU_DEVICE * , UCHAR );
+	/*0040*/ LONG (* AttachDeviceDomain)( _EXT_IOMMU * , _EXT_IOMMU_DEVICE * , _EXT_IOMMU_DOMAIN * , void * );
+	/*0048*/ void (* DetachDeviceDomain)( _EXT_IOMMU * , _EXT_IOMMU_DEVICE * , void * );
+	/*0050*/ void (* FlushDomainTb)( _EXT_IOMMU * , _EXT_IOMMU_DOMAIN * , _EXT_IOMMU_FLUSH_CONTEXT * , UINT , _KTB_FLUSH_VA * );
+	/*0058*/ void (* SyncFlush)( _EXT_IOMMU * , _EXT_IOMMU_FLUSH_CONTEXT * );
+	/*0060*/ void (* CompleteFlush)( _EXT_IOMMU * , _EXT_IOMMU_FLUSH_CONTEXT * );
+	/*0068*/ LONG (* AllocateRemappingTableEntry)( void * , ULONG , ULONG , ULONG , USHORT , UCHAR , UCHAR , ULONG , _EXT_IOMMU_DEVICE_ID * );
+	/*0070*/ LONG (* FreeRemappingTableEntry)( void * , ULONG , ULONG );
+	/*0078*/ UCHAR (* UpdateRemappingTableEntry)( void * , UCHAR , ULONG , _INTERRUPT_LINE_STATE * );
+	/*0080*/ void (* InvalidateRemappingTableEntry)( void * , ULONG );
+	/*0088*/ void (* UpdateRemappingDestination)( void * , UCHAR , ULONG * , ULONG * , ULONG );
+	/*0090*/ void (* CaptureGlobalCrashdumpState)( void * );
+	/*0098*/
+};
+
+struct _EXT_IOMMU_FUNCTION_TABLE_EXTENDED {
+	/*0000*/ UCHAR (* FindDevice)( void * , _EXT_IOMMU_DEVICE_ID * , UCHAR , _EXT_IOMMU_OUTPUT_MAPPING * );
+	/*0008*/ LONG (* SetDeviceSvmCapabilities)( void * , ULONGLONG , UCHAR );
+	/*0010*/ void (* SetDevicePasidTable)( void * , ULONGLONG , _IOMMU_PASID_TABLE_OBJECT * );
+	/*0018*/ LONG (* GrowPasidTable)( void * , _IOMMU_PASID_TABLE_OBJECT * , ULONG );
+	/*0020*/ LONG (* SetPasidAddressSpace)( void * , _IOMMU_PASID_TABLE_OBJECT * , ULONG , ULONGLONG , UCHAR * );
+	/*0028*/ void (* FlushTb)( void * , ULONG , void * , _LIST_ENTRY * , ULONG , _KTB_FLUSH_VA * );
+	/*0030*/ void (* FlushDeviceTbOnly)( void * , ULONGLONG , ULONG );
+	/*0038*/ void (* DismissPageFault)( void * , ULONG , ULONGLONG , USHORT , LONG );
+	/*0040*/ ULONG (* GetPageFault)( void * , ULONG * , ULONGLONG * , USHORT * , void * * , ULONGLONG * );
+	/*0048*/ LONG (* SetMessageInterruptRouting)( void * , UCHAR , _LARGE_INTEGER , ULONG );
+	/*0050*/ void (* EnableInterrupt)( void * );
+	/*0058*/ void (* DisableInterrupt)( void * );
+	/*0060*/ UCHAR (* HandleInterrupt)( void * );
+	/*0068*/ UCHAR (* CheckForReservedRegion)( _EXT_IOMMU_DEVICE_ID * );
+	/*0070*/ void (* MarkHiberRegions)( void * , void * , _LIST_ENTRY * );
+	/*0078*/ void (* DrainSvmPageRequests)( void * , ULONGLONG , ULONG );
+	/*0080*/ void (* CancelPageRequests)( void * , ULONGLONG , ULONG );
+	/*0088*/ LONG (* EnumerateReservedDevices)( void * , ULONG * , _IOMMU_RESERVED_DEVICE * * );
+	/*0090*/ LONG (* ProcessReservedDomains)( void * , ULONG , _IOMMU_RESERVED_DEVICE * * );
+	/*0098*/ LONG (* QueryAcpiDeviceMapping)( void * , _EXT_IOMMU_DEVICE_ID * , _EXT_IOMMU_DEVICE_ID * );
+	/*00a0*/ UINT (* GetRidAcpiMapCount)( void * , _EXT_IOMMU_DEVICE_ID * );
+	/*00a8*/ void (* FreePasidTable)( void * , _IOMMU_PASID_TABLE_OBJECT * , void * );
+	/*00b0*/ LONG (* ConfigureAts)( void * , ULONGLONG , UCHAR );
+	/*00b8*/
+};
+
+enum _EXT_IOMMU_INTERRUPT_REMAPPING_POLICY {
+	ExtIommuInterruptRemappingPolicyDisable = 0x0,
+	ExtIommuInterruptRemappingPolicyEnableLoose = 0x1,
+	ExtIommuInterruptRemappingPolicyEnableStrict = 0x2
+};
+
+enum _EXT_IOMMU_KNOWN_IOMMU_TYPE {
+	ExtIommuInvalid = 0x0,
+	ExtIommuAmd = 0x1,
+	ExtIommuIntel = 0x2,
+	ExtIommuSmmuv1 = 0x3,
+	ExtIommuSmmuv2 = 0x4,
+	ExtIommuSmmuv3 = 0x5,
+	ExtIommuIts = 0x6,
+	ExtIommuUnknown = 0x1000
+};
+
+struct _EXT_IOMMU_OUTPUT_MAPPING {
+	/*0000*/ ULONGLONG OutputId;
+	/*0008*/
+};
+
+struct _EXT_IOMMU_RESERVED_MEMORY_REGION {
+	/*0000*/ _LARGE_INTEGER Base;
+	/*0008*/ _LARGE_INTEGER Limit;
+	/*0010*/ UCHAR Ignored;
+	/*0018*/
+};
+
+struct _EXT_IOMMU_S1_X64_DOMAIN_SETTINGS {
+	struct {
+		/*0000*/ UCHAR EnableTranslation : 01; // 0x01;
+		/*0000*/ UCHAR Reserved : 07; // 0xfe;
+		/*0001*/
+	} Flags;
+	/*0008*/ void * PasidTable;
+	/*0010*/
+};
+
+struct _EXT_IOMMU_SETTINGS {
+	struct {
+		/*0000*/ ULONGLONG BroadcastTlbMaintenance : 01; // 0x0000000000000001;
+		/*0008*/
+	} EnabledCapabilities;
+	/*0008*/ _EXT_IOMMU_ADDRESS_TRANSLATION_POLICY TranslationPolicy;
+	/*000c*/ _EXT_IOMMU_INTERRUPT_REMAPPING_POLICY RemappingPolicy;
+	/*0010*/ ULONG RemappingTableEntries;
+	/*0018*/
+};
+
 enum _EXT_IOMMU_TRANSLATION_TYPE {
 	ExtTranslationTypePassThrough = 0x0,
 	ExtTranslationTypeBlocked = 0x1,
 	ExtTranslationTypeTranslate = 0x2,
-	ExtTranslationTypeSafePassThrough = 0x3,
-	ExtTranslationTypeInvalid = 0x4
+	ExtTranslationTypeInvalid = 0x3
 };
 
 struct _EXT_SET_PARAMETERS_V0 {
@@ -5817,10 +6618,10 @@ struct _EX_HEAP_POOL_NODE {
 
 struct _EX_HEAP_SESSION_STATE {
 	/*0000*/ _RTLP_HP_HEAP_MANAGER HeapManager;
-	/*38d0*/ RTL_HP_ENV_HANDLE PagedEnv;
-	/*38e0*/ _SEGMENT_HEAP * PagedHeap;
-	/*38e8*/ _SEGMENT_HEAP * SpecialPoolHeap;
-	/*38f0*/
+	/*38e0*/ RTL_HP_ENV_HANDLE PagedEnv;
+	/*38f0*/ _SEGMENT_HEAP * PagedHeap;
+	/*38f8*/ _SEGMENT_HEAP * SpecialPoolHeap;
+	/*3900*/
 };
 
 enum _EX_HEAP_TYPE {
@@ -5846,7 +6647,7 @@ struct _EX_PARTITION {
 
 struct _EX_POOL_HEAP_MANAGER_STATE {
 	/*0000*/ _RTLP_HP_HEAP_MANAGER HeapManager;
-	/*38d0*/ ULONG NumberOfPools;
+	/*38e0*/ ULONG NumberOfPools;
 	/*3900*/ _EX_HEAP_POOL_NODE PoolNode[0x40];
 	/*86900*/ _SEGMENT_HEAP * SpecialHeaps[0x4];
 	/*86940*/
@@ -6024,13 +6825,23 @@ struct _FADT {
 	/*00e8*/ _GEN_ADDR x_gp1_blk;
 	/*00f4*/ _GEN_ADDR sleep_control_reg;
 	/*0100*/ _GEN_ADDR sleep_status_reg;
-	/*010c*/
+	/*010c*/ ULONGLONG hypervisor_vendor_identity;
+	/*0114*/
 };
 
 struct _FAKE_HEAP_ENTRY {
 	/*0000*/ ULONGLONG Size;
 	/*0008*/ ULONGLONG PreviousSize;
 	/*0010*/
+};
+
+enum _FAN_NOISE_ZONES_ {
+	FanNoiseZoneLow = 0x0,
+	FanNoiseZoneMedium = 0x1,
+	FanNoiseZoneMediumHigh = 0x2,
+	FanNoiseZoneHigh = 0x3,
+	FanNoiseZoneLast = 0x3,
+	FanNoiseZoneMax = 0x4
 };
 
 struct _FAST_ERESOURCE {
@@ -6282,7 +7093,8 @@ enum _FILE_INFORMATION_CLASS {
 	FileLinkInformationExBypassAccessCheck = 0x49,
 	FileStorageReserveIdInformation = 0x4a,
 	FileCaseSensitiveInformationForceAccessCheck = 0x4b,
-	FileMaximumInformation = 0x4c
+	FileKnownFolderInformation = 0x4c,
+	FileMaximumInformation = 0x4d
 };
 
 struct _FILE_NETWORK_OPEN_INFORMATION {
@@ -6340,7 +7152,8 @@ enum _FILE_OBJECT_EXTENSION_TYPE {
 	FoExtTypeOplockKey = 0x6,
 	FoExtTypeSilo = 0x7,
 	FoExtTypeMemoryPartitionInfo = 0x8,
-	MaxFoExtTypes = 0x9
+	FoExtTypeShadowFile = 0x9,
+	MaxFoExtTypes = 0xa
 };
 
 union _FILE_SEGMENT_ELEMENT {
@@ -6376,6 +7189,13 @@ struct _FREE_DISPLAY {
 	/*0004*/ ULONG Hint;
 	/*0008*/ _RTL_BITMAP Display;
 	/*0018*/
+};
+
+enum _FREQUENCY_QOS_BUCKET {
+	FrequencyQosBucketHigh = 0x0,
+	FrequencyQosBucketLow = 0x1,
+	FrequencyQosBucketTotal = 0x2,
+	FrequencyQosBucketMax = 0x3
 };
 
 enum _FSINFOCLASS {
@@ -6415,8 +7235,25 @@ struct _FSRTL_ADVANCED_FCB_HEADER {
 	/*0050*/ void * * FileContextSupportPointer;
 	/*0058*/ void * Oplock;
 	/*0058*/ void * ReservedForRemote;
-	/*0060*/ void * ReservedContext;
-	/*0068*/
+	/*0060*/ void * AePushLock;
+	/*0068*/ ULONG BypassIoOpenCount;
+	/*0070*/
+};
+
+struct _FSRTL_COMMON_FCB_HEADER {
+	/*0000*/ SHORT NodeTypeCode;
+	/*0002*/ SHORT NodeByteSize;
+	/*0004*/ UCHAR Flags;
+	/*0005*/ UCHAR IsFastIoPossible;
+	/*0006*/ UCHAR Flags2;
+	/*0007*/ UCHAR Reserved : 04; // 0x0f;
+	/*0007*/ UCHAR Version : 04; // 0xf0;
+	/*0008*/ _ERESOURCE * Resource;
+	/*0010*/ _ERESOURCE * PagingIoResource;
+	/*0018*/ _LARGE_INTEGER AllocationSize;
+	/*0020*/ _LARGE_INTEGER FileSize;
+	/*0028*/ _LARGE_INTEGER ValidDataLength;
+	/*0030*/
 };
 
 struct _FS_FILTER_CALLBACKS {
@@ -6464,6 +7301,7 @@ union _FS_FILTER_PARAMETERS {
 		/*0004*/ ULONG PageProtection;
 		/*0008*/ _FS_FILTER_SECTION_SYNC_OUTPUT * OutputInformation;
 		/*0010*/ ULONG Flags;
+		/*0014*/ ULONG AllocationAttributes;
 		/*0018*/
 	} AcquireForSectionSynchronization;
 	struct {
@@ -6598,6 +7436,49 @@ struct _GEN_ADDR {
 	/*000c*/
 };
 
+struct _GIC_DISTRIBUTOR {
+	/*0000*/ UCHAR Type;
+	/*0001*/ UCHAR Length;
+	/*0002*/ USHORT Reserved1;
+	/*0004*/ ULONG Identifier;
+	/*0008*/ ULONGLONG ControllerPhysicalAddress;
+	/*0010*/ ULONG GsivBase;
+	/*0014*/ UCHAR Version;
+	/*0015*/ UCHAR Reserved[0x3];
+	/*0018*/
+};
+
+struct _GIC_ITS {
+	/*0000*/ UCHAR Type;
+	/*0001*/ UCHAR Length;
+	/*0002*/ USHORT Reserved1;
+	/*0004*/ ULONG Identifier;
+	/*0008*/ ULONGLONG PhysicalAddress;
+	/*0010*/ ULONG Reserved2;
+	/*0014*/
+};
+
+struct _GIC_MSIFRAME_ENTRY {
+	/*0000*/ UCHAR Type;
+	/*0001*/ UCHAR Length;
+	/*0002*/ USHORT Reserved1;
+	/*0004*/ ULONG Identifier;
+	/*0008*/ ULONGLONG PhysicalAddress;
+	/*0010*/ ULONG Flags;
+	/*0014*/ USHORT SpiCount;
+	/*0016*/ USHORT SpiBase;
+	/*0018*/
+};
+
+struct _GIC_REDISTRIBUTOR {
+	/*0000*/ UCHAR Type;
+	/*0001*/ UCHAR Length;
+	/*0002*/ USHORT Reserved;
+	/*0004*/ ULONGLONG DiscoveryRangeBaseAddress;
+	/*000c*/ ULONG DiscoveryRangeLength;
+	/*0010*/
+};
+
 enum _GPIO_PIN_CONFIG_TYPE {
 	PullDefault = 0x0,
 	PullUp = 0x1,
@@ -6644,25 +7525,26 @@ enum _HALP_DMA_ADAPTER_ALLOCATION_STATE {
 
 struct _HALP_DMA_ADAPTER_OBJECT {
 	/*0000*/ _DMA_ADAPTER DmaHeader;
-	/*0010*/ _RTL_BITMAP * ContiguousMapRegisters;
-	/*0018*/ _HALP_DMA_TRANSLATION_ENTRY * ScatterBufferListHead;
-	/*0020*/ ULONG NumberOfFreeScatterBuffers;
-	/*0028*/ _HALP_DMA_TRANSLATION_BUFFER * ContiguousTranslations;
-	/*0030*/ _HALP_DMA_TRANSLATION_BUFFER * ScatterTranslations;
-	/*0038*/ _HALP_DMA_TRANSLATION_BUFFER_POSITION ContiguousTranslationEnd;
-	/*0048*/ _HALP_DMA_TRANSLATION_BUFFER_POSITION ScatterTranslationEnd;
+	/*0010*/ ULONG Signature;
+	/*0018*/ _RTL_BITMAP * ContiguousMapRegisters;
+	/*0020*/ _HALP_DMA_TRANSLATION_ENTRY * ScatterBufferListHead;
+	/*0028*/ ULONG NumberOfFreeScatterBuffers;
+	/*0030*/ _HALP_DMA_TRANSLATION_BUFFER * ContiguousTranslations;
+	/*0038*/ _HALP_DMA_TRANSLATION_BUFFER * ScatterTranslations;
+	/*0040*/ _HALP_DMA_TRANSLATION_BUFFER_POSITION ContiguousTranslationEnd;
+	/*0050*/ _HALP_DMA_TRANSLATION_BUFFER_POSITION ScatterTranslationEnd;
 	struct {
-		/*0058*/ _HALP_DMA_TRANSLATION_BUFFER_POSITION ContiguousHint;
-		/*0068*/ _HALP_DMA_TRANSLATION_BUFFER_POSITION ScatterHint;
-		/*0078*/
+		/*0060*/ _HALP_DMA_TRANSLATION_BUFFER_POSITION ContiguousHint;
+		/*0070*/ _HALP_DMA_TRANSLATION_BUFFER_POSITION ScatterHint;
+		/*0080*/
 	} CrashDump;
-	/*0078*/ ULONGLONG SpinLock;
-	/*0080*/ ULONGLONG GrowLock;
-	/*0088*/ _LARGE_INTEGER MaximumPhysicalAddress;
-	/*0090*/ UCHAR IsMasterAdapter;
-	/*0091*/ UCHAR DmaCanCross64K;
-	/*0094*/ ULONG LibraryVersion;
-	/*0098*/
+	/*0080*/ ULONGLONG SpinLock;
+	/*0088*/ ULONGLONG GrowLock;
+	/*0090*/ _LARGE_INTEGER MaximumPhysicalAddress;
+	/*0098*/ UCHAR IsMasterAdapter;
+	/*0099*/ UCHAR DmaCanCross64K;
+	/*009c*/ ULONG LibraryVersion;
+	/*00a0*/
 };
 
 struct _HALP_DMA_CHANNEL {
@@ -6719,17 +7601,15 @@ struct _HALP_DMA_DOMAIN_OBJECT {
 	/*0018*/ _LARGE_INTEGER BoundaryAddressMultiple;
 	/*0020*/ UCHAR CacheCoherent;
 	/*0021*/ UCHAR FirmwareReserved;
-	/*0028*/ void * IommuDomainPointer;
-	/*0030*/ void * LaState;
-	/*0038*/ ULONGLONG LaStateLock;
-	/*0040*/ _EXT_IOMMU_TRANSLATION_TYPE TranslationType;
-	/*0048*/ _ADAPTER_OBJECT * OwningAdapter;
-	/*0050*/ _RTL_RB_TREE CommonBufferRoot;
-	/*0060*/ ULONGLONG CommonBufferTreeLock;
-	/*0068*/ _LIST_ENTRY VectorCommonBufferListHead;
-	/*0078*/ ULONGLONG VectorCommonBufferLock;
-	/*0080*/ ULONG DomainRefCount;
-	/*0088*/
+	/*0028*/ _IOMMU_DMA_DOMAIN * IommuDomainPointer;
+	/*0030*/ _HALP_DMA_TRANSLATION_TYPE TranslationType;
+	/*0038*/ _ADAPTER_OBJECT * OwningAdapter;
+	/*0040*/ _RTL_RB_TREE CommonBufferRoot;
+	/*0050*/ ULONGLONG CommonBufferTreeLock;
+	/*0058*/ _LIST_ENTRY VectorCommonBufferListHead;
+	/*0068*/ ULONGLONG VectorCommonBufferLock;
+	/*0070*/ ULONG DomainRefCount;
+	/*0078*/
 };
 
 enum _HALP_DMA_MAP_BUFFER_TYPE {
@@ -6740,15 +7620,15 @@ enum _HALP_DMA_MAP_BUFFER_TYPE {
 
 struct _HALP_DMA_MASTER_ADAPTER_OBJECT {
 	/*0000*/ _HALP_DMA_ADAPTER_OBJECT AdapterObject;
-	/*0098*/ _LIST_ENTRY ContiguousAdapterQueue;
-	/*00a8*/ _LIST_ENTRY ScatterAdapterQueue;
-	/*00b8*/ ULONG MapBufferSize;
-	/*00c0*/ _LARGE_INTEGER MapBufferPhysicalAddress;
-	/*00c8*/ ULONG ContiguousPageCount;
-	/*00cc*/ ULONG ContiguousPageLimit;
-	/*00d0*/ ULONG ScatterPageCount;
-	/*00d4*/ ULONG ScatterPageLimit;
-	/*00d8*/
+	/*00a0*/ _LIST_ENTRY ContiguousAdapterQueue;
+	/*00b0*/ _LIST_ENTRY ScatterAdapterQueue;
+	/*00c0*/ ULONG MapBufferSize;
+	/*00c8*/ _LARGE_INTEGER MapBufferPhysicalAddress;
+	/*00d0*/ ULONG ContiguousPageCount;
+	/*00d4*/ ULONG ContiguousPageLimit;
+	/*00d8*/ ULONG ScatterPageCount;
+	/*00dc*/ ULONG ScatterPageLimit;
+	/*00e0*/
 };
 
 struct _HALP_DMA_TRANSLATION_BUFFER {
@@ -6768,9 +7648,7 @@ struct _HALP_DMA_TRANSLATION_ENTRY {
 	/*0000*/ ULONGLONG PhysicalAddress;
 	/*0008*/ _HALP_DMA_TRANSLATION_ENTRY * Next;
 	/*0010*/ ULONG MappedLength;
-	/*0018*/ ULONGLONG LogicalAddress;
-	/*0020*/ ULONGLONG LogicalMappedLength;
-	/*0028*/ ULONGLONG NextLogicalAddress;
+	/*0018*/ _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN_MAPPED_SEGMENT RemappingAddress;
 	union {
 		/*0030*/ void * VirtualAddress;
 		struct {
@@ -6788,6 +7666,14 @@ struct _HALP_DMA_TRANSLATION_ENTRY {
 	/*0038*/ _HALP_DMA_TRANSLATION_ENTRY * NextMapping;
 	/*0040*/ UCHAR LogicalBounceBufferPremapped;
 	/*0048*/
+};
+
+enum _HALP_DMA_TRANSLATION_TYPE {
+	DmaTranslationTypePassthrough = 0x0,
+	DmaTranslationTypeSafePassthrough = 0x1,
+	DmaTranslationTypeHybridPassthrough = 0x2,
+	DmaTranslationTypeTranslate = 0x3,
+	DmaTranslationTypeMax = 0x4
 };
 
 struct _HALP_EMERGENCY_LA_QUEUE_ENTRY {
@@ -6844,21 +7730,55 @@ struct _HAL_DP_REPLACE_PARAMETERS {
 	/*0018*/
 };
 
+struct _HAL_HV_DMA_CREATE_DOMAIN_INFO {
+	/*0000*/ _HAL_HV_DMA_DOMAIN_INFO DomainInfo;
+	/*0008*/ UCHAR InheritPassthroughDomain;
+	/*0009*/ UCHAR ForwardProgressRequired;
+	/*000c*/
+};
+
+struct _HAL_HV_DMA_DOMAIN_CONFIG {
+	/*0000*/ _HAL_HV_DMA_DOMAIN_CONFIG_ARCH Type;
+	/*0008*/ _HAL_HV_DMA_DOMAIN_CONFIG_ARM64 Arm64;
+	/*0008*/ _HAL_HV_DMA_DOMAIN_CONFIG_X64 X64;
+	/*0028*/
+};
+
+enum _HAL_HV_DMA_DOMAIN_CONFIG_ARCH {
+	HalHvDmaDomainConfigArm64 = 0x0,
+	HalHvDmaDomainConfigX64 = 0x1
+};
+
+struct _HAL_HV_DMA_DOMAIN_CONFIG_ARM64 {
+	/*0000*/ _LARGE_INTEGER Ttbr0;
+	/*0008*/ _LARGE_INTEGER Ttbr1;
+	/*0010*/ ULONG Mair0;
+	/*0014*/ ULONG Mair1;
+	/*0018*/ UCHAR InputSize0;
+	/*0019*/ UCHAR InputSize1;
+	/*001a*/ USHORT Asid;
+	/*001c*/ UCHAR CoherentTableWalks;
+	/*001d*/ UCHAR TranslationEnabled;
+	/*0020*/
+};
+
+struct _HAL_HV_DMA_DOMAIN_CONFIG_X64 {
+	/*0000*/ _LARGE_INTEGER FirstLevelPageTableRoot;
+	/*0008*/ UCHAR TranslationEnabled;
+	/*0010*/
+};
+
 struct _HAL_HV_DMA_DOMAIN_INFO {
 	/*0000*/ ULONG DomainId;
 	/*0004*/ UCHAR IsStage1;
 	/*0008*/
 };
 
-struct _HAL_HV_SVM_DEVICE_CAPABILITIES {
-	/*0000*/ ULONG SvmSupported : 01; // 0x00000001;
-	/*0000*/ ULONG PciExecute : 01; // 0x00000002;
-	/*0000*/ ULONG NoExecute : 01; // 0x00000004;
-	/*0000*/ ULONG Reserved : 28; // 0x7ffffff8;
-	/*0000*/ ULONG OverflowPossible : 01; // 0x80000000;
-	/*0004*/ ULONG PasidCount;
-	/*0008*/ ULONG IommuIndex;
-	/*000c*/
+struct _HAL_HV_DMA_HYBRID_PASSTHROUGH_RESERVED_REGIONS {
+	/*0000*/ ULONGLONG UnitSizePages;
+	/*0008*/ _RTL_BITMAP ReservedUnitMap;
+	/*0018*/ ULONG ReservedUnitMapBuffer[0x10];
+	/*0058*/
 };
 
 struct _HAL_HV_SVM_SYSTEM_CAPABILITIES {
@@ -6918,14 +7838,14 @@ struct _HAL_INTEL_ENLIGHTENMENT_INFORMATION {
 	/*0018*/ ULONG Reserved0;
 	/*001c*/ ULONG SpinCountMask;
 	/*0020*/ void (* LongSpinWait)( ULONG );
-	/*0028*/ ULONGLONG (* GetReferenceTime)();
+	/*0028*/ ULONGLONG (* GetReferenceTime)( ULONG * );
 	/*0030*/ LONG (* SetSystemSleepProperty)( UINT , UCHAR , UCHAR );
 	/*0038*/ LONG (* EnterSleepState)( UINT );
 	/*0040*/ LONG (* NotifyDebugDeviceAvailable)();
 	/*0048*/ LONG (* MapDeviceInterrupt)( ULONGLONG , void * , _GROUP_AFFINITY * , void * );
 	/*0050*/ LONG (* UnmapDeviceInterrupt)( ULONGLONG , void * );
 	/*0058*/ LONG (* RetargetDeviceInterrupt)( ULONGLONG , void * , void * , _GROUP_AFFINITY * , void * );
-	/*0060*/ LONG (* SetHpetConfig)( _LARGE_INTEGER , ULONG , ULONGLONG , UCHAR , void * );
+	/*0060*/ LONG (* SetHpetConfig)( ULONG , ULONGLONG , UCHAR , void * );
 	/*0068*/ LONG (* NotifyHpetEnabled)();
 	/*0070*/ LONG (* QueryAssociatedProcessors)( ULONG , ULONG * , ULONG * );
 	/*0078*/ LONG (* ReadMultipleMsr)( ULONG , ULONG , ULONG * , ULONGLONG * );
@@ -6945,44 +7865,51 @@ struct _HAL_INTEL_ENLIGHTENMENT_INFORMATION {
 	/*00e8*/ LONG (* IumAccessPciDevice)( UCHAR , ULONG , ULONG , ULONG , ULONG , ULONG , ULONG , void * );
 	/*00f0*/ ULONGLONG (* IumEfiRuntimeService)( ULONG , void * , ULONGLONG , ULONGLONG * );
 	/*00f8*/ void (* SvmGetSystemCapabilities)( _HAL_HV_SVM_SYSTEM_CAPABILITIES * );
-	/*0100*/ LONG (* SvmGetDeviceCapabilities)( ULONG , _HAL_HV_SVM_DEVICE_CAPABILITIES * );
+	/*0100*/ LONG (* GetDeviceCapabilities)( _EXT_IOMMU_DEVICE_ID * , void * );
 	/*0108*/ LONG (* SvmCreatePasidSpace)( ULONG , ULONG );
 	/*0110*/ LONG (* SvmSetPasidAddressSpace)( ULONG , ULONG , ULONGLONG );
 	/*0118*/ void (* SvmFlushPasid)( ULONG , ULONG , ULONG , _KTB_FLUSH_VA * );
-	/*0120*/ LONG (* SvmAttachPasidSpace)( ULONG , ULONG , ULONG , ULONG );
-	/*0128*/ LONG (* SvmDetachPasidSpace)( ULONG );
-	/*0130*/ LONG (* SvmEnablePasid)( ULONG , ULONG );
-	/*0138*/ LONG (* SvmDisablePasid)( ULONG , ULONG );
+	/*0120*/ LONG (* SvmAttachPasidSpace)( ULONGLONG , ULONG , ULONG , ULONG );
+	/*0128*/ LONG (* SvmDetachPasidSpace)( ULONGLONG );
+	/*0130*/ LONG (* SvmEnablePasid)( ULONGLONG , ULONG );
+	/*0138*/ LONG (* SvmDisablePasid)( ULONGLONG , ULONG );
 	/*0140*/ LONG (* SvmAcknowledgePageRequest)( ULONG , void * , ULONG * );
 	/*0148*/ LONG (* SvmCreatePrQueue)( ULONG , ULONG , _LARGE_INTEGER , ULONG , ULONG );
 	/*0150*/ LONG (* SvmDeletePrQueue)( ULONG );
 	/*0158*/ LONG (* SvmClearPrqStalled)( ULONG );
-	/*0160*/ LONG (* SvmSetDeviceEnabled)( ULONG , UCHAR );
-	/*0168*/ LONG (* HvDebuggerPowerHandler)( UCHAR );
-	/*0170*/ LONG (* SetQpcBias)( ULONGLONG );
-	/*0178*/ ULONGLONG (* GetQpcBias)();
-	/*0180*/ LONG (* RegisterDeviceId)( _EXT_IOMMU_DEVICE_ID * , ULONGLONG );
-	/*0188*/ LONG (* UnregisterDeviceId)( ULONGLONG );
-	/*0190*/ LONG (* AllocateDeviceDomain)( _HAL_HV_DMA_DOMAIN_INFO * );
-	/*0198*/ LONG (* AttachDeviceDomain)( _EXT_IOMMU_DEVICE_ID * , _HAL_HV_DMA_DOMAIN_INFO * );
-	/*01a0*/ LONG (* DetachDeviceDomain)( ULONGLONG );
-	/*01a8*/ LONG (* DeleteDeviceDomain)( _HAL_HV_DMA_DOMAIN_INFO * );
-	/*01b0*/ LONG (* MapDeviceLogicalRange)( _HAL_HV_DMA_DOMAIN_INFO * , ULONG , ULONGLONG , ULONGLONG * , ULONGLONG * , UCHAR );
-	/*01b8*/ LONG (* UnmapDeviceLogicalRange)( _HAL_HV_DMA_DOMAIN_INFO * , ULONGLONG , ULONGLONG * );
-	/*01c0*/ LONG (* MapDeviceSparsePages)( _HAL_HV_DMA_DOMAIN_INFO * , ULONG , ULONGLONG * , ULONGLONG * );
-	/*01c8*/ LONG (* UnmapDeviceSparsePages)( _HAL_HV_DMA_DOMAIN_INFO * , ULONGLONG * , ULONGLONG * );
-	/*01d0*/ LONG (* GetDmaGuardEnabled)( UCHAR * );
-	/*01d8*/ LONG (* UpdateMicrocode)( void * , UINT );
-	/*01e0*/ LONG (* GetSintMessage)( UCHAR , void * * );
-	/*01e8*/ LONG (* SetRootFaultReportingReady)();
-	/*01f0*/
+	/*0160*/ LONG (* SetDeviceAtsEnabled)( _EXT_IOMMU_DEVICE_ID * , UCHAR );
+	/*0168*/ LONG (* SetDeviceCapabilities)( ULONGLONG , ULONG , ULONG );
+	/*0170*/ LONG (* HvDebuggerPowerHandler)( UCHAR );
+	/*0178*/ LONG (* SetQpcBias)( ULONGLONG );
+	/*0180*/ ULONGLONG (* GetQpcBias)();
+	/*0188*/ LONG (* RegisterDeviceId)( _EXT_IOMMU_DEVICE_ID * , ULONGLONG );
+	/*0190*/ LONG (* UnregisterDeviceId)( ULONGLONG );
+	/*0198*/ LONG (* AllocateDeviceDomain)( _HAL_HV_DMA_CREATE_DOMAIN_INFO * );
+	/*01a0*/ LONG (* AttachDeviceDomain)( ULONGLONG , _HAL_HV_DMA_DOMAIN_INFO * );
+	/*01a8*/ LONG (* DetachDeviceDomain)( ULONGLONG );
+	/*01b0*/ LONG (* DeleteDeviceDomain)( _HAL_HV_DMA_DOMAIN_INFO * );
+	/*01b8*/ LONG (* MapDeviceLogicalRange)( _HAL_HV_DMA_DOMAIN_INFO * , ULONG , ULONGLONG , ULONGLONG * , ULONGLONG * , UCHAR );
+	/*01c0*/ LONG (* UnmapDeviceLogicalRange)( _HAL_HV_DMA_DOMAIN_INFO * , ULONGLONG , ULONGLONG * );
+	/*01c8*/ LONG (* MapDeviceSparsePages)( _HAL_HV_DMA_DOMAIN_INFO * , ULONG , ULONGLONG * , ULONGLONG * );
+	/*01d0*/ LONG (* UnmapDeviceSparsePages)( _HAL_HV_DMA_DOMAIN_INFO * , ULONGLONG * , ULONGLONG * );
+	/*01d8*/ LONG (* GetDmaGuardEnabled)( UCHAR * );
+	/*01e0*/ LONG (* UpdateMicrocode)( void * , UINT , UCHAR );
+	/*01e8*/ LONG (* GetSintMessage)( UCHAR , void * * );
+	/*01f0*/ LONG (* RestoreTime)( UINT , ULONGLONG , ULONGLONG );
+	/*01f8*/ LONG (* SetRootFaultReportingReady)();
+	/*0200*/ LONG (* ConfigureDeviceDomain)( _HAL_HV_DMA_DOMAIN_INFO * , _HAL_HV_DMA_DOMAIN_CONFIG * );
+	/*0208*/ LONG (* UnblockDefaultDma)();
+	/*0210*/ LONG (* FlushDeviceDomain)( _HAL_HV_DMA_DOMAIN_INFO * );
+	/*0218*/ LONG (* FlushDeviceDomainVaList)( _HAL_HV_DMA_DOMAIN_INFO * , ULONG , _KTB_FLUSH_VA * );
+	/*0220*/ LONG (* GetHybridPassthroughReservedRegions)( _HAL_HV_DMA_HYBRID_PASSTHROUGH_RESERVED_REGIONS * );
+	/*0228*/
 };
 
 struct _HAL_IOMMU_DISPATCH {
 	/*0000*/ UCHAR (* HalIommuSupportEnabled)();
 	/*0008*/ LONG (* HalIommuGetConfiguration)( ULONG , ULONG * , ULONG * , void * * );
 	/*0010*/ LONG (* HalIommuGetLibraryContext)( ULONG , ULONG , void * * );
-	/*0018*/ LONG (* HalIommuMapDevice)( void * , _EXT_IOMMU_DEVICE_ID * , _IOMMU_SVM_CAPABILITIES * , void * * );
+	/*0018*/ LONG (* HalIommuMapDevice)( void * , _EXT_IOMMU_DEVICE_ID * , _DEVICE_OBJECT * , _IOMMU_SVM_CAPABILITIES * , void * * );
 	/*0020*/ LONG (* HalIommuEnableDevicePasid)( void * , void * );
 	/*0028*/ LONG (* HalIommuSetAddressSpace)( void * , ULONGLONG );
 	/*0030*/ LONG (* HalIommuDisableDevicePasid)( void * , void * );
@@ -6998,7 +7925,11 @@ struct _HAL_IOMMU_DISPATCH {
 	/*0080*/ LONG (* HalIommuDevicePowerChange)( void * , void * , UCHAR );
 	/*0088*/ LONG (* HalIommuBeginDeviceReset)( void * , ULONG * );
 	/*0090*/ LONG (* HalIommuFinalizeDeviceReset)( void * );
-	/*0098*/
+	/*0098*/ LONG (* HalIommuGetAtsSettings)( _EXT_IOMMU_DEVICE_ID * , _IOMMU_ATS_SETTINGS * );
+	/*00a0*/ LONG (* HalIommuCreateAtsDevice)( _EXT_IOMMU_DEVICE_ID * , _DEVICE_OBJECT * , _IOMMU_SVM_CAPABILITIES * , void * * );
+	/*00a8*/ void (* HalIommuDeleteAtsDevice)( void * );
+	/*00b0*/ LONG (* HalIommuGetDomainTransitionSupport)( _EXT_IOMMU_DEVICE_ID * , UCHAR * );
+	/*00b8*/
 };
 
 struct _HAL_LBR_ENTRY {
@@ -7147,8 +8078,7 @@ struct _HARDWARE_PTE {
 	/*0000*/ ULONGLONG CopyOnWrite : 01; // 0x0000000000000200;
 	/*0000*/ ULONGLONG Prototype : 01; // 0x0000000000000400;
 	/*0000*/ ULONGLONG reserved0 : 01; // 0x0000000000000800;
-	/*0000*/ ULONGLONG PageFrameNumber : 36; // 0x0000fffffffff000;
-	/*0000*/ ULONGLONG reserved1 : 04; // 0x000f000000000000;
+	/*0000*/ ULONGLONG PageFrameNumber : 40; // 0x000ffffffffff000;
 	/*0000*/ ULONGLONG SoftwareWsIndex : 11; // 0x7ff0000000000000;
 	/*0000*/ ULONGLONG NoExecute : 01; // 0x8000000000000000;
 	/*0008*/
@@ -7182,32 +8112,6 @@ struct _HBASE_BLOCK {
 	/*0ff8*/ ULONG BootType;
 	/*0ffc*/ ULONG BootRecover;
 	/*1000*/
-};
-
-struct _HBIN {
-	/*0000*/ ULONG Signature;
-	/*0004*/ ULONG FileOffset;
-	/*0008*/ ULONG Size;
-	/*000c*/ ULONG Reserved1[0x2];
-	/*0014*/ _LARGE_INTEGER TimeStamp;
-	/*001c*/ ULONG Spare;
-	/*0020*/
-};
-
-struct _HCELL {
-	/*0000*/ LONG Size;
-	union {
-		struct {
-			union {
-				/*0004*/ ULONG UserData;
-				/*0004*/ ULONG Next;
-				/*0008*/
-			} u;
-			/*0008*/
-		} NewCell;
-		/*0008*/
-	} u;
-	/*0008*/
 };
 
 struct _HEADLESS_LOADER_BLOCK {
@@ -7289,7 +8193,7 @@ struct _HEAP {
 	/*01a0*/ USHORT FrontHeapLockCount;
 	/*01a2*/ UCHAR FrontEndHeapType;
 	/*01a3*/ UCHAR RequestedFrontEndHeapType;
-	/*01a8*/ WCHAR * FrontEndHeapUsageData;
+	/*01a8*/ USHORT * FrontEndHeapUsageData;
 	/*01b0*/ USHORT FrontEndHeapMaximumIndex;
 	/*01b2*/ UCHAR volatile FrontEndHeapStatusBitmap[0x81];
 	/*0238*/ _HEAP_COUNTERS Counters;
@@ -7728,6 +8632,7 @@ struct _HEAP_SEG_CONTEXT {
 		/*000d*/ UCHAR LargePagePolicy : 03; // 0x07;
 		/*000d*/ UCHAR FullDecommit : 01; // 0x08;
 		/*000d*/ UCHAR ReleaseEmptySegments : 01; // 0x10;
+		/*000d*/ UCHAR LargeHeapFirstSegment : 01; // 0x20;
 		/*000d*/ UCHAR AllFlags;
 		/*000e*/
 	} Flags;
@@ -7823,16 +8728,16 @@ struct _HEAP_VAMGR_ALLOCATOR {
 	/*0000*/ ULONGLONG TreeLock;
 	/*0008*/ _RTL_RB_TREE FreeRanges;
 	/*0018*/ _HEAP_VAMGR_VASPACE * VaSpace;
-	/*0020*/ void * PartitionHandle;
+	/*0020*/ void * ContextHandle;
 	/*0028*/ USHORT ChunksPerRegion;
 	/*002a*/ USHORT RefCount;
 	/*002c*/ UCHAR AllocatorIndex;
 	/*002d*/ UCHAR NumaNode;
 	/*002e*/ UCHAR LockType : 01; // 0x01;
-	/*002e*/ UCHAR MemoryType : 02; // 0x06;
-	/*002e*/ UCHAR ConstrainedVA : 01; // 0x08;
-	/*002e*/ UCHAR AllowFreeHead : 01; // 0x10;
-	/*002e*/ UCHAR Spare0 : 03; // 0xe0;
+	/*002e*/ UCHAR MemoryType : 03; // 0x0e;
+	/*002e*/ UCHAR ConstrainedVA : 01; // 0x10;
+	/*002e*/ UCHAR AllowFreeHead : 01; // 0x20;
+	/*002e*/ UCHAR Spare0 : 02; // 0xc0;
 	/*002f*/ UCHAR Spare1;
 	/*0030*/
 };
@@ -7973,29 +8878,30 @@ struct _HHIVE {
 	/*0098*/ ULONG HvUsedCellsUse;
 	/*009c*/ ULONG CmUsedCellsUse;
 	/*00a0*/ ULONG HiveFlags;
-	/*00a4*/ ULONG CurrentLog;
-	/*00a8*/ ULONG CurrentLogSequence;
-	/*00ac*/ ULONG CurrentLogMinimumSequence;
-	/*00b0*/ ULONG CurrentLogOffset;
-	/*00b4*/ ULONG MinimumLogSequence;
-	/*00b8*/ ULONG LogFileSizeCap;
-	/*00bc*/ UCHAR LogDataPresent[0x2];
-	/*00be*/ UCHAR PrimaryFileValid;
-	/*00bf*/ UCHAR BaseBlockDirty;
-	/*00c0*/ _LARGE_INTEGER LastLogSwapTime;
-	/*00c8*/ USHORT FirstLogFile : 03; // 0x0007;
-	/*00c8*/ USHORT SecondLogFile : 03; // 0x0038;
-	/*00c8*/ USHORT HeaderRecovered : 01; // 0x0040;
-	/*00c8*/ USHORT LegacyRecoveryIndicated : 01; // 0x0080;
-	/*00c8*/ USHORT RecoveryInformationReserved : 08; // 0xff00;
-	/*00c8*/ USHORT RecoveryInformation;
-	/*00ca*/ UCHAR LogEntriesRecovered[0x2];
-	/*00cc*/ ULONG RefreshCount;
-	/*00d0*/ ULONG StorageTypeCount;
-	/*00d4*/ ULONG Version;
-	/*00d8*/ _HVP_VIEW_MAP ViewMap;
-	/*0110*/ _DUAL Storage[0x2];
-	/*0600*/
+	/*00a4*/ ULONG FlusherFlags;
+	/*00a8*/ ULONG CurrentLog;
+	/*00ac*/ ULONG CurrentLogSequence;
+	/*00b0*/ ULONG CurrentLogMinimumSequence;
+	/*00b4*/ ULONG CurrentLogOffset;
+	/*00b8*/ ULONG MinimumLogSequence;
+	/*00bc*/ ULONG LogFileSizeCap;
+	/*00c0*/ UCHAR LogDataPresent[0x2];
+	/*00c2*/ UCHAR PrimaryFileValid;
+	/*00c3*/ UCHAR BaseBlockDirty;
+	/*00c8*/ _LARGE_INTEGER LastLogSwapTime;
+	/*00d0*/ USHORT FirstLogFile : 03; // 0x0007;
+	/*00d0*/ USHORT SecondLogFile : 03; // 0x0038;
+	/*00d0*/ USHORT HeaderRecovered : 01; // 0x0040;
+	/*00d0*/ USHORT LegacyRecoveryIndicated : 01; // 0x0080;
+	/*00d0*/ USHORT RecoveryInformationReserved : 08; // 0xff00;
+	/*00d0*/ USHORT RecoveryInformation;
+	/*00d2*/ UCHAR LogEntriesRecovered[0x2];
+	/*00d4*/ ULONG RefreshCount;
+	/*00d8*/ ULONG StorageTypeCount;
+	/*00dc*/ ULONG Version;
+	/*00e0*/ _HVP_VIEW_MAP ViewMap;
+	/*0118*/ _DUAL Storage[0x2];
+	/*0608*/
 };
 
 struct _HIDDEN_PROCESSOR_POWER_INTERFACE {
@@ -8027,75 +8933,8 @@ struct _HIVE_LIST_ENTRY {
 	/*0088*/ _EX_PUSH_LOCK MountCallbackLock;
 	/*0090*/ _EX_PUSH_LOCK CallbackListLock;
 	/*0098*/ _LIST_ENTRY CallbackListHead;
-	/*00a8*/ _WORK_QUEUE_ITEM * CallbackWorkItem;
-	/*00b0*/ LONG volatile CallbackWorkItemBusy;
-	/*00b8*/ _UNICODE_STRING FilePath;
-	/*00c8*/
-};
-
-struct _HIVE_LOAD_FAILURE {
-	/*0000*/ _HHIVE * Hive;
-	/*0008*/ USHORT Index;
-	/*000a*/ USHORT RecoverableIndex;
-	struct {
-		/*0000*/ _CM_LOAD_FAILURE_TYPE Failure;
-		/*0004*/ LONG Status;
-		/*0008*/ ULONG Point;
-		/*000c*/
-	} Locations[0x8];
-	struct {
-		/*0000*/ _CM_LOAD_FAILURE_TYPE Failure;
-		/*0004*/ LONG Status;
-		/*0008*/ ULONG Point;
-		/*000c*/
-	} RecoverableLocations[0x8];
-	struct {
-		/*00d0*/ ULONG Action;
-		/*00d8*/ void * Handle;
-		/*00e0*/ LONG Status;
-		/*00e8*/
-	} RegistryIO;
-	struct {
-		/*00e8*/ void * CheckStack;
-		/*00f0*/
-	} CheckRegistry2;
-	struct {
-		/*00f0*/ ULONG Cell;
-		/*00f8*/ _CELL_DATA * CellPoint;
-		/*0100*/ void * RootPoint;
-		/*0108*/ ULONG Index;
-		/*0110*/
-	} CheckKey;
-	struct {
-		/*0110*/ _CELL_DATA * List;
-		/*0118*/ ULONG Index;
-		/*011c*/ ULONG Cell;
-		/*0120*/ _CELL_DATA * CellPoint;
-		/*0128*/
-	} CheckValueList;
-	struct {
-		/*0128*/ ULONG Space;
-		/*012c*/ ULONG MapPoint;
-		/*0130*/ _HBIN * BinPoint;
-		/*0138*/
-	} CheckHive;
-	struct {
-		/*0138*/ ULONG Space;
-		/*013c*/ ULONG MapPoint;
-		/*0140*/ _HBIN * BinPoint;
-		/*0148*/
-	} CheckHive1;
-	struct {
-		/*0148*/ _HBIN * Bin;
-		/*0150*/ _HCELL * CellPoint;
-		/*0158*/
-	} CheckBin;
-	struct {
-		/*0158*/ ULONG FileOffset;
-		/*015c*/
-	} RecoverData;
-	/*0160*/ _CM_PARSE_DEBUG_INFO LinkDebug;
-	/*01b0*/
+	/*00a8*/ _UNICODE_STRING FilePath;
+	/*00b8*/
 };
 
 struct _HIVE_WAIT_PACKET {
@@ -8200,11 +9039,24 @@ union _HV_PARTITION_PRIVILEGE_MASK {
 	/*0008*/
 };
 
+enum _HV_SUBNODE_TYPE {
+	HvSubnodeAny = 0x0,
+	HvSubnodeSocket = 0x1,
+	HvSubnodeAmdNode = 0x2,
+	HvSubnodeL3 = 0x3,
+	HvSubnodeCount = 0x4,
+	HvSubnodeInvalid = 0xffffffff
+};
+
 struct _HV_X64_HYPERVISOR_FEATURES {
 	/*0000*/ _HV_PARTITION_PRIVILEGE_MASK PartitionPrivileges;
 	/*0008*/ UINT MaxSupportedCState : 04; // 0x0000000f;
 	/*0008*/ UINT HpetNeededForC3PowerState_Deprecated : 01; // 0x00000010;
-	/*0008*/ UINT Reserved : 27; // 0xffffffe0;
+	/*0008*/ UINT InvariantMperfAvailable : 01; // 0x00000020;
+	/*0008*/ UINT SupervisorShadowStackAvailable : 01; // 0x00000040;
+	/*0008*/ UINT ArchPmuAvailable : 01; // 0x00000080;
+	/*0008*/ UINT ExceptionTrapInterceptAvailable : 01; // 0x00000100;
+	/*0008*/ UINT Reserved : 23; // 0xfffffe00;
 	/*000c*/ UINT MwaitAvailable_Deprecated : 01; // 0x00000001;
 	/*000c*/ UINT GuestDebuggingAvailable : 01; // 0x00000002;
 	/*000c*/ UINT PerformanceMonitorsAvailable : 01; // 0x00000004;
@@ -8235,7 +9087,8 @@ struct _HV_X64_HYPERVISOR_FEATURES {
 	/*000c*/ UINT IptAvailable : 01; // 0x08000000;
 	/*000c*/ UINT CrossVtlFlushAvailable : 01; // 0x10000000;
 	/*000c*/ UINT IdleSpecCtrlAvailable : 01; // 0x20000000;
-	/*000c*/ UINT Reserved1 : 02; // 0xc0000000;
+	/*000c*/ UINT TranslateGvaFlagsAvailable : 01; // 0x40000000;
+	/*000c*/ UINT ApicEoiInterceptAvailable : 01; // 0x80000000;
 	/*0010*/
 };
 
@@ -8398,6 +9251,52 @@ struct _IMAGE_SECURITY_CONTEXT {
 	/*0008*/
 };
 
+struct _INBV_DISPLAY_CONTEXT {
+	/*0000*/ UCHAR FrameBufferValid;
+	/*0001*/ UCHAR FrameBufferMapped;
+	/*0002*/ UCHAR DisplayRotation;
+	/*0004*/ _INBV_MODE_INFORMATION ModeInformation;
+	/*0018*/ void * ShadowBuffer;
+	union {
+		/*0020*/ void * FrameBuffer;
+		/*0020*/ LONG (* BltRoutine)( _INBV_GRAPHICS_RECTANGLE * , _INBV_OFFSET * , UCHAR );
+		/*0028*/
+	} VideoMemory;
+	/*0028*/
+};
+
+struct _INBV_GRAPHICS_RECTANGLE {
+	/*0000*/ ULONG Height;
+	/*0004*/ ULONG Width;
+	/*0008*/ _INBV_PIXEL_FORMAT PixelFormat;
+	/*000c*/ ULONG Size;
+	/*0010*/ void * Data;
+	/*0018*/
+};
+
+struct _INBV_MODE_INFORMATION {
+	/*0000*/ ULONG Height;
+	/*0004*/ ULONG Width;
+	/*0008*/ ULONG Stride;
+	/*000c*/ _INBV_PIXEL_FORMAT PixelFormat;
+	/*0010*/
+};
+
+struct _INBV_OFFSET {
+	/*0000*/ ULONG X;
+	/*0004*/ ULONG Y;
+	/*0008*/
+};
+
+enum _INBV_PIXEL_FORMAT {
+	PixelFormatUnknown = 0x0,
+	PixelFormat4BitPlanar = 0x1,
+	PixelFormatR8G8B8 = 0x2,
+	PixelFormatR8G8B8X8 = 0x3,
+	PixelFormatB8G8R8 = 0x4,
+	PixelFormatB8G8R8X8 = 0x5
+};
+
 struct _INITIAL_PRIVILEGE_SET {
 	/*0000*/ ULONG PrivilegeCount;
 	/*0004*/ ULONG Control;
@@ -8408,6 +9307,12 @@ struct _INITIAL_PRIVILEGE_SET {
 struct _INPUT_MAPPING_ELEMENT {
 	/*0000*/ ULONG InputMappingId;
 	/*0004*/
+};
+
+struct _INSTALLED_MEMORY_RANGE {
+	/*0000*/ ULONGLONG BasePage;
+	/*0008*/ ULONGLONG PageCount;
+	/*0010*/
 };
 
 struct _INTERFACE {
@@ -8478,7 +9383,10 @@ struct _INTERRUPT_FUNCTION_TABLE {
 	/*00a0*/ void (* DeactivateInterrupt)( void * , ULONG );
 	/*00a8*/ void (* DirectedEndOfInterrupt)( void * , ULONG , ULONG );
 	/*00b0*/ LONG (* QueryLocalUnitInfo)( void * , ULONG , ULONG * , ULONG * , _KINTERRUPT_MODE * , _KINTERRUPT_MODE * );
-	/*00b8*/
+	/*00b8*/ LONG (* QueryPendingState)( void * , _INTERRUPT_LINE * , UCHAR * , UCHAR * );
+	/*00c0*/ void (* CaptureGlobalCrashdumpState)( void * );
+	/*00c8*/ void (* CaptureProcessorCrashdumpState)( void * , ULONG );
+	/*00d0*/
 };
 
 struct _INTERRUPT_HT_INTR_INFO {
@@ -8518,6 +9426,32 @@ struct _INTERRUPT_LINE {
 	/*0008*/
 };
 
+struct _INTERRUPT_LINES {
+	/*0000*/ _LIST_ENTRY ListEntry;
+	/*0010*/ ULONG ControllerId;
+	/*0014*/ LONG MinLine;
+	/*0018*/ LONG MaxLine;
+	/*001c*/ ULONG GsiBase;
+	/*0020*/ _INTERRUPT_LINE_TYPE Type;
+	/*0024*/ _INTERRUPT_LINE_SUBTYPE SubType;
+	/*0028*/ _INTERRUPT_LINE_STATE * State;
+	/*0030*/ _INTERRUPT_LINE_INTERNAL_STATE * InternalState;
+	/*0038*/ ULONGLONG MsiAddress;
+	/*0040*/ ULONG MsiData;
+	/*0048*/ _RTL_BITMAP MsiInUse;
+	/*0058*/
+};
+
+struct _INTERRUPT_LINE_INTERNAL_STATE {
+	/*0000*/ UCHAR Fixed;
+	/*0001*/ UCHAR Irql;
+	/*0002*/ UCHAR Swapping;
+	/*0004*/ ULONG OldClusterId;
+	/*0008*/ ULONG OldClusterMask;
+	/*000c*/ UCHAR LineStateDetermined;
+	/*0010*/
+};
+
 struct _INTERRUPT_LINE_STATE {
 	/*0000*/ _KINTERRUPT_POLARITY Polarity;
 	/*0004*/ UCHAR EmulateActiveBoth;
@@ -8528,6 +9462,23 @@ struct _INTERRUPT_LINE_STATE {
 	/*0030*/ ULONG Vector;
 	/*0034*/ ULONG Priority;
 	/*0038*/
+};
+
+enum _INTERRUPT_LINE_SUBTYPE {
+	InterruptLineSubTypeNone = 0x0,
+	InterruptLineSubTypeV2m = 0x1,
+	InterruptLineSubTypeLpi = 0x2
+};
+
+enum _INTERRUPT_LINE_TYPE {
+	InterruptLineInvalidType = 0x0,
+	InterruptLineUnusable = 0x1,
+	InterruptLineStandardPin = 0x2,
+	InterruptLineProcessorLocal = 0x3,
+	InterruptLineSoftwareOnly = 0x4,
+	InterruptLineSoftwareOnlyProcessorLocal = 0x5,
+	InterruptLineOutputPin = 0x6,
+	InterruptLineMsi = 0x7
 };
 
 enum _INTERRUPT_PROBLEM {
@@ -8569,7 +9520,8 @@ enum _INTERRUPT_PROBLEM {
 	InterruptProblemDeinitializeIoUnitFailed = 0x23,
 	InterruptProblemMismatchedThermalLvtIsr = 0x24,
 	InterruptProblemHvRetargetFailed = 0x25,
-	InterruptProblemDeferredErrorSetupFailed = 0x26
+	InterruptProblemDeferredErrorSetupFailed = 0x26,
+	InterruptProblemBadInterruptPartition = 0x27
 };
 
 struct _INTERRUPT_REMAPPING_INFO {
@@ -8580,8 +9532,7 @@ struct _INTERRUPT_REMAPPING_INFO {
 		struct {
 			/*0004*/ ULONG MessageAddressHigh;
 			/*0008*/ ULONG MessageAddressLow;
-			/*000c*/ USHORT MessageData;
-			/*000e*/ USHORT Reserved;
+			/*000c*/ ULONG MessageData;
 			/*0010*/
 		} Msi;
 		/*0010*/
@@ -8595,6 +9546,13 @@ enum _INTERRUPT_RESULT {
 	InterruptBeginSpurious = 0x2,
 	InterruptBeginVector = 0x3,
 	InterruptBeginNone = 0x4
+};
+
+enum _INTERRUPT_STEERING_MODE {
+	IntSteerModeNone = 0x0,
+	IntSteerModeController = 0x1,
+	IntSteerModeRedirect = 0x2,
+	IntSteerModeControllerFixed = 0x3
 };
 
 struct _INTERRUPT_TARGET {
@@ -8623,6 +9581,35 @@ enum _INTERRUPT_TARGET_TYPE {
 	InterruptTargetLogicalClustered = 0x6,
 	InterruptTargetRemapIndex = 0x7,
 	InterruptTargetHypervisor = 0x8
+};
+
+struct _INTERRUPT_TRACKING_ENTRY {
+	/*0000*/ _LIST_ENTRY ListEntry;
+	/*0010*/ _INTERRUPT_TRACKING_ROOT * IntTrackRoot;
+	/*0018*/ ULONG InterruptObjectCount;
+	/*0020*/ _KINTERRUPT * * InterruptObjectArray;
+	/*0028*/ ULONGLONG IsrTime;
+	/*0030*/ ULONGLONG DpcTime;
+	/*0038*/ UCHAR IsPrimaryInterrupt;
+	/*0040*/ _INTERRUPT_VECTOR_DATA VectorData;
+	/*0098*/
+};
+
+struct _INTERRUPT_TRACKING_ROOT {
+	/*0000*/ _LIST_ENTRY ListEntry;
+	/*0010*/ _LIST_ENTRY TrackingEntryList;
+	/*0020*/ ULONG Gsiv;
+	/*0028*/ _INTERRUPT_VECTOR_DATA VectorData;
+	/*0080*/ _INTERRUPT_STEERING_MODE SteeringMode;
+	/*0084*/ UCHAR EnableSteering;
+	/*0088*/ _GROUP_AFFINITY CpuSetMask;
+	/*0098*/ ULONGLONG AffinityEpoch;
+	/*00a0*/ _GROUP_AFFINITY CurrentTarget;
+	/*00b0*/ _GROUP_AFFINITY NextTarget;
+	/*00c0*/ ULONGLONG TimeDelta;
+	/*00c8*/ void * RedirectHandle;
+	/*00d0*/ _LIST_ENTRY SteerQueueLink;
+	/*00e0*/
 };
 
 struct _INTERRUPT_VECTOR_DATA {
@@ -8661,15 +9648,6 @@ struct _INTERRUPT_VECTOR_DATA {
 	/*0058*/
 };
 
-struct _INVERTED_FUNCTION_TABLE {
-	/*0000*/ ULONG CurrentSize;
-	/*0004*/ ULONG MaximumSize;
-	/*0008*/ ULONG volatile Epoch;
-	/*000c*/ UCHAR Overflow;
-	/*0010*/ _INVERTED_FUNCTION_TABLE_ENTRY TableEntry[0x100];
-	/*1810*/
-};
-
 struct _INVERTED_FUNCTION_TABLE_ENTRY {
 	/*0000*/ _IMAGE_RUNTIME_FUNCTION_ENTRY * FunctionTable;
 	/*0000*/ _DYNAMIC_FUNCTION_TABLE * DynamicTable;
@@ -8677,6 +9655,15 @@ struct _INVERTED_FUNCTION_TABLE_ENTRY {
 	/*0010*/ ULONG SizeOfImage;
 	/*0014*/ ULONG SizeOfTable;
 	/*0018*/
+};
+
+struct _INVERTED_FUNCTION_TABLE_KERNEL_MODE {
+	/*0000*/ ULONG CurrentSize;
+	/*0004*/ ULONG MaximumSize;
+	/*0008*/ ULONG volatile Epoch;
+	/*000c*/ UCHAR Overflow;
+	/*0010*/ _INVERTED_FUNCTION_TABLE_ENTRY TableEntry[0x100];
+	/*1810*/
 };
 
 union _INVPCID_DESCRIPTOR {
@@ -8722,7 +9709,231 @@ struct _IOAPIC {
 	/*000c*/
 };
 
-struct _IOMMU_DMA_DOMAIN;
+union _IOMMU_ATS_SETTINGS {
+	/*0000*/ UCHAR AtsSupported : 01; // 0x01;
+	/*0000*/ UCHAR AtsRequired : 01; // 0x02;
+	/*0000*/ UCHAR Rsvd : 06; // 0xfc;
+	/*0000*/ UCHAR AsUCHAR;
+	/*0001*/
+};
+
+struct _IOMMU_DEVICE_CREATION_CONFIGURATION {
+	/*0000*/ _LIST_ENTRY NextConfiguration;
+	/*0010*/ _IOMMU_DEVICE_CREATION_CONFIGURATION_TYPE ConfigType;
+	/*0018*/ _IOMMU_DEVICE_CREATION_CONFIGURATION_ACPI Acpi;
+	/*0018*/ void * DeviceId;
+	/*0020*/
+};
+
+struct _IOMMU_DEVICE_CREATION_CONFIGURATION_ACPI {
+	/*0000*/ UINT InputMappingBase;
+	/*0004*/ UINT MappingsCount;
+	/*0008*/
+};
+
+enum _IOMMU_DEVICE_CREATION_CONFIGURATION_TYPE {
+	IommuDeviceCreationConfigTypeNone = 0x0,
+	IommuDeviceCreationConfigTypeAcpi = 0x1,
+	IommuDeviceCreationConfigTypeDeviceId = 0x2,
+	IommuDeviceCreationConfigTypeMax = 0x3
+};
+
+struct _IOMMU_DMA_DEVICE {
+	/*0000*/ _EXT_IOMMU_DEVICE_ID * DeviceId;
+	/*0008*/ _DEVICE_OBJECT * DeviceObject;
+	/*0010*/ LONG DeviceState;
+	/*0018*/ _IOMMU_DMA_DOMAIN * DomainOwner;
+	struct {
+		/*0020*/ ULONGLONG LogicalId;
+		/*0028*/
+	} Hypervisor;
+	struct {
+		/*0020*/ _REGISTERED_IOMMU * Iommu;
+		/*0028*/ _EXT_IOMMU_DEVICE * ExtDevice;
+		/*0030*/ ULONGLONG SourceId;
+		/*0038*/ ULONG AtsReferenceCount;
+		/*003c*/ ULONG InvalidationQueueDepth;
+		/*0040*/ _EX_RUNDOWN_REF DeviceActive;
+		/*0048*/
+	} Native;
+	/*0048*/ _IOMMU_INTERFACE_CALLBACK_RECORD * InterfaceCallbackRecord;
+	/*0050*/ UCHAR DpptException;
+	/*0058*/ _IOMMU_TRACKED_DEVICE * SvmDevice;
+	/*0060*/ void (* FaultHandler)( void * , _FAULT_INFORMATION * );
+	/*0068*/ void * FaultContext;
+	/*0070*/ _FAULT_INFORMATION FaultInfo;
+	/*00a8*/ _KDPC FaultDpc;
+	/*00e8*/ _WORK_QUEUE_ITEM FaultWorkItem;
+	/*0108*/
+};
+
+struct _IOMMU_DMA_DOMAIN {
+	/*0000*/ _HALP_DMA_DOMAIN_OBJECT * DmaDomainOwner;
+	/*0008*/ _IOMMU_DMA_DOMAIN_TYPE DomainType;
+	/*000c*/ _EXT_IOMMU_TRANSLATION_TYPE TranslationType;
+	/*0010*/ _LIST_ENTRY HardwareDomainListHead;
+	/*0020*/ ULONGLONG HardwareDomainListLock;
+	/*0028*/ _DMAR_PAGE_TABLE_STATE * DmarptState;
+	/*0030*/ ULONG DomainId;
+	/*0034*/ UCHAR IsStage1;
+	/*0036*/ USHORT Asid;
+	/*0038*/ _IOMMU_DMA_LOGICAL_ALLOCATOR * LogicalAllocator;
+	/*0040*/
+};
+
+union _IOMMU_DMA_DOMAIN_CREATION_FLAGS {
+	/*0000*/ ULONGLONG Reserved : 64; // 0x0000000000000000;
+	/*0000*/ ULONGLONG AsUlonglong;
+	/*0008*/
+};
+
+enum _IOMMU_DMA_DOMAIN_TYPE {
+	DomainTypeTranslate = 0x0,
+	DomainTypePassThrough = 0x1,
+	DomainTypeUnmanaged = 0x2,
+	DomainTypeMax = 0x3
+};
+
+struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN {
+	/*0000*/ ULONGLONG LogicalAddressBase;
+	/*0008*/ ULONGLONG Size;
+	/*0010*/
+};
+
+struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN_MAPPED_SEGMENT {
+	/*0000*/ _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN * OwningToken;
+	/*0008*/ ULONGLONG Offset;
+	/*0010*/ ULONGLONG Size;
+	/*0018*/
+};
+
+struct _IOMMU_DMA_LOGICAL_ALLOCATOR {
+	/*0000*/ _IOMMU_DMA_LOGICAL_ALLOCATOR_OPERATIONS_V1 * Operations;
+	/*0008*/ ULONG Version;
+	/*000c*/ ULONG Size;
+	/*0010*/ _IOMMU_DMA_LOGICAL_ALLOCATOR_TYPE AllocatorType;
+	/*0018*/
+};
+
+struct _IOMMU_DMA_LOGICAL_ALLOCATOR_CAPABILITIES {
+	/*0000*/ ULONG ExplicitAddressCapable : 01; // 0x00000001;
+	/*0000*/ ULONG Reserved : 31; // 0xfffffffe;
+	/*0004*/
+};
+
+struct _IOMMU_DMA_LOGICAL_ALLOCATOR_CONFIG {
+	/*0000*/ _IOMMU_DMA_LOGICAL_ALLOCATOR_TYPE LogicalAllocatorType;
+	struct {
+		/*0004*/ ULONG AddressWidth;
+		/*0008*/
+	} BuddyAllocatorConfig;
+	/*0008*/
+};
+
+struct _IOMMU_DMA_LOGICAL_ALLOCATOR_OPERATIONS_V1 {
+	/*0000*/ LONG (* AllocateLogicalAddress)( _IOMMU_DMA_LOGICAL_ALLOCATOR * , ULONGLONG * , ULONGLONG , ULONGLONG * , ULONGLONG * , ULONGLONG * );
+	/*0008*/ LONG (* FreeLogicalAddress)( _IOMMU_DMA_LOGICAL_ALLOCATOR * , ULONGLONG );
+	/*0010*/ LONG (* ReserveLogicalAddress)( _IOMMU_DMA_LOGICAL_ALLOCATOR * , ULONGLONG , ULONGLONG );
+	/*0018*/ _IOMMU_DMA_LOGICAL_ALLOCATOR_CAPABILITIES (* QueryCapabilities)( _IOMMU_DMA_LOGICAL_ALLOCATOR * );
+	/*0020*/ void (* CleanUp)( _IOMMU_DMA_LOGICAL_ALLOCATOR * );
+	/*0028*/
+};
+
+enum _IOMMU_DMA_LOGICAL_ALLOCATOR_TYPE {
+	IommuDmaLogicalAllocatorNone = 0x0,
+	IommuDmaLogicalAllocatorBuddy = 0x1,
+	IommuDmaLogicalAllocatorMax = 0x2
+};
+
+struct _IOMMU_DMA_RESERVED_REGION {
+	/*0000*/ _IOMMU_DMA_RESERVED_REGION * RegionNext;
+	/*0008*/ ULONGLONG Base;
+	/*0010*/ ULONGLONG NumberOfPages;
+	/*0018*/ UCHAR ShouldMap;
+	/*0020*/
+};
+
+struct _IOMMU_INTERFACE_CALLBACK_RECORD {
+	/*0000*/ _LIST_ENTRY ListEntry;
+	/*0010*/ void (* CallbackRoutine)( _IOMMU_INTERFACE_STATE_CHANGE * , void * );
+	/*0018*/ void * CallbackContext;
+	/*0020*/ _IOMMU_DMA_DEVICE * DmaDevice;
+	/*0028*/ _IOMMU_INTERFACE_STATE_CHANGE LastReportedState;
+	/*0030*/
+};
+
+struct _IOMMU_INTERFACE_STATE_CHANGE {
+	/*0000*/ _IOMMU_INTERFACE_STATE_CHANGE_FIELDS PresentFields;
+	/*0004*/ ULONG AvailableDomainTypes;
+	/*0008*/
+};
+
+union _IOMMU_INTERFACE_STATE_CHANGE_FIELDS {
+	/*0000*/ ULONG AvailableDomainTypes : 01; // 0x00000001;
+	/*0000*/ ULONG Reserved : 31; // 0xfffffffe;
+	/*0000*/ ULONG AsULONG;
+	/*0004*/
+};
+
+struct _IOMMU_MAP_PHYSICAL_ADDRESS {
+	/*0000*/ _IOMMU_MAP_PHYSICAL_ADDRESS_TYPE MapType;
+	struct {
+		/*0008*/ _MDL * Mdl;
+		/*0010*/
+	} Mdl;
+	struct {
+		/*0008*/ _LARGE_INTEGER Base;
+		/*0010*/ ULONGLONG Size;
+		/*0018*/
+	} ContiguousRange;
+	struct {
+		/*0008*/ ULONGLONG * PageFrame;
+		/*0010*/ ULONGLONG NumberOfPages;
+		/*0018*/
+	} PfnArray;
+	/*0018*/
+};
+
+enum _IOMMU_MAP_PHYSICAL_ADDRESS_TYPE {
+	MapPhysicalAddressTypeMdl = 0x0,
+	MapPhysicalAddressTypeContiguousRange = 0x1,
+	MapPhysicalAddressTypePfn = 0x2,
+	MapPhysicalAddressTypeMax = 0x3
+};
+
+struct _IOMMU_PAGE_HANDLING_DATA {
+	/*0000*/ _EX_PUSH_LOCK ResetLock;
+	/*0008*/ ULONGLONG Lock;
+	/*0010*/ ULONG ValidGroupFaultSequenceNumber;
+	/*0018*/ ULONG (* GetPageFault)( void * , ULONG * , ULONGLONG * , USHORT * , void * * , ULONGLONG * );
+	/*0020*/ void (* DismissPageFault)( void * , ULONG , ULONGLONG , USHORT , LONG );
+	/*0028*/
+};
+
+struct _IOMMU_PASID_TABLE_OBJECT {
+	/*0000*/ _LIST_ENTRY ListEntry;
+	/*0010*/ ULONG Domain;
+	/*0018*/ _LIST_ENTRY DeviceListHead;
+	/*0028*/ void * Table;
+	/*0030*/ ULONG PasidCount;
+	/*0038*/ void * OldTable;
+	/*0040*/
+};
+
+struct _IOMMU_RESERVED_DEVICE {
+	/*0000*/ _EXT_IOMMU_DEVICE_ID * DeviceId;
+	/*0008*/ void * PageTable;
+	/*0010*/ _LARGE_INTEGER PageTablePhysical;
+	/*0018*/ ULONG RegionCount;
+	/*0020*/ _EXT_IOMMU_RESERVED_MEMORY_REGION Regions[0x1];
+	/*0038*/
+};
+
+struct _IOMMU_RESERVED_DEVICE_LIST {
+	/*0000*/ ULONG Count;
+	/*0008*/ _IOMMU_RESERVED_DEVICE * Devices[0x1];
+	/*0010*/
+};
 
 union _IOMMU_SVM_CAPABILITIES {
 	/*0000*/ ULONG AtsCapability : 01; // 0x00000001;
@@ -8742,11 +9953,27 @@ union _IOMMU_SVM_CAPABILITIES {
 	/*000c*/
 };
 
+struct _IOMMU_TRACKED_DEVICE {
+	/*0000*/ _LIST_ENTRY ListEntry;
+	/*0010*/ ULONGLONG Lock;
+	/*0018*/ void * Iommu;
+	/*0020*/ ULONG IommuCapabilities;
+	/*0024*/ ULONG ReferenceCount;
+	/*0028*/ ULONGLONG SourceId;
+	/*0030*/ _IOMMU_SVM_CAPABILITIES Capabilities;
+	/*003c*/ ULONG Flags;
+	/*0040*/ _IOMMU_PASID_TABLE_OBJECT * CurrentPasidTable;
+	/*0048*/ _LIST_ENTRY PasidTableDeviceList;
+	/*0058*/ _LIST_ENTRY ActiveDeviceListHead;
+	/*0068*/ _IOMMU_DMA_DEVICE * DmaDevice;
+	/*0070*/
+};
+
 struct _IOP_FILE_OBJECT_EXTENSION {
 	/*0000*/ ULONG FoExtFlags;
-	/*0008*/ void * FoExtPerTypeExtension[0x9];
-	/*0050*/ _IOP_PRIORITY_HINT FoIoPriorityHint;
-	/*0058*/
+	/*0008*/ void * FoExtPerTypeExtension[0xa];
+	/*0058*/ _IOP_PRIORITY_HINT FoIoPriorityHint;
+	/*0060*/
 };
 
 struct _IOP_IRP_EXTENSION {
@@ -8771,7 +9998,8 @@ struct _IOP_IRP_EXTENSION {
 		/*0038*/ ULONGLONG UserFlagsId : 16; // 0xffff000000000000;
 		/*0040*/
 	} DriverFlags;
-	/*0040*/
+	/*0040*/ _COPY_INFORMATION CopyInformation;
+	/*0050*/
 };
 
 struct _IOP_IRP_EXTENSION_STATUS {
@@ -8787,6 +10015,36 @@ struct _IOP_IRP_STACK_PROFILER {
 	/*0054*/
 };
 
+struct _IOP_MC_BE_PAGE_NODE {
+	/*0000*/ _RTL_BALANCED_NODE Node;
+	/*0018*/ UINT PageIndex;
+	/*0020*/
+};
+
+struct _IOP_MC_BUFFER_ENTRY {
+	/*0000*/ USHORT Type;
+	/*0002*/ USHORT Reserved;
+	/*0004*/ UINT Size;
+	/*0008*/ LONG ReferenceCount;
+	/*000c*/ _IOP_MC_BUFFER_ENTRY_FLAGS Flags;
+	/*0010*/ _LIST_ENTRY GlobalDataLink;
+	/*0020*/ void * Address;
+	/*0028*/ UINT Length;
+	/*002c*/ CHAR AccessMode;
+	/*0030*/ LONG MdlRef;
+	/*0038*/ _MDL * Mdl;
+	/*0040*/ _KEVENT MdlRundownEvent;
+	/*0058*/ ULONGLONG * PfnArray;
+	/*0060*/ _IOP_MC_BE_PAGE_NODE PageNodes[0x1];
+	/*0080*/
+};
+
+enum _IOP_MC_BUFFER_ENTRY_FLAGS {
+	IOP_MCBF_UNLOCK = 0x1,
+	IOP_MCBF_SIGNAL_RUNDOWN = 0x2,
+	IOP_MCBF_CLEANED_UP = 0x4
+};
+
 enum _IOP_PRIORITY_HINT {
 	IopIoPriorityNotSet = 0x0,
 	IopIoPriorityVeryLow = 0x1,
@@ -8795,6 +10053,30 @@ enum _IOP_PRIORITY_HINT {
 	IopIoPriorityHigh = 0x4,
 	IopIoPriorityCritical = 0x5,
 	MaxIopIoPriorityTypes = 0x6
+};
+
+struct _IORING_OBJECT {
+	/*0000*/ SHORT Type;
+	/*0002*/ SHORT Size;
+	/*0008*/ _NT_IORING_INFO UserInfo;
+	/*0038*/ void * Section;
+	/*0040*/ _NT_IORING_SUBMISSION_QUEUE * SubmissionQueue;
+	/*0048*/ _MDL * CompletionQueueMdl;
+	/*0050*/ _NT_IORING_COMPLETION_QUEUE * CompletionQueue;
+	/*0058*/ ULONGLONG ViewSize;
+	/*0060*/ LONG InSubmit;
+	/*0068*/ ULONGLONG CompletionLock;
+	/*0070*/ ULONGLONG SubmitCount;
+	/*0078*/ ULONGLONG CompletionCount;
+	/*0080*/ ULONGLONG CompletionWaitUntil;
+	/*0088*/ _KEVENT CompletionEvent;
+	/*00a0*/ UCHAR SignalCompletionEvent;
+	/*00a8*/ _KEVENT * CompletionUserEvent;
+	/*00b0*/ UINT RegBuffersCount;
+	/*00b8*/ _IOP_MC_BUFFER_ENTRY * * RegBuffers;
+	/*00c0*/ UINT RegFilesCount;
+	/*00c8*/ void * * RegFiles;
+	/*00d0*/
 };
 
 struct _IOSAPIC {
@@ -8883,7 +10165,8 @@ struct _IO_CLIENT_EXTENSION {
 struct _IO_COMPLETION_CONTEXT {
 	/*0000*/ void * Port;
 	/*0008*/ void * Key;
-	/*0010*/
+	/*0010*/ LONGLONG UsageCount;
+	/*0018*/
 };
 
 struct _IO_DRIVER_CREATE_CONTEXT {
@@ -9418,12 +10701,14 @@ struct _IRP {
 	/*0046*/ CHAR ApcEnvironment;
 	/*0047*/ UCHAR AllocationFlags;
 	/*0048*/ _IO_STATUS_BLOCK * UserIosb;
+	/*0048*/ void * IoRingContext;
 	/*0050*/ _KEVENT * UserEvent;
 	union {
 		struct {
 			/*0058*/ void (* UserApcRoutine)( void * , _IO_STATUS_BLOCK * , ULONG );
 			/*0058*/ void * IssuingProcess;
 			/*0060*/ void * UserApcContext;
+			/*0060*/ _IORING_OBJECT * IoRing;
 			/*0068*/
 		} AsynchronousParameters;
 		/*0058*/ _LARGE_INTEGER AllocationSize;
@@ -9542,6 +10827,8 @@ enum _JOBOBJECTINFOCLASS {
 	JobObjectSiloSystemRoot = 0x2d,
 	JobObjectEnergyTrackingState = 0x2e,
 	JobObjectThreadImpersonationInformation = 0x2f,
+	JobObjectIoPriorityLimit = 0x30,
+	JobObjectPagePriorityLimit = 0x31,
 	JobObjectReserved1Information = 0x12,
 	JobObjectReserved2Information = 0x13,
 	JobObjectReserved3Information = 0x14,
@@ -9572,7 +10859,9 @@ enum _JOBOBJECTINFOCLASS {
 	JobObjectReserved23Information = 0x2d,
 	JobObjectReserved24Information = 0x2e,
 	JobObjectReserved25Information = 0x2f,
-	MaxJobObjectInfoClass = 0x30
+	JobObjectReserved26Information = 0x30,
+	JobObjectReserved27Information = 0x31,
+	MaxJobObjectInfoClass = 0x32
 };
 
 union _JOBOBJECT_ENERGY_TRACKING_STATE {
@@ -9580,6 +10869,16 @@ union _JOBOBJECT_ENERGY_TRACKING_STATE {
 	/*0000*/ ULONG UpdateMask;
 	/*0004*/ ULONG DesiredState;
 	/*0008*/
+};
+
+enum _JOBOBJECT_IO_PRIORITY_LIMIT_FLAGS {
+	JOBOBJECT_IO_PRIORITY_LIMIT_ENABLE = 0x1,
+	JOBOBJECT_IO_PRIORITY_LIMIT_VALID_FLAGS = 0x1
+};
+
+enum _JOBOBJECT_PAGE_PRIORITY_LIMIT_FLAGS {
+	JOBOBJECT_PAGE_PRIORITY_LIMIT_ENABLE = 0x1,
+	JOBOBJECT_PAGE_PRIORITY_LIMIT_VALID_FLAGS = 0x1
 };
 
 struct _JOBOBJECT_WAKE_FILTER {
@@ -9608,8 +10907,9 @@ struct _KAFFINITY_EX {
 	/*0000*/ USHORT Count;
 	/*0002*/ USHORT Size;
 	/*0004*/ ULONG Reserved;
-	/*0008*/ ULONGLONG Bitmap[0x14];
-	/*00a8*/
+	/*0008*/ ULONGLONG Bitmap[0x1];
+	/*0008*/ ULONGLONG StaticBitmap[0x20];
+	/*0108*/
 };
 
 union _KALPC_DIRECT_EVENT {
@@ -9644,7 +10944,9 @@ struct _KALPC_MESSAGE {
 			/*0028*/ ULONG OwnerPortReference : 01; // 0x00001000;
 			/*0028*/ ULONG ReceiverReference : 01; // 0x00002000;
 			/*0028*/ ULONG ViewAttributeRetrieved : 01; // 0x00004000;
-			/*0028*/ ULONG InDispatch : 01; // 0x00008000;
+			/*0028*/ ULONG ViewAttributeDeleteOnRelease : 01; // 0x00008000;
+			/*0028*/ ULONG InDispatch : 01; // 0x00010000;
+			/*0028*/ ULONG InCanceledQueue : 01; // 0x00020000;
 			/*002c*/
 		} s1;
 		/*0028*/ ULONG State;
@@ -9782,7 +11084,9 @@ struct _KALPC_WORK_ON_BEHALF_DATA {
 
 struct _KAPC {
 	/*0000*/ UCHAR Type;
-	/*0001*/ UCHAR SpareByte0;
+	/*0001*/ UCHAR AllFlags;
+	/*0001*/ UCHAR CallbackDataContext : 01; // 0x01;
+	/*0001*/ UCHAR Unused : 07; // 0xfe;
 	/*0002*/ UCHAR Size;
 	/*0003*/ UCHAR SpareByte1;
 	/*0004*/ ULONG SpareLong0;
@@ -9814,12 +11118,83 @@ struct _KAPC_STATE {
 	/*0030*/
 };
 
+struct _KCLOCK_INCREMENT_TRACE {
+	/*0000*/ ULONG ActualIncrement;
+	/*0004*/ ULONG RequestedIncrement;
+	/*0008*/ ULONGLONG InterruptTime;
+	/*0010*/ ULONGLONG PerformanceCounter;
+	/*0018*/ UCHAR OneShot;
+	/*0020*/
+};
+
+struct _KCLOCK_TICK_TRACE {
+	/*0000*/ ULONGLONG PerformanceCounter;
+	/*0008*/ ULONGLONG PreInterruptTime;
+	/*0010*/ ULONGLONG PostInterruptTime;
+	/*0018*/ ULONGLONG TimeStampCounter;
+	/*0020*/ UCHAR IsClockOwner;
+	/*0028*/
+};
+
+struct _KCLOCK_TIMER_DEADLINE_ENTRY {
+	/*0000*/ ULONGLONG DueTime;
+	/*0008*/ ULONG TolerableDelay;
+	/*000c*/ UCHAR TypeFlags;
+	/*000c*/ UCHAR Valid : 01; // 0x01;
+	/*000c*/ UCHAR NoWake : 01; // 0x02;
+	/*000c*/ UCHAR Unused : 06; // 0xfc;
+	/*0010*/
+};
+
+enum _KCLOCK_TIMER_DEADLINE_TYPE {
+	KClockTimerKTimerExpirationNonHr = 0x0,
+	KClockTimerKTimerExpirationPseudoHr = 0x1,
+	KClockTimerKTimer2ExpirationHr = 0x2,
+	KClockTimerKTimersMax = 0x2,
+	KClockTimerQuantumEnd = 0x3,
+	KClockTimerGroupSchedulingGenerationEnd = 0x4,
+	KClockTimerIdlePromotion = 0x5,
+	KClockTimerBamQosHysteresisEnd = 0x6,
+	KClockTimerMax = 0x7
+};
+
+enum _KCLOCK_TIMER_ONE_SHOT_STATE {
+	KClockTimerOneShotUnarmed = 0x0,
+	KClockTimerOneShotArmed = 0x1,
+	KClockTimerOneShotRearmRequired = 0x2,
+	KClockTimerOneShotInvalid = 0x3
+};
+
+struct _KCLOCK_TIMER_STATE {
+	/*0000*/ ULONGLONG NextTickDueTime;
+	/*0008*/ ULONG TimeIncrement;
+	/*000c*/ ULONG LastRequestedTimeIncrement;
+	/*0010*/ _KCLOCK_TIMER_ONE_SHOT_STATE OneShotState;
+	/*0014*/ _KCLOCK_TIMER_DEADLINE_TYPE ExpectedWakeReason;
+	/*0018*/ _KCLOCK_TIMER_DEADLINE_ENTRY ClockTimerEntries[0x7];
+	/*0088*/ UCHAR ClockActive;
+	/*008c*/ ULONG ClockTickTraceIndex;
+	/*0090*/ ULONG ClockIncrementTraceIndex;
+	/*0098*/ _KCLOCK_TICK_TRACE ClockTickTraces[0x10];
+	/*0318*/ _KCLOCK_INCREMENT_TRACE ClockIncrementTraces[0x10];
+	/*0518*/
+};
+
 enum _KCONTINUE_TYPE {
 	KCONTINUE_UNWIND = 0x0,
 	KCONTINUE_RESUME = 0x1,
 	KCONTINUE_LONGJUMP = 0x2,
 	KCONTINUE_SET = 0x3,
-	KCONTINUE_LAST = 0x4
+	KCONTINUE_LAST = 0x4,
+	KCONTINUE_INVALID = 0x4
+};
+
+struct _KCORE_CONTROL_BLOCK {
+	/*0000*/ UCHAR ProcessorCount;
+	/*0001*/ UCHAR ScanStartIndex;
+	/*0002*/ UCHAR Spare[0x6];
+	/*0008*/ _KPRCB * Prcbs[0x8];
+	/*0048*/
 };
 
 struct _KDESCRIPTOR {
@@ -9868,7 +11243,9 @@ struct _KDPC_DATA {
 	/*0018*/ LONG volatile DpcQueueDepth;
 	/*001c*/ ULONG DpcCount;
 	/*0020*/ _KDPC * volatile ActiveDpc;
-	/*0028*/
+	/*0028*/ ULONG LongDpcPresent;
+	/*002c*/ ULONG Padding;
+	/*0030*/
 };
 
 struct _KDPC_LIST {
@@ -9941,7 +11318,25 @@ struct _KENTROPY_TIMING_STATE {
 	/*0004*/ ULONG Buffer[0x40];
 	/*0108*/ _KDPC Dpc;
 	/*0148*/ ULONG LastDeliveredBuffer;
-	/*0150*/
+	/*0150*/ void * ReservedRawDataBuffer;
+	/*0158*/
+};
+
+union _KERNEL_SHADOW_STACK_LIMIT {
+	/*0000*/ ULONGLONG AllFields;
+	/*0000*/ ULONGLONG ShadowStackType : 03; // 0x0000000000000007;
+	/*0000*/ ULONGLONG Unused : 09; // 0x0000000000000ff8;
+	/*0000*/ ULONGLONG ShadowStackLimitPfn : 52; // 0xfffffffffffff000;
+	/*0008*/
+};
+
+enum _KERNEL_SHADOW_STACK_TYPE {
+	KernelShadowStackTypeUserThread = 0x0,
+	KernelShadowStackTypeKernelThread = 0x1,
+	KernelShadowStackTypeRstorssp = 0x2,
+	KernelShadowStackTypeSetssbsy = 0x3,
+	KernelShadowStackTypeSetssbsyForSystemStartup = 0x4,
+	KernelShadowStackTypeMax = 0x5
 };
 
 enum _KERNEL_STACK_LIMITS {
@@ -9964,7 +11359,11 @@ struct _KERNEL_STACK_SEGMENT {
 	/*0008*/ ULONGLONG StackLimit;
 	/*0010*/ ULONGLONG KernelStack;
 	/*0018*/ ULONGLONG InitialStack;
-	/*0020*/
+	/*0020*/ ULONGLONG KernelShadowStackBase;
+	/*0028*/ _KERNEL_SHADOW_STACK_LIMIT KernelShadowStackLimit;
+	/*0030*/ ULONGLONG KernelShadowStack;
+	/*0038*/ ULONGLONG KernelShadowStackInitial;
+	/*0040*/
 };
 
 struct _KEVENT {
@@ -10020,16 +11419,48 @@ union _KEXECUTE_OPTIONS {
 	/*0001*/
 };
 
+struct _KE_IDEAL_PROCESSOR_ASSIGNMENT_BLOCK {
+	/*0000*/ _KE_PROCESS_CONCURRENCY_COUNT ExpectedConcurrencyCount;
+	/*0004*/ _KE_IDEAL_PROCESSOR_SET_BREAKPOINTS Breakpoints;
+	union {
+		/*000c*/ ULONG ConcurrencyCountFixed : 01; // 0x00000001;
+		/*000c*/ ULONG AllFlags;
+		/*0010*/
+	} AssignmentFlags;
+	/*0010*/ _KAFFINITY_EX IdealProcessorSets;
+	/*0118*/
+};
+
+struct _KE_IDEAL_PROCESSOR_SET_BREAKPOINTS {
+	/*0000*/ _KE_PROCESS_CONCURRENCY_COUNT Low;
+	/*0004*/ _KE_PROCESS_CONCURRENCY_COUNT High;
+	/*0008*/
+};
+
+union _KE_PROCESS_CONCURRENCY_COUNT {
+	/*0000*/ ULONG Fraction : 20; // 0x000fffff;
+	/*0000*/ ULONG Count : 12; // 0xfff00000;
+	/*0000*/ ULONG AllFields;
+	/*0004*/
+};
+
 enum _KE_WAKE_SOURCE_TYPE {
 	KeWakeSourceTypeSpuriousWake = 0x0,
 	KeWakeSourceTypeSpuriousClock = 0x1,
 	KeWakeSourceTypeSpuriousInterrupt = 0x2,
 	KeWakeSourceTypeQueryFailure = 0x3,
 	KeWakeSourceTypeAccountingFailure = 0x4,
-	KeWakeSourceTypeStaticSourceMax = 0x4,
-	KeWakeSourceTypeInterrupt = 0x5,
-	KeWakeSourceTypeIRTimer = 0x6,
-	KeWakeSourceTypeMax = 0x7
+	KeWakeSourceTypeNonIrTimer = 0x5,
+	KeWakeSourceTypeDebugPoll = 0x6,
+	KeWakeSourceTypeClockWatchdog = 0x7,
+	KeWakeSourceTypeClockInternal = 0x8,
+	KeWakeSourceTypeClockNotOwner = 0x9,
+	KeWakeSourceTypeClockNotArmed = 0xa,
+	KeWakeSourceTypeExTimer = 0xb,
+	KeWakeSourceTypeStaticSourceMax = 0xb,
+	KeWakeSourceTypeInterrupt = 0x80,
+	KeWakeSourceTypeIRTimer = 0x81,
+	KeWakeSourceTypeMax = 0x82
 };
 
 struct _KFLOATING_SAVE {
@@ -10093,8 +11524,18 @@ enum _KHETERO_CPU_QOS {
 	KHeteroCpuQosLow = 0x2,
 	KHeteroCpuQosMultimedia = 0x3,
 	KHeteroCpuQosDeadline = 0x4,
-	KHeteroCpuQosDynamic = 0x5,
-	KHeteroCpuQosMax = 0x5
+	KHeteroCpuQosEco = 0x5,
+	KHeteroCpuQosUtility = 0x6,
+	KHeteroCpuQosDynamic = 0x7,
+	KHeteroCpuQosMax = 0x7
+};
+
+struct _KHETERO_HWFEEDBACK_CLASS {
+	/*0000*/ UCHAR PerformanceClass;
+	/*0001*/ UCHAR EfficiencyClass;
+	/*0002*/ UCHAR PerformanceClassRawValue;
+	/*0003*/ UCHAR EfficiencyClassRawValue;
+	/*0004*/
 };
 
 struct _KHETERO_PROCESSOR_SET {
@@ -10108,6 +11549,20 @@ enum _KHETERO_RUNNING_TYPE {
 	KHeteroShortRunning = 0x0,
 	KHeteroLongRunning = 0x1,
 	KHeteroRunningTypeMax = 0x2
+};
+
+union _KHETERO_STATE {
+	/*0000*/ UCHAR Qos : 03; // 0x07;
+	/*0000*/ UCHAR WorkloadClass : 03; // 0x38;
+	/*0000*/ UCHAR RunningType : 01; // 0x40;
+	/*0000*/ UCHAR AllFields;
+	/*0001*/
+};
+
+struct _KHETRO_HWFEEDBACK_TYPE {
+	/*0000*/ ULONG Count;
+	/*0004*/ _KHETERO_HWFEEDBACK_CLASS HwFeedbackClass[0x1];
+	/*0008*/
 };
 
 union _KIDTENTRY64 {
@@ -10159,7 +11614,7 @@ struct _KINTERRUPT {
 	/*00a8*/ void * IntTrackEntry;
 	/*00b0*/ _ISRDPCSTATS IsrDpcStats;
 	/*0110*/ void * RedirectObject;
-	/*0118*/ void * PhysicalDeviceObject;
+	/*0118*/ UCHAR Padding[0x8];
 	/*0120*/
 };
 
@@ -10177,6 +11632,12 @@ enum _KINTERRUPT_POLARITY {
 	InterruptActiveBoth = 0x3,
 	InterruptActiveBothTriggerLow = 0x3,
 	InterruptActiveBothTriggerHigh = 0x4
+};
+
+enum _KISOLATION_WIDTH {
+	KiIsolationWidthLogicalProcessor = 0x0,
+	KiIsolationWidthCore = 0x1,
+	KiIsolationWidthMax = 0x2
 };
 
 struct _KIST_BASE_FRAME {
@@ -10221,7 +11682,9 @@ struct _KLDR_DATA_TABLE_ENTRY {
 	union {
 		/*006e*/ USHORT SignatureLevel : 04; // 0x000f;
 		/*006e*/ USHORT SignatureType : 03; // 0x0070;
-		/*006e*/ USHORT Unused : 09; // 0xff80;
+		/*006e*/ USHORT Frozen : 02; // 0x0180;
+		/*006e*/ USHORT HotPatch : 01; // 0x0200;
+		/*006e*/ USHORT Unused : 06; // 0xfc00;
 		/*006e*/ USHORT EntireField;
 		/*0070*/
 	} u1;
@@ -10231,56 +11694,52 @@ struct _KLDR_DATA_TABLE_ENTRY {
 	/*0080*/ void * CoverageSection;
 	/*0088*/ void * LoadedImports;
 	/*0090*/ void * Spare;
+	/*0090*/ _KLDR_DATA_TABLE_ENTRY * NtDataTableEntry;
 	/*0098*/ ULONG SizeOfImageNotRounded;
 	/*009c*/ ULONG TimeDateStamp;
 	/*00a0*/
 };
 
 struct _KLOCK_ENTRY {
-	/*0000*/ _RTL_BALANCED_NODE TreeNode;
-	/*0000*/ _SINGLE_LIST_ENTRY FreeListEntry;
-	/*0018*/ ULONG EntryFlags;
-	/*0018*/ UCHAR EntryOffset;
-	/*0019*/ UCHAR ThreadLocalFlags;
-	/*0019*/ UCHAR WaitingBit : 01; // 0x01;
-	/*0019*/ UCHAR Spare0 : 07; // 0xfe;
-	/*001a*/ UCHAR AcquiredByte;
-	/*001a*/ UCHAR AcquiredBit : 01; // 0x01;
-	/*001b*/ UCHAR CrossThreadFlags;
-	/*001b*/ UCHAR HeadNodeBit : 01; // 0x01;
-	/*001b*/ UCHAR IoPriorityBit : 01; // 0x02;
-	/*001b*/ UCHAR IoQoSWaiter : 01; // 0x04;
-	/*001b*/ UCHAR Spare1 : 05; // 0xf8;
-	/*0018*/ ULONG StaticState : 08; // 0x000000ff;
-	/*0018*/ ULONG AllFlags : 24; // 0xffffff00;
-	/*001c*/ ULONG SpareFlags;
-	/*0020*/ _KLOCK_ENTRY_LOCK_STATE LockState;
-	/*0020*/ void * volatile LockUnsafe;
-	/*0020*/ UCHAR volatile CrossThreadReleasableAndBusyByte;
-	/*0021*/ UCHAR Reserved[0x6];
-	/*0027*/ UCHAR volatile InTreeByte;
-	/*0028*/ void * SessionState;
-	/*0028*/ ULONG SessionId;
-	/*002c*/ ULONG SessionPad;
+	/*0000*/ _KLOCK_ENTRY_LOCK_STATE LockState;
+	/*0000*/ void * volatile LockUnsafe;
+	/*0000*/ UCHAR volatile CrossThreadReleasableAndBusyByte;
+	/*0001*/ UCHAR Reserved[0x6];
+	/*0007*/ UCHAR volatile InTreeByte;
+	/*0008*/ void * SessionState;
+	/*0008*/ ULONG SessionId;
+	/*000c*/ ULONG SessionPad;
+	/*0010*/ ULONG EntryFlags;
+	/*0010*/ UCHAR EntryIndex;
+	/*0011*/ UCHAR WaitingByte;
+	/*0012*/ UCHAR AcquiredByte;
+	/*0013*/ UCHAR CrossThreadFlags;
+	/*0013*/ UCHAR HeadNodeBit : 01; // 0x01;
+	/*0013*/ UCHAR IoPriorityBit : 01; // 0x02;
+	/*0013*/ UCHAR IoQoSWaiter : 01; // 0x04;
+	/*0013*/ UCHAR Spare1 : 05; // 0xf8;
+	/*0010*/ ULONG StaticState : 08; // 0x000000ff;
+	/*0010*/ ULONG AllFlags : 24; // 0xffffff00;
+	/*0014*/ ULONG SpareFlags;
+	/*0018*/ _RTL_BALANCED_NODE TreeNode;
 	/*0030*/ _RTL_RB_TREE OwnerTree;
 	/*0040*/ _RTL_RB_TREE WaiterTree;
 	/*0030*/ CHAR CpuPriorityKey;
 	/*0050*/ ULONGLONG EntryLock;
 	/*0058*/ _KLOCK_ENTRY_BOOST_BITMAP BoostBitmap;
-	/*005c*/ ULONG SparePad;
 	/*0060*/
 };
 
 union _KLOCK_ENTRY_BOOST_BITMAP {
-	/*0000*/ ULONG AllFields;
-	/*0000*/ ULONG AllBoosts : 17; // 0x0001ffff;
-	/*0000*/ ULONG Reserved : 15; // 0xfffe0000;
-	/*0000*/ USHORT CpuBoostsBitmap : 15; // 0x7fff;
-	/*0000*/ USHORT IoBoost : 01; // 0x8000;
-	/*0002*/ USHORT IoQoSBoost : 01; // 0x0001;
-	/*0002*/ USHORT IoNormalPriorityWaiterCount : 08; // 0x01fe;
-	/*0002*/ USHORT IoQoSWaiterCount : 07; // 0xfe00;
-	/*0004*/
+	/*0000*/ ULONGLONG AllFields;
+	/*0000*/ ULONG AllBoosts;
+	/*0004*/ ULONG WaiterCounts;
+	/*0000*/ ULONG CpuBoostsBitmap : 30; // 0x3fffffff;
+	/*0000*/ ULONG IoBoost : 01; // 0x40000000;
+	/*0000*/ ULONG IoQoSBoost : 01; // 0x80000000;
+	/*0004*/ ULONG IoNormalPriorityWaiterCount : 08; // 0x000000ff;
+	/*0004*/ ULONG IoQoSWaiterCount : 07; // 0x00007f00;
+	/*0008*/
 };
 
 struct _KLOCK_ENTRY_LOCK_STATE {
@@ -10316,39 +11775,23 @@ struct _KMUTANT {
 };
 
 struct _KNODE {
-	/*0000*/ ULONGLONG IdleNonParkedCpuSet;
-	/*0008*/ ULONGLONG IdleSmtSet;
-	/*0010*/ ULONGLONG NonPairedSmtSet;
-	/*0018*/ ULONGLONG IdleCpuSet;
-	/*0040*/ ULONGLONG DeepIdleSet;
-	/*0048*/ ULONGLONG IdleConstrainedSet;
-	/*0050*/ ULONGLONG NonParkedSet;
-	/*0058*/ ULONGLONG SoftParkedSet;
-	/*0060*/ ULONGLONG NonIsrTargetedSet;
-	/*0068*/ LONG ParkLock;
-	/*006c*/ USHORT ThreadSeed;
-	/*006e*/ USHORT ProcessSeed;
-	/*0080*/ ULONG SiblingMask;
-	/*0088*/ _GROUP_AFFINITY Affinity;
-	/*0088*/ UCHAR AffinityFill[0xa];
-	/*0092*/ USHORT NodeNumber;
-	/*0094*/ USHORT PrimaryNodeNumber;
-	/*0096*/ USHORT Spare0;
-	/*0098*/ ULONGLONG SharedReadyQueueMask;
-	/*00a0*/ ULONGLONG StrideMask;
-	/*00a8*/ ULONG ProximityId;
-	/*00ac*/ ULONG Lowest;
-	/*00b0*/ ULONG Highest;
-	/*00b4*/ UCHAR MaximumProcessors;
-	/*00b5*/ _flags Flags;
-	/*00b6*/ UCHAR Spare10;
-	/*00b8*/ _KHETERO_PROCESSOR_SET HeteroSets[0x5];
-	/*0130*/ ULONGLONG PpmConfiguredQosSets[0x5];
-	/*0158*/ ULONGLONG Spare11;
-	/*0160*/ _KQOS_GROUPING_SETS QosGroupingSets;
-	/*0170*/ ULONGLONG QosPreemptibleSet;
-	/*0178*/ ULONGLONG LLCLeaders;
-	/*0180*/
+	/*0000*/ USHORT NodeNumber;
+	/*0002*/ USHORT PrimaryNodeNumber;
+	/*0004*/ ULONG ProximityId;
+	/*0008*/ USHORT MaximumProcessors;
+	struct {
+		/*000a*/ UCHAR ProcessorOnly : 01; // 0x01;
+		/*000a*/ UCHAR GroupsAssigned : 01; // 0x02;
+		/*000a*/ UCHAR MeasurableDistance : 01; // 0x04;
+		/*000b*/
+	} Flags;
+	/*000b*/ UCHAR GroupSeed;
+	/*000c*/ UCHAR PrimaryGroup;
+	/*000d*/ UCHAR Padding[0x3];
+	/*0010*/ ULONG ActiveGroups;
+	/*0018*/ _KSCHEDULER_SUBNODE * SchedulerSubNodes[0x20];
+	/*0118*/ ULONG ActiveTopologyElements[0x5];
+	/*0130*/
 };
 
 enum _KNOWN_CONTROLLER_TYPE {
@@ -10421,7 +11864,7 @@ struct _KPCR {
 	/*0110*/ void * Unused3;
 	/*0118*/ ULONG PcrAlign1[0x18];
 	/*0180*/ _KPRCB Prcb;
-	/*b080*/
+	/*c080*/
 };
 
 struct _KPRCB {
@@ -10442,7 +11885,7 @@ struct _KPRCB {
 	/*0024*/ ULONG Number;
 	/*0028*/ ULONGLONG RspBase;
 	/*0030*/ ULONGLONG PrcbLock;
-	/*0038*/ CHAR * PriorityState;
+	/*0038*/ _KPRIORITY_STATE * PriorityState;
 	/*0040*/ CHAR CpuType;
 	/*0041*/ CHAR CpuID;
 	/*0042*/ USHORT CpuStep;
@@ -10454,11 +11897,14 @@ struct _KPRCB {
 	/*008a*/ USHORT MajorVersion;
 	/*008c*/ UCHAR BuildType;
 	/*008d*/ UCHAR CpuVendor;
-	/*008e*/ UCHAR CoresPerPhysicalProcessor;
-	/*008f*/ UCHAR LogicalProcessorsPerCore;
+	/*008e*/ UCHAR LegacyCoresPerPhysicalProcessor;
+	/*008f*/ UCHAR LegacyLogicalProcessorsPerCore;
 	/*0090*/ ULONGLONG TscFrequency;
-	/*0098*/ ULONGLONG PrcbPad04[0x5];
-	/*00c0*/ _KNODE * ParentNode;
+	/*0098*/ _KPRCB_TRACEPOINT_LOG * TracepointLog;
+	/*00a0*/ ULONG CoresPerPhysicalProcessor;
+	/*00a4*/ ULONG LogicalProcessorsPerCore;
+	/*00a8*/ ULONGLONG PrcbPad04[0x3];
+	/*00c0*/ _KSCHEDULER_SUBNODE * SchedulerSubNode;
 	/*00c8*/ ULONGLONG GroupSetMember;
 	/*00d0*/ UCHAR Group;
 	/*00d1*/ UCHAR GroupIndex;
@@ -10476,12 +11922,15 @@ struct _KPRCB {
 	/*00f8*/ UCHAR BpbIbpbOnReturn : 01; // 0x04;
 	/*00f8*/ UCHAR BpbIbpbOnTrap : 01; // 0x08;
 	/*00f8*/ UCHAR BpbIbpbOnRetpolineExit : 01; // 0x10;
-	/*00f8*/ UCHAR BpbStateReserved : 03; // 0xe0;
+	/*00f8*/ UCHAR BpbFlushRsbOnReturn : 01; // 0x20;
+	/*00f8*/ UCHAR BpbFlushRsbOnRetpolineExit : 01; // 0x40;
+	/*00f8*/ UCHAR BpbStateReserved : 01; // 0x80;
 	/*00f9*/ UCHAR BpbFeatures;
 	/*00f9*/ UCHAR BpbClearOnIdle : 01; // 0x01;
 	/*00f9*/ UCHAR BpbEnabled : 01; // 0x02;
 	/*00f9*/ UCHAR BpbSmep : 01; // 0x04;
-	/*00f9*/ UCHAR BpbFeaturesReserved : 05; // 0xf8;
+	/*00f9*/ UCHAR BpbKCet : 01; // 0x08;
+	/*00f9*/ UCHAR BpbFeaturesReserved : 04; // 0xf0;
 	/*00fa*/ UCHAR BpbCurrentSpecCtrl;
 	/*00fb*/ UCHAR BpbKernelSpecCtrl;
 	/*00fc*/ UCHAR BpbNmiSpecCtrl;
@@ -10500,7 +11949,9 @@ struct _KPRCB {
 	/*06d2*/ UCHAR BpbTrappedIbpbOnReturn : 01; // 0x04;
 	/*06d2*/ UCHAR BpbTrappedIbpbOnTrap : 01; // 0x08;
 	/*06d2*/ UCHAR BpbTrappedIbpbOnRetpolineExit : 01; // 0x10;
-	/*06d2*/ UCHAR BpbtrappedBpbStateReserved : 03; // 0xe0;
+	/*06d2*/ UCHAR BpbTrappedFlushRsbOnReturn : 01; // 0x20;
+	/*06d2*/ UCHAR BpbTrappedFlushRsbOnRetpolineExit : 01; // 0x40;
+	/*06d2*/ UCHAR BpbTrappedBpbStateReserved : 01; // 0x80;
 	/*06d3*/ UCHAR BpbRetpolineState;
 	/*06d3*/ UCHAR BpbRunningNonRetpolineCode : 01; // 0x01;
 	/*06d3*/ UCHAR BpbIndirectCallsSafe : 01; // 0x02;
@@ -10553,247 +12004,275 @@ struct _KPRCB {
 	/*2da8*/ ULONGLONG PrcbPad31;
 	/*2db0*/ _KPRCB * PairPrcb;
 	/*2db8*/ _KSTATIC_AFFINITY_BLOCK StaticAffinity;
-	/*3058*/ ULONGLONG PrcbPad35[0x5];
-	/*3080*/ _SLIST_HEADER InterruptObjectPool;
-	/*3090*/ _RTL_HASH_TABLE * DpcRuntimeHistoryHashTable;
-	/*3098*/ _KDPC * DpcRuntimeHistoryHashTableCleanupDpc;
-	/*30a0*/ void (* CurrentDpcRoutine)( _KDPC * , void * , void * , void * );
-	/*30a8*/ ULONGLONG CurrentDpcRuntimeHistoryCached;
-	/*30b0*/ ULONGLONG CurrentDpcStartTime;
-	/*30b8*/ ULONGLONG PrcbPad41[0x1];
-	/*30c0*/ _KDPC_DATA DpcData[0x2];
-	/*3110*/ void * DpcStack;
-	/*3118*/ LONG MaximumDpcQueueDepth;
-	/*311c*/ ULONG DpcRequestRate;
-	/*3120*/ ULONG MinimumDpcRate;
-	/*3124*/ ULONG DpcLastCount;
-	/*3128*/ UCHAR ThreadDpcEnable;
-	/*3129*/ UCHAR volatile QuantumEnd;
-	/*312a*/ UCHAR volatile DpcRoutineActive;
-	/*312b*/ UCHAR volatile IdleSchedule;
-	/*312c*/ LONG volatile DpcRequestSummary;
-	/*312c*/ SHORT DpcRequestSlot[0x2];
-	/*312c*/ SHORT NormalDpcState;
-	/*312e*/ SHORT ThreadDpcState;
-	/*312c*/ ULONG DpcNormalProcessingActive : 01; // 0x00000001;
-	/*312c*/ ULONG DpcNormalProcessingRequested : 01; // 0x00000002;
-	/*312c*/ ULONG DpcNormalThreadSignal : 01; // 0x00000004;
-	/*312c*/ ULONG DpcNormalTimerExpiration : 01; // 0x00000008;
-	/*312c*/ ULONG DpcNormalDpcPresent : 01; // 0x00000010;
-	/*312c*/ ULONG DpcNormalLocalInterrupt : 01; // 0x00000020;
-	/*312c*/ ULONG DpcNormalSpare : 10; // 0x0000ffc0;
-	/*312c*/ ULONG DpcThreadActive : 01; // 0x00010000;
-	/*312c*/ ULONG DpcThreadRequested : 01; // 0x00020000;
-	/*312c*/ ULONG DpcThreadSpare : 14; // 0xfffc0000;
-	/*3130*/ ULONG PrcbPad93;
-	/*3134*/ ULONG LastTick;
-	/*3138*/ ULONG ClockInterrupts;
-	/*313c*/ ULONG ReadyScanTick;
-	/*3140*/ void * InterruptObject[0x100];
-	/*3940*/ _KTIMER_TABLE TimerTable;
-	/*7b58*/ ULONG PrcbPad92[0xa];
-	/*7b80*/ _KGATE DpcGate;
-	/*7b98*/ void * PrcbPad52;
-	/*7ba0*/ _KDPC CallDpc;
-	/*7be0*/ LONG ClockKeepAlive;
-	/*7be4*/ UCHAR PrcbPad60[0x2];
-	/*7be6*/ UCHAR NmiActive;
-	/*7be7*/ UCHAR MceActive;
-	/*7be6*/ USHORT CombinedNmiMceActive;
-	/*7be8*/ LONG DpcWatchdogPeriod;
-	/*7bec*/ LONG DpcWatchdogCount;
-	/*7bf0*/ LONG volatile KeSpinLockOrdering;
-	/*7bf4*/ ULONG DpcWatchdogProfileCumulativeDpcThreshold;
-	/*7bf8*/ void * CachedPtes;
-	/*7c00*/ _LIST_ENTRY WaitListHead;
-	/*7c10*/ ULONGLONG WaitLock;
-	/*7c18*/ ULONG ReadySummary;
-	/*7c1c*/ LONG AffinitizedSelectionMask;
-	/*7c20*/ ULONG QueueIndex;
-	/*7c24*/ ULONG PrcbPad75[0x2];
-	/*7c2c*/ ULONG DpcWatchdogSequenceNumber;
-	/*7c30*/ _KDPC TimerExpirationDpc;
-	/*7c70*/ _RTL_RB_TREE ScbQueue;
-	/*7c80*/ _LIST_ENTRY DispatcherReadyListHead[0x20];
-	/*7e80*/ ULONG InterruptCount;
-	/*7e84*/ ULONG KernelTime;
-	/*7e88*/ ULONG UserTime;
-	/*7e8c*/ ULONG DpcTime;
-	/*7e90*/ ULONG InterruptTime;
-	/*7e94*/ ULONG AdjustDpcThreshold;
-	/*7e98*/ UCHAR DebuggerSavedIRQL;
-	/*7e99*/ UCHAR GroupSchedulingOverQuota;
-	/*7e9a*/ UCHAR volatile DeepSleep;
-	/*7e9b*/ UCHAR PrcbPad80;
-	/*7e9c*/ ULONG DpcTimeCount;
-	/*7ea0*/ ULONG DpcTimeLimit;
-	/*7ea4*/ ULONG PeriodicCount;
-	/*7ea8*/ ULONG PeriodicBias;
-	/*7eac*/ ULONG AvailableTime;
-	/*7eb0*/ ULONG KeExceptionDispatchCount;
-	/*7eb4*/ ULONG ReadyThreadCount;
-	/*7eb8*/ ULONGLONG ReadyQueueExpectedRunTime;
-	/*7ec0*/ ULONGLONG StartCycles;
-	/*7ec8*/ ULONGLONG TaggedCyclesStart;
-	/*7ed0*/ ULONGLONG TaggedCycles[0x3];
-	/*7ee8*/ ULONGLONG AffinitizedCycles;
-	/*7ef0*/ ULONGLONG ImportantCycles;
-	/*7ef8*/ ULONGLONG UnimportantCycles;
-	/*7f00*/ ULONG DpcWatchdogProfileSingleDpcThreshold;
-	/*7f04*/ LONG volatile MmSpinLockOrdering;
-	/*7f08*/ void * volatile CachedStack;
-	/*7f10*/ ULONG PageColor;
-	/*7f14*/ ULONG NodeColor;
-	/*7f18*/ ULONG NodeShiftedColor;
-	/*7f1c*/ ULONG SecondaryColorMask;
-	/*7f20*/ UCHAR PrcbPad81[0x6];
-	/*7f26*/ UCHAR ExceptionStackActive;
-	/*7f27*/ UCHAR TbFlushListActive;
-	/*7f28*/ void * ExceptionStack;
-	/*7f30*/ ULONGLONG PrcbPad82[0x1];
-	/*7f38*/ ULONGLONG CycleTime;
-	/*7f40*/ ULONGLONG Cycles[0x4][0x2];
-	/*7f80*/ ULONG CcFastMdlReadNoWait;
-	/*7f84*/ ULONG CcFastMdlReadWait;
-	/*7f88*/ ULONG CcFastMdlReadNotPossible;
-	/*7f8c*/ ULONG CcMapDataNoWait;
-	/*7f90*/ ULONG CcMapDataWait;
-	/*7f94*/ ULONG CcPinMappedDataCount;
-	/*7f98*/ ULONG CcPinReadNoWait;
-	/*7f9c*/ ULONG CcPinReadWait;
-	/*7fa0*/ ULONG CcMdlReadNoWait;
-	/*7fa4*/ ULONG CcMdlReadWait;
-	/*7fa8*/ ULONG CcLazyWriteHotSpots;
-	/*7fac*/ ULONG CcLazyWriteIos;
-	/*7fb0*/ ULONG CcLazyWritePages;
-	/*7fb4*/ ULONG CcDataFlushes;
-	/*7fb8*/ ULONG CcDataPages;
-	/*7fbc*/ ULONG CcLostDelayedWrites;
-	/*7fc0*/ ULONG CcFastReadResourceMiss;
-	/*7fc4*/ ULONG CcCopyReadWaitMiss;
-	/*7fc8*/ ULONG CcFastMdlReadResourceMiss;
-	/*7fcc*/ ULONG CcMapDataNoWaitMiss;
-	/*7fd0*/ ULONG CcMapDataWaitMiss;
-	/*7fd4*/ ULONG CcPinReadNoWaitMiss;
-	/*7fd8*/ ULONG CcPinReadWaitMiss;
-	/*7fdc*/ ULONG CcMdlReadNoWaitMiss;
-	/*7fe0*/ ULONG CcMdlReadWaitMiss;
-	/*7fe4*/ ULONG CcReadAheadIos;
-	/*7fe8*/ LONG volatile MmCacheTransitionCount;
-	/*7fec*/ LONG volatile MmCacheReadCount;
-	/*7ff0*/ LONG volatile MmCacheIoCount;
-	/*7ff4*/ ULONG PrcbPad91;
-	/*7ff8*/ void * MmInternal;
-	/*8000*/ _PROCESSOR_POWER_STATE PowerState;
-	/*8200*/ void * HyperPte;
-	/*8208*/ _LIST_ENTRY ScbList;
-	/*8218*/ _KDPC ForceIdleDpc;
-	/*8258*/ _KDPC DpcWatchdogDpc;
-	/*8298*/ _KTIMER DpcWatchdogTimer;
-	/*82d8*/ _CACHE_DESCRIPTOR Cache[0x5];
-	/*8314*/ ULONG CacheCount;
-	/*8318*/ ULONG volatile CachedCommit;
-	/*831c*/ ULONG volatile CachedResidentAvailable;
-	/*8320*/ void * WheaInfo;
-	/*8328*/ void * EtwSupport;
-	/*8330*/ void * ExSaPageArray;
-	/*8338*/ ULONG KeAlignmentFixupCount;
-	/*833c*/ ULONG PrcbPad95;
-	/*8340*/ _SLIST_HEADER HypercallPageList;
-	/*8350*/ ULONGLONG * StatisticsPage;
-	/*8358*/ ULONGLONG GenerationTarget;
-	/*8360*/ ULONGLONG PrcbPad85[0x4];
-	/*8380*/ void * HypercallCachedPages;
-	/*8388*/ void * VirtualApicAssist;
-	/*8390*/ _KAFFINITY_EX PackageProcessorSet;
-	/*8438*/ ULONG PackageId;
-	/*843c*/ ULONG PrcbPad86;
-	/*8440*/ ULONGLONG SharedReadyQueueMask;
-	/*8448*/ _KSHARED_READY_QUEUE * SharedReadyQueue;
-	/*8450*/ ULONG SharedQueueScanOwner;
-	/*8454*/ ULONG ScanSiblingIndex;
-	/*8458*/ ULONGLONG CoreProcessorSet;
-	/*8460*/ ULONGLONG ScanSiblingMask;
-	/*8468*/ ULONGLONG LLCMask;
-	/*8470*/ ULONGLONG CacheProcessorMask[0x5];
-	/*8498*/ _PROCESSOR_PROFILE_CONTROL_AREA * ProcessorProfileControlArea;
-	/*84a0*/ void * ProfileEventIndexAddress;
-	/*84a8*/ void * * DpcWatchdogProfile;
-	/*84b0*/ void * * DpcWatchdogProfileCurrentEmptyCapture;
-	/*84b8*/ void * SchedulerAssist;
-	/*84c0*/ _SYNCH_COUNTERS SynchCounters;
-	/*8578*/ ULONGLONG PrcbPad94;
-	/*8580*/ _FILESYSTEM_DISK_COUNTERS FsCounters;
-	/*8590*/ UCHAR VendorString[0xd];
-	/*859d*/ UCHAR PrcbPad100[0x3];
-	/*85a0*/ ULONGLONG FeatureBits;
-	/*85a8*/ _LARGE_INTEGER UpdateSignature;
-	/*85b0*/ ULONGLONG PteBitCache;
-	/*85b8*/ ULONG PteBitOffset;
-	/*85bc*/ ULONG PrcbPad105;
-	/*85c0*/ _CONTEXT * Context;
-	/*85c8*/ ULONG ContextFlagsInit;
-	/*85cc*/ ULONG PrcbPad115;
-	/*85d0*/ _XSAVE_AREA * ExtendedState;
-	/*85d8*/ void * IsrStack;
-	/*85e0*/ _KENTROPY_TIMING_STATE EntropyTimingState;
-	/*8730*/ ULONGLONG PrcbPad110;
+	/*31d8*/ _KSOFTWARE_INTERRUPT_BATCH DeferredDispatchInterrupts;
+	/*32e8*/ ULONGLONG PrcbPad35[0x3];
+	/*3300*/ _SLIST_HEADER InterruptObjectPool;
+	/*3310*/ _RTL_HASH_TABLE * DpcRuntimeHistoryHashTable;
+	/*3318*/ _KDPC * DpcRuntimeHistoryHashTableCleanupDpc;
+	/*3320*/ void (* CurrentDpcRoutine)( _KDPC * , void * , void * , void * );
+	/*3328*/ ULONGLONG CurrentDpcRuntimeHistoryCached;
+	/*3330*/ ULONGLONG CurrentDpcStartTime;
+	/*3338*/ _KTHREAD * DpcDelegateThread;
+	/*3340*/ _KDPC_DATA DpcData[0x2];
+	/*33a0*/ void * DpcStack;
+	/*33a8*/ LONG MaximumDpcQueueDepth;
+	/*33ac*/ ULONG DpcRequestRate;
+	/*33b0*/ ULONG MinimumDpcRate;
+	/*33b4*/ ULONG DpcLastCount;
+	/*33b8*/ UCHAR ThreadDpcEnable;
+	/*33b9*/ UCHAR volatile QuantumEnd;
+	/*33ba*/ UCHAR volatile DpcRoutineActive;
+	/*33bb*/ UCHAR volatile IdleSchedule;
+	/*33bc*/ LONG volatile DpcRequestSummary;
+	/*33bc*/ SHORT DpcRequestSlot[0x2];
+	/*33bc*/ SHORT NormalDpcState;
+	/*33be*/ SHORT ThreadDpcState;
+	/*33bc*/ ULONG DpcNormalProcessingActive : 01; // 0x00000001;
+	/*33bc*/ ULONG DpcNormalProcessingRequested : 01; // 0x00000002;
+	/*33bc*/ ULONG DpcNormalThreadSignal : 01; // 0x00000004;
+	/*33bc*/ ULONG DpcNormalTimerExpiration : 01; // 0x00000008;
+	/*33bc*/ ULONG DpcNormalDpcPresent : 01; // 0x00000010;
+	/*33bc*/ ULONG DpcNormalLocalInterrupt : 01; // 0x00000020;
+	/*33bc*/ ULONG DpcNormalPriorityAntiStarvation : 01; // 0x00000040;
+	/*33bc*/ ULONG DpcNormalSwapToDpcDelegate : 01; // 0x00000080;
+	/*33bc*/ ULONG DpcNormalSpare : 08; // 0x0000ff00;
+	/*33bc*/ ULONG DpcThreadActive : 01; // 0x00010000;
+	/*33bc*/ ULONG DpcThreadRequested : 01; // 0x00020000;
+	/*33bc*/ ULONG DpcThreadSpare : 14; // 0xfffc0000;
+	/*33c0*/ ULONG LastTick;
+	/*33c4*/ ULONG ClockInterrupts;
+	/*33c8*/ ULONG ReadyScanTick;
+	/*33cc*/ ULONG SingleDpcSoftTimeLimitTicks;
+	/*33d0*/ _KSINGLE_DPC_SOFT_TIMEOUT_EVENT_INFO * SingleDpcSoftTimeoutEventInfo;
+	/*33d8*/ ULONG CumulativeDpcSoftTimeLimitTicks;
+	/*33dc*/ ULONG DpcWatchdogProfileBufferSize;
+	/*33e0*/ ULONG PrcbPad93[0x8];
+	/*3400*/ void * InterruptObject[0x100];
+	/*3c00*/ _KTIMER_TABLE TimerTable;
+	/*7e18*/ ULONG PrcbPad92[0xa];
+	/*7e40*/ _KGATE DpcGate;
+	/*7e58*/ void * PrcbPad52;
+	/*7e60*/ _KDPC CallDpc;
+	/*7ea0*/ LONG ClockKeepAlive;
+	/*7ea4*/ UCHAR PrcbPad60[0x2];
+	/*7ea6*/ UCHAR NmiActive;
+	/*7ea7*/ UCHAR MceActive;
+	/*7ea6*/ USHORT CombinedNmiMceActive;
+	/*7ea8*/ LONG DpcWatchdogPeriodTicks;
+	/*7eac*/ LONG DpcWatchdogCount;
+	/*7eb0*/ LONG volatile KeSpinLockOrdering;
+	/*7eb4*/ ULONG DpcWatchdogProfileCumulativeDpcThresholdTicks;
+	/*7eb8*/ void * CachedPtes;
+	/*7ec0*/ _LIST_ENTRY WaitListHead;
+	/*7ed0*/ ULONGLONG WaitLock;
+	/*7ed8*/ ULONG ReadySummary;
+	/*7edc*/ LONG AffinitizedSelectionMask;
+	/*7ee0*/ ULONG QueueIndex;
+	/*7ee4*/ ULONG NormalPriorityQueueIndex;
+	/*7ee8*/ ULONG NormalPriorityReadyScanTick;
+	/*7eec*/ ULONG DpcWatchdogSequenceNumber;
+	/*7ef0*/ _KDPC TimerExpirationDpc;
+	/*7f30*/ _RTL_RB_TREE ScbQueue;
+	/*7f40*/ _LIST_ENTRY DispatcherReadyListHead[0x20];
+	/*8140*/ ULONG InterruptCount;
+	/*8144*/ ULONG KernelTime;
+	/*8148*/ ULONG UserTime;
+	/*814c*/ ULONG DpcTime;
+	/*8150*/ ULONG InterruptTime;
+	/*8154*/ ULONG AdjustDpcThreshold;
+	/*8158*/ UCHAR DebuggerSavedIRQL;
+	/*8159*/ UCHAR GroupSchedulingOverQuota;
+	/*815a*/ UCHAR volatile DeepSleep;
+	/*815b*/ UCHAR PrcbPad80;
+	/*815c*/ ULONG DpcTimeCount;
+	/*8160*/ ULONG DpcTimeLimitTicks;
+	/*8164*/ ULONG PeriodicCount;
+	/*8168*/ ULONG PeriodicBias;
+	/*816c*/ ULONG AvailableTime;
+	/*8170*/ ULONG KeExceptionDispatchCount;
+	/*8174*/ ULONG ReadyThreadCount;
+	/*8178*/ ULONGLONG ReadyQueueExpectedRunTime;
+	/*8180*/ ULONGLONG StartCycles;
+	/*8188*/ ULONGLONG TaggedCycles[0x4];
+	/*81a8*/ ULONGLONG AffinitizedCycles;
+	/*81b0*/ ULONGLONG * CyclesByThreadType;
+	/*81b8*/ ULONG CpuCycleScalingFactor;
+	/*81bc*/ USHORT PerformanceScoreByClass[0x8];
+	/*81cc*/ USHORT EfficiencyScoreByClass[0x8];
+	/*81dc*/ ULONG PrcbPad83[0x19];
+	/*8240*/ ULONG DpcWatchdogProfileSingleDpcThresholdTicks;
+	/*8244*/ LONG PrcbPad82;
+	/*8248*/ void * volatile CachedStack;
+	/*8250*/ ULONG PageColor;
+	/*8254*/ ULONG NodeColor;
+	/*8258*/ ULONG NodeShiftedColor;
+	/*825c*/ ULONG SecondaryColorMask;
+	/*8260*/ UCHAR PrcbPad81[0x5];
+	/*8265*/ UCHAR SystemWorkKickInProgress;
+	/*8266*/ UCHAR ExceptionStackActive;
+	/*8267*/ UCHAR TbFlushListActive;
+	/*8268*/ void * ExceptionStack;
+	/*8270*/ LONGLONG volatile MmSpinLockOrdering;
+	/*8278*/ ULONGLONG CycleTime;
+	/*8280*/ ULONGLONG Cycles[0x4][0x2];
+	/*82c0*/ ULONG CcFastMdlReadNoWait;
+	/*82c4*/ ULONG CcFastMdlReadWait;
+	/*82c8*/ ULONG CcFastMdlReadNotPossible;
+	/*82cc*/ ULONG CcMapDataNoWait;
+	/*82d0*/ ULONG CcMapDataWait;
+	/*82d4*/ ULONG CcPinMappedDataCount;
+	/*82d8*/ ULONG CcPinReadNoWait;
+	/*82dc*/ ULONG CcPinReadWait;
+	/*82e0*/ ULONG CcMdlReadNoWait;
+	/*82e4*/ ULONG CcMdlReadWait;
+	/*82e8*/ ULONG CcLazyWriteHotSpots;
+	/*82ec*/ ULONG CcLazyWriteIos;
+	/*82f0*/ ULONG CcLazyWritePages;
+	/*82f4*/ ULONG CcDataFlushes;
+	/*82f8*/ ULONG CcDataPages;
+	/*82fc*/ ULONG CcLostDelayedWrites;
+	/*8300*/ ULONG CcFastReadResourceMiss;
+	/*8304*/ ULONG CcCopyReadWaitMiss;
+	/*8308*/ ULONG CcFastMdlReadResourceMiss;
+	/*830c*/ ULONG CcMapDataNoWaitMiss;
+	/*8310*/ ULONG CcMapDataWaitMiss;
+	/*8314*/ ULONG CcPinReadNoWaitMiss;
+	/*8318*/ ULONG CcPinReadWaitMiss;
+	/*831c*/ ULONG CcMdlReadNoWaitMiss;
+	/*8320*/ ULONG CcMdlReadWaitMiss;
+	/*8324*/ ULONG CcReadAheadIos;
+	/*8328*/ LONG volatile MmCacheTransitionCount;
+	/*832c*/ LONG volatile MmCacheReadCount;
+	/*8330*/ LONG volatile MmCacheIoCount;
+	/*8334*/ ULONG PrcbPad91;
+	/*8338*/ void * MmInternal;
+	/*8340*/ _PROCESSOR_POWER_STATE PowerState;
+	/*8570*/ ULONGLONG PrcbPad96[0x2];
+	/*8580*/ void * PrcbPad90;
+	/*8588*/ _LIST_ENTRY ScbList;
+	/*8598*/ _KDPC ForceIdleDpc;
+	/*85d8*/ _KDPC DpcWatchdogDpc;
+	/*8618*/ ULONGLONG PrcbPad98[0x8];
+	/*8658*/ _CACHE_DESCRIPTOR Cache[0x5];
+	/*8694*/ ULONG CacheCount;
+	/*8698*/ ULONG volatile CachedCommit;
+	/*869c*/ ULONG volatile CachedResidentAvailable;
+	/*86a0*/ void * WheaInfo;
+	/*86a8*/ void * EtwSupport;
+	/*86b0*/ void * ExSaPageArray;
+	/*86b8*/ ULONG KeAlignmentFixupCount;
+	/*86bc*/ ULONG PrcbPad95;
+	/*86c0*/ _SLIST_HEADER HypercallPageList;
+	/*86d0*/ ULONGLONG * StatisticsPage;
+	/*86d8*/ ULONGLONG GenerationTarget;
+	/*86e0*/ ULONGLONG PrcbPad85[0x4];
+	/*8700*/ void * HypercallCachedPages;
+	/*8708*/ void * VirtualApicAssist;
+	/*8710*/ _KAFFINITY_EX PackageProcessorSet;
+	/*8818*/ ULONG ProcessorId;
+	/*881c*/ ULONG CoreId;
+	/*8820*/ ULONG ModuleId;
+	/*8824*/ ULONG DieId;
+	/*8828*/ ULONG PackageId;
+	/*8818*/ ULONG TopologyId[0x5];
+	/*882c*/ ULONG NodeRelativeTopologyIndex[0x5];
+	/*8840*/ ULONGLONG SharedReadyQueueMask;
+	/*8848*/ _KSHARED_READY_QUEUE * SharedReadyQueue;
+	/*8850*/ ULONG SharedQueueScanOwner;
+	/*8854*/ ULONG ScanSiblingIndex;
+	/*8858*/ _KCORE_CONTROL_BLOCK * CoreControlBlock;
+	/*8860*/ ULONGLONG CoreProcessorSet;
+	/*8868*/ ULONGLONG ScanSiblingMask;
+	/*8870*/ ULONGLONG LLCMask;
+	/*8878*/ ULONGLONG GroupModuleProcessorSet;
+	/*8880*/ _KTHREAD * SmtIsolationThread;
+	/*8888*/ ULONGLONG PrcbPad97[0x2];
+	/*8898*/ _PROCESSOR_PROFILE_CONTROL_AREA * ProcessorProfileControlArea;
+	/*88a0*/ void * ProfileEventIndexAddress;
+	/*88a8*/ void * * DpcWatchdogProfile;
+	/*88b0*/ void * * DpcWatchdogProfileCurrentEmptyCapture;
+	/*88b8*/ void * SchedulerAssist;
+	/*88c0*/ _SYNCH_COUNTERS SynchCounters;
+	/*8978*/ ULONGLONG PrcbPad94;
+	/*8980*/ _FILESYSTEM_DISK_COUNTERS FsCounters;
+	/*8990*/ UCHAR VendorString[0xd];
+	/*899d*/ UCHAR PrcbPad100[0x3];
+	/*89a0*/ ULONGLONG FeatureBits;
+	/*89a8*/ _LARGE_INTEGER UpdateSignature;
+	/*89b0*/ ULONGLONG PteBitCache;
+	/*89b8*/ ULONG PteBitOffset;
+	/*89bc*/ ULONG PrcbPad105;
+	/*89c0*/ _CONTEXT * Context;
+	/*89c8*/ ULONG ContextFlagsInit;
+	/*89cc*/ ULONG PrcbPad115;
+	/*89d0*/ _XSAVE_AREA * ExtendedState;
+	/*89d8*/ void * IsrStack;
+	/*89e0*/ _KENTROPY_TIMING_STATE EntropyTimingState;
 	struct {
-		/*8738*/ ULONG UpdateCycle;
-		/*873c*/ SHORT PairLocal;
-		/*873c*/ UCHAR PairLocalLow;
-		/*873d*/ UCHAR PairLocalForceStibp : 01; // 0x01;
-		/*873d*/ UCHAR Reserved : 04; // 0x1e;
-		/*873d*/ UCHAR Frozen : 01; // 0x20;
-		/*873d*/ UCHAR ForceUntrusted : 01; // 0x40;
-		/*873d*/ UCHAR SynchIpi : 01; // 0x80;
-		/*873e*/ SHORT PairRemote;
-		/*873e*/ UCHAR PairRemoteLow;
-		/*873f*/ UCHAR Reserved2;
-		/*8740*/ UCHAR Trace[0x18];
-		/*8758*/ ULONGLONG LocalDomain;
-		/*8760*/ ULONGLONG RemoteDomain;
-		/*8768*/ _KTHREAD * Thread;
-		/*8770*/
+		/*8b38*/ ULONG UpdateCycle;
+		/*8b3c*/ SHORT PairLocal;
+		/*8b3c*/ UCHAR PairLocalLow;
+		/*8b3d*/ UCHAR PairLocalForceStibp : 01; // 0x01;
+		/*8b3d*/ UCHAR Reserved : 04; // 0x1e;
+		/*8b3d*/ UCHAR Frozen : 01; // 0x20;
+		/*8b3d*/ UCHAR ForceUntrusted : 01; // 0x40;
+		/*8b3d*/ UCHAR SynchIpi : 01; // 0x80;
+		/*8b3e*/ SHORT PairRemote;
+		/*8b3e*/ UCHAR PairRemoteLow;
+		/*8b3f*/ UCHAR Reserved2;
+		/*8b40*/ UCHAR Trace[0x18];
+		/*8b58*/ ULONGLONG LocalDomain;
+		/*8b60*/ ULONGLONG RemoteDomain;
+		/*8b68*/ _KTHREAD * Thread;
+		/*8b70*/
 	} StibpPairingTrace;
-	/*8770*/ _SINGLE_LIST_ENTRY AbSelfIoBoostsList;
-	/*8778*/ _SINGLE_LIST_ENTRY AbPropagateBoostsList;
-	/*8780*/ _KDPC AbDpc;
-	/*87c0*/ _IOP_IRP_STACK_PROFILER IoIrpStackProfilerCurrent;
-	/*8814*/ _IOP_IRP_STACK_PROFILER IoIrpStackProfilerPrevious;
-	/*8868*/ _KSECURE_FAULT_INFORMATION SecureFault;
-	/*8878*/ ULONGLONG PrcbPad120;
-	/*8880*/ _KSHARED_READY_QUEUE LocalSharedReadyQueue;
-	/*8af0*/ ULONGLONG PrcbPad125[0x2];
-	/*8b00*/ ULONG TimerExpirationTraceCount;
-	/*8b04*/ ULONG PrcbPad127;
-	/*8b08*/ _KTIMER_EXPIRATION_TRACE TimerExpirationTrace[0x10];
-	/*8c08*/ ULONGLONG PrcbPad128[0x7];
-	/*8c40*/ _REQUEST_MAILBOX * Mailbox;
-	/*8c48*/ ULONGLONG PrcbPad130[0x7];
-	/*8c80*/ _MACHINE_CHECK_CONTEXT McheckContext[0x2];
-	/*8d20*/ ULONGLONG PrcbPad134[0x4];
-	/*8d40*/ _KLOCK_QUEUE_HANDLE SelfmapLockHandle[0x4];
-	/*8da0*/ ULONGLONG PrcbPad134a[0x4];
-	/*8dc0*/ UCHAR PrcbPad138[0x80];
-	/*8e40*/ UCHAR PrcbPad138a[0x40];
-	/*8e80*/ ULONGLONG KernelDirectoryTableBase;
-	/*8e88*/ ULONGLONG RspBaseShadow;
-	/*8e90*/ ULONGLONG UserRspShadow;
-	/*8e98*/ ULONG ShadowFlags;
-	/*8e9c*/ ULONG PrcbPad138b;
-	/*8ea0*/ ULONGLONG PrcbPad138c;
-	/*8ea8*/ USHORT PrcbPad138d;
-	/*8eaa*/ USHORT VerwSelector;
-	/*8eac*/ ULONG DbgMceNestingLevel;
-	/*8eb0*/ ULONG DbgMceFlags;
-	/*8eb4*/ ULONG PrcbPad139b;
-	/*8eb8*/ ULONGLONG PrcbPad140[0x1f9];
-	/*9e80*/ ULONGLONG PrcbPad140a[0x8];
-	/*9ec0*/ ULONGLONG PrcbPad141[0x1f8];
-	/*ae80*/ UCHAR PrcbPad141a[0x40];
-	/*aec0*/ _REQUEST_MAILBOX RequestMailbox[0x1];
-	/*af00*/
+	/*8b70*/ _SINGLE_LIST_ENTRY AbSelfIoBoostsList;
+	/*8b78*/ _SINGLE_LIST_ENTRY AbPropagateBoostsList;
+	/*8b80*/ _KDPC AbDpc;
+	/*8bc0*/ _IOP_IRP_STACK_PROFILER IoIrpStackProfilerCurrent;
+	/*8c14*/ _IOP_IRP_STACK_PROFILER IoIrpStackProfilerPrevious;
+	/*8c68*/ _KSECURE_FAULT_INFORMATION SecureFault;
+	/*8c80*/ _KSHARED_READY_QUEUE * LocalSharedReadyQueue;
+	/*8c88*/ ULONGLONG PrcbPad125[0x7];
+	/*8cc0*/ ULONG TimerExpirationTraceCount;
+	/*8cc4*/ ULONG PrcbPad127;
+	/*8cc8*/ _KTIMER_EXPIRATION_TRACE TimerExpirationTrace[0x10];
+	/*8dc8*/ ULONGLONG PrcbPad128[0x7];
+	/*8e00*/ _KCLOCK_TIMER_STATE ClockTimerState;
+	/*9318*/ UCHAR PrcbPad129[0x28];
+	/*9340*/ _REQUEST_MAILBOX * Mailbox;
+	/*9348*/ ULONGLONG PrcbPad130[0x7];
+	/*9380*/ _MACHINE_CHECK_CONTEXT McheckContext[0x2];
+	/*9420*/ ULONGLONG TransitionShadowStack;
+	/*9428*/ ULONGLONG KernelShadowStackInitial;
+	/*9430*/ ULONGLONG * IstShadowStacksTable;
+	/*9438*/ void * CachedShadowStack;
+	/*9440*/ _KLOCK_QUEUE_HANDLE SelfmapLockHandle[0x4];
+	/*94a0*/ ULONGLONG PrcbPad134a[0x4];
+	/*94c0*/ _KAFFINITY_EX DieProcessorSet;
+	/*95c8*/ ULONG CoresPerPhysicalDie;
+	/*95cc*/ ULONG LogicalProcessorsPerModule;
+	/*95d0*/ _KDPC FreezeForRecoveryDpc;
+	/*9610*/ _KAFFINITY_EX ModuleProcessorSet;
+	/*9718*/ _KCORE_CONTROL_BLOCK LocalCoreControlBlock;
+	/*9760*/ UCHAR PrcbPad138[0x720];
+	/*9e80*/ ULONGLONG KernelDirectoryTableBase;
+	/*9e88*/ ULONGLONG RspBaseShadow;
+	/*9e90*/ ULONGLONG UserRspShadow;
+	/*9e98*/ ULONG ShadowFlags;
+	/*9e9c*/ ULONG PrcbPad138b;
+	/*9ea0*/ ULONGLONG PrcbPad138c;
+	/*9ea8*/ USHORT PrcbPad138d;
+	/*9eaa*/ USHORT VerwSelector;
+	/*9eac*/ ULONG DbgMceNestingLevel;
+	/*9eb0*/ ULONG DbgMceFlags;
+	/*9eb4*/ ULONG PrcbPad139b;
+	/*9eb8*/ _KAFFINITY_EX CacheProcessorSet[0x5];
+	/*a3e0*/ ULONGLONG PrcbPad140[0x154];
+	/*ae80*/ ULONGLONG PrcbPad140a[0x8];
+	/*aec0*/ ULONGLONG PrcbPad141[0x200];
+	/*bec0*/ _REQUEST_MAILBOX RequestMailbox[0x1];
+	/*bf00*/
 };
 
 union _KPRCBFLAG {
@@ -10802,8 +12281,30 @@ union _KPRCBFLAG {
 	/*0000*/ ULONG PendingQosUpdate : 02; // 0x00000300;
 	/*0000*/ ULONG CacheIsolationEnabled : 01; // 0x00000400;
 	/*0000*/ ULONG TracepointActive : 01; // 0x00000800;
-	/*0000*/ ULONG PrcbFlagsReserved : 20; // 0xfffff000;
+	/*0000*/ ULONG LongDpcRunning : 01; // 0x00001000;
+	/*0000*/ ULONG PrcbFlagsReserved : 19; // 0xffffe000;
 	/*0004*/
+};
+
+struct _KPRCB_TRACEPOINT_LOG {
+	/*0000*/ _KPRCB_TRACEPOINT_LOG_ENTRY Entries[0x100];
+	/*2000*/ ULONG LogIndex;
+	/*2008*/
+};
+
+struct _KPRCB_TRACEPOINT_LOG_ENTRY {
+	/*0000*/ ULONGLONG OldPc;
+	/*0008*/ ULONGLONG OldSp;
+	/*0010*/ ULONGLONG NewPc;
+	/*0018*/ ULONGLONG NewSp;
+	/*0020*/
+};
+
+union _KPRIORITY_STATE {
+	/*0000*/ UCHAR Priority : 07; // 0x7f;
+	/*0000*/ UCHAR IsolationWidth : 01; // 0x80;
+	/*0000*/ UCHAR AllFields;
+	/*0001*/
 };
 
 struct _KPRIQUEUE {
@@ -10824,11 +12325,9 @@ struct _KPROCESS {
 	/*0044*/ ULONG ProcessTimerDelay;
 	/*0048*/ ULONGLONG DeepFreezeStartTime;
 	/*0050*/ _KAFFINITY_EX Affinity;
-	/*00f8*/ ULONGLONG AffinityPadding[0xc];
 	/*0158*/ _LIST_ENTRY ReadyListHead;
 	/*0168*/ _SINGLE_LIST_ENTRY SwapListEntry;
 	/*0170*/ _KAFFINITY_EX volatile ActiveProcessors;
-	/*0218*/ ULONGLONG ActiveProcessorsPadding[0xc];
 	/*0278*/ ULONG AutoAlignment : 01; // 0x00000001;
 	/*0278*/ ULONG DisableBoost : 01; // 0x00000002;
 	/*0278*/ ULONG DisableQuantum : 01; // 0x00000004;
@@ -10836,21 +12335,19 @@ struct _KPROCESS {
 	/*0278*/ ULONG TimerVirtualization : 01; // 0x00000010;
 	/*0278*/ ULONG CheckStackExtents : 01; // 0x00000020;
 	/*0278*/ ULONG CacheIsolationEnabled : 01; // 0x00000040;
-	/*0278*/ ULONG PpmPolicy : 03; // 0x00000380;
-	/*0278*/ ULONG VaSpaceDeleted : 01; // 0x00000400;
-	/*0278*/ ULONG ReservedFlags : 21; // 0xfffff800;
+	/*0278*/ ULONG PpmPolicy : 04; // 0x00000780;
+	/*0278*/ ULONG VaSpaceDeleted : 01; // 0x00000800;
+	/*0278*/ ULONG MultiGroup : 01; // 0x00001000;
+	/*0278*/ ULONG ReservedFlags : 19; // 0xffffe000;
 	/*0278*/ LONG volatile ProcessFlags;
 	/*027c*/ ULONG ActiveGroupsMask;
 	/*0280*/ CHAR BasePriority;
 	/*0281*/ CHAR QuantumReset;
 	/*0282*/ CHAR Visited;
 	/*0283*/ _KEXECUTE_OPTIONS Flags;
-	/*0284*/ USHORT ThreadSeed[0x14];
-	/*02ac*/ USHORT ThreadSeedPadding[0xc];
-	/*02c4*/ USHORT IdealProcessor[0x14];
-	/*02ec*/ USHORT IdealProcessorPadding[0xc];
-	/*0304*/ USHORT IdealNode[0x14];
-	/*032c*/ USHORT IdealNodePadding[0xc];
+	/*0284*/ USHORT ThreadSeed[0x20];
+	/*02c4*/ USHORT IdealProcessor[0x20];
+	/*0304*/ USHORT IdealNode[0x20];
 	/*0344*/ USHORT IdealGlobalNode;
 	/*0346*/ USHORT Spare1;
 	/*0348*/ _KSTACK_COUNT volatile StackCount;
@@ -10877,7 +12374,14 @@ struct _KPROCESS {
 	} SecureState;
 	/*03e8*/ ULONGLONG KernelWaitTime;
 	/*03f0*/ ULONGLONG UserWaitTime;
-	/*03f8*/ ULONGLONG EndPadding[0x8];
+	/*03f8*/ ULONGLONG LastRebalanceQpc;
+	/*0400*/ void * PerProcessorCycleTimes;
+	/*0408*/ ULONGLONG ExtendedFeatureDisableMask;
+	/*0410*/ USHORT PrimaryGroup;
+	/*0412*/ USHORT Spare3[0x3];
+	/*0418*/ void * UserCetLogging;
+	/*0420*/ _LIST_ENTRY CpuPartitionList;
+	/*0430*/ ULONGLONG EndPadding[0x1];
 	/*0438*/
 };
 
@@ -10896,7 +12400,8 @@ enum _KPROCESS_PPM_POLICY {
 	ProcessPpmWindowOccluded = 0x5,
 	ProcessPpmWindowVisible = 0x6,
 	ProcessPpmWindowInFocus = 0x7,
-	MaxProcessPpmPolicy = 0x8
+	ProcessPpmMaximumThrottle = 0x8,
+	MaxProcessPpmPolicy = 0x9
 };
 
 enum _KPROCESS_STATE {
@@ -11013,9 +12518,10 @@ struct _KSCB {
 	/*0070*/ UCHAR MaxOverQuota : 01; // 0x02;
 	/*0070*/ UCHAR MinOverQuota : 01; // 0x04;
 	/*0070*/ UCHAR RankBias : 01; // 0x08;
-	/*0070*/ UCHAR SoftCap : 01; // 0x10;
-	/*0070*/ UCHAR ShareRankOwner : 01; // 0x20;
-	/*0070*/ UCHAR Spare1 : 02; // 0xc0;
+	/*0070*/ UCHAR UnconstrainedMaxQuota : 01; // 0x10;
+	/*0070*/ UCHAR UnconstrainedMinQuota : 01; // 0x20;
+	/*0070*/ UCHAR ShareRankOwner : 01; // 0x40;
+	/*0070*/ UCHAR Spare1 : 01; // 0x80;
 	/*0071*/ UCHAR Depth;
 	/*0072*/ USHORT ReadySummary;
 	/*0074*/ ULONG Rank;
@@ -11026,6 +12532,43 @@ struct _KSCB {
 	/*0198*/ _KSCB * Parent;
 	/*01a0*/ _KSCB * Root;
 	/*01a8*/
+};
+
+struct _KSCHEDULER_SUBNODE {
+	/*0000*/ ULONGLONG SubNodeLock;
+	/*0008*/ ULONGLONG IdleNonParkedCpuSet;
+	/*0010*/ ULONGLONG IdleCpuSet;
+	/*0018*/ ULONGLONG IdleSmtSet;
+	/*0020*/ ULONGLONG IdleModuleSet;
+	/*0010*/ ULONGLONG IdleIsolationUnitSet[0x2];
+	/*0028*/ ULONGLONG NonPairedSmtSet;
+	/*0040*/ ULONGLONG DeepIdleSet;
+	/*0048*/ ULONGLONG IdleConstrainedSet;
+	/*0050*/ ULONGLONG NonParkedSet;
+	/*0058*/ ULONGLONG ParkRequestSet;
+	/*0060*/ ULONGLONG SoftParkRequestSet;
+	/*0068*/ ULONGLONG NonIsrTargetedSet;
+	/*0070*/ LONG ParkLock;
+	/*0074*/ UCHAR ProcessSeed;
+	/*0075*/ UCHAR Spare5[0x3];
+	/*0080*/ _GROUP_AFFINITY Affinity;
+	/*0080*/ UCHAR AffinityFill[0xa];
+	/*008a*/ USHORT ParentNodeNumber;
+	/*008c*/ USHORT SubNodeNumber;
+	/*008e*/ USHORT Spare;
+	/*0090*/ ULONGLONG SiblingMask;
+	/*0098*/ ULONGLONG SharedReadyQueueMask;
+	/*00a0*/ ULONGLONG StrideMask;
+	/*00a8*/ ULONGLONG LLCLeaders;
+	/*00b0*/ ULONG Lowest;
+	/*00b4*/ ULONG Highest;
+	/*00b8*/ _flags Flags;
+	/*00b9*/ UCHAR WorkloadClasses;
+	/*00c0*/ _KHETERO_PROCESSOR_SET * HeteroSets;
+	/*00c8*/ ULONGLONG PpmConfiguredQosSets[0x7];
+	/*0100*/ _KQOS_GROUPING_SETS QosGroupingSets;
+	/*0140*/ UCHAR SoftParkRanks[0x40];
+	/*0180*/
 };
 
 struct _KSCHEDULING_GROUP {
@@ -11071,7 +12614,8 @@ struct _KSECONDARY_IDT_ENTRY {
 struct _KSECURE_FAULT_INFORMATION {
 	/*0000*/ ULONGLONG FaultCode;
 	/*0008*/ ULONGLONG FaultVa;
-	/*0010*/
+	/*0010*/ ULONGLONG FaultPa;
+	/*0018*/
 };
 
 struct _KSEMAPHORE {
@@ -11084,17 +12628,54 @@ struct _KSHARED_READY_QUEUE {
 	/*0000*/ ULONGLONG Lock;
 	/*0008*/ ULONG ReadySummary;
 	/*0010*/ _LIST_ENTRY ReadyListHead[0x20];
-	/*0210*/ CHAR RunningSummary[0x40];
-	/*0250*/ UCHAR Span;
-	/*0251*/ UCHAR LowProcIndex;
-	/*0252*/ UCHAR QueueIndex;
-	/*0253*/ UCHAR ProcCount;
-	/*0254*/ UCHAR ScanOwner;
-	/*0255*/ UCHAR Spare[0x3];
-	/*0258*/ ULONGLONG Affinity;
-	/*0260*/ ULONG ReadyThreadCount;
-	/*0268*/ ULONGLONG ReadyQueueExpectedRunTime;
-	/*0270*/
+	/*0210*/ _KPRIORITY_STATE RunningSummary[0x40];
+	/*0250*/ _KHETERO_STATE HeteroRunningSummary[0x40];
+	/*0290*/ UCHAR Span;
+	/*0291*/ UCHAR LowProcIndex;
+	/*0292*/ UCHAR QueueIndex;
+	/*0293*/ UCHAR NormalPriorityQueueIndex;
+	/*0294*/ UCHAR ProcCount;
+	/*0295*/ UCHAR ScanOwner;
+	/*0296*/ UCHAR Spare1[0x2];
+	/*0298*/ ULONGLONG Affinity;
+	/*02a0*/ ULONG ReadyThreadCount;
+	/*02a4*/ UCHAR SoftParkElectionScheduled;
+	/*02a5*/ UCHAR Spare2[0x3];
+	/*02a8*/ ULONGLONG ReadyQueueExpectedRunTime;
+	/*02b0*/ ULONGLONG SoftParkElectionGeneration;
+	/*02b8*/ ULONGLONG SoftParkElectionRunTime;
+	/*02c0*/ _KDPC SoftParkElectionDpc;
+	/*0300*/ _KSHARED_READY_QUEUE_HETERO_STATISTICS SoftParkElectionHeteroStats;
+	/*0680*/
+};
+
+struct _KSHARED_READY_QUEUE_HETERO_STATISTICS {
+	/*0000*/ ULONGLONG ExpectedRuntimeByClass[0x7][0x2][0x8];
+	/*0380*/
+};
+
+struct _KSINGLE_DPC_SOFT_TIMEOUT_EVENT_INFO {
+	/*0000*/ _KDPC EventDpc;
+	/*0040*/ void * DeferredRoutine;
+	/*0048*/ ULONG volatile TickCount;
+	/*0050*/
+};
+
+struct _KSOFTWARE_INTERRUPT_BATCH {
+	/*0000*/ UCHAR Level;
+	/*0001*/ UCHAR TargetType;
+	/*0002*/ UCHAR ReservedBatchInProgress;
+	/*0003*/ UCHAR Spare;
+	/*0004*/ ULONG SingleTargetIndex;
+	/*0008*/ _KAFFINITY_EX MultipleTargetAffinity;
+	/*0110*/
+};
+
+enum _KSOFTWARE_INTERRUPT_TARGET {
+	KSoftwareInterruptTargetNone = 0x0,
+	KSoftwareInterruptTargetSingleProcessor = 0x1,
+	KSoftwareInterruptTargetMultipleProcessors = 0x2,
+	KSoftwareInterruptTargetMax = 0x3
 };
 
 struct _KSPECIAL_REGISTERS {
@@ -11137,12 +12718,50 @@ struct _KSPIN_LOCK_QUEUE {
 	/*0010*/
 };
 
+union _KSR_CAPABILITIES {
+	/*0000*/ ULONG PerennialDatabase : 01; // 0x00000001;
+	/*0000*/ ULONG SkipSubAllocator : 01; // 0x00000002;
+	/*0000*/ ULONG Reserved : 30; // 0xfffffffc;
+	/*0000*/ ULONG AsULong;
+	/*0004*/
+};
+
+struct _KSR_FIRMWARE_INFORMATION {
+	/*0000*/ ULONG Version;
+	/*0008*/ _UNICODE_STRING EfiVersionString;
+	/*0018*/ _VIRTUAL_EFI_RUNTIME_SERVICES EfiRuntimeServices;
+	/*0088*/ void * EfiMemoryMap;
+	/*0090*/ ULONG EfiMemoryMapSize;
+	/*0094*/ ULONG EfiMemoryMapDescriptorSize;
+	/*0098*/ _MEMORY_CACHING_REQUIREMENTS * CachingRequirements;
+	/*00a0*/ ULONG CachingRequirementsCount;
+	/*00a8*/ void * Smbios;
+	/*00b0*/ _INBV_DISPLAY_CONTEXT * DisplayContext;
+	/*00b8*/ void * SecureBootPolicy;
+	/*00c0*/ ULONG SecureBootPolicySize;
+	/*00c8*/ DEBUG_MEMORY_REQUIREMENTS DebugDeviceMemory;
+	/*00e8*/ ULONG SoftRestartCount;
+	/*00f0*/ void * CodeIntegrityPolicy;
+	/*00f8*/ ULONG CodeIntegrityPolicySize;
+	/*0100*/ void * EfiMemoryAttributes;
+	/*0108*/ void * Esrt;
+	/*0110*/ ULONG EsrtSize;
+	/*0118*/ void * CodeIntegrityPolicyHash;
+	/*0120*/ ULONG CodeIntegrityPolicyHashSize;
+	/*0128*/ void * CodeIntegrityPolicyOriginalHash;
+	/*0130*/ ULONG CodeIntegrityPolicyOriginalHashSize;
+	/*0138*/ _PHYSICAL_MEMORY_RANGE * BadPageRanges;
+	/*0140*/ ULONG BadPageRangeCount;
+	/*0144*/ _KSR_CAPABILITIES Capabilities;
+	/*0148*/
+};
+
 struct _KSTACK_CONTROL {
 	/*0000*/ ULONGLONG StackBase;
 	/*0008*/ ULONGLONG ActualLimit;
 	/*0008*/ ULONGLONG StackExpansion : 01; // 0x0000000000000001;
 	/*0010*/ _KERNEL_STACK_SEGMENT Previous;
-	/*0030*/
+	/*0050*/
 };
 
 union _KSTACK_COUNT {
@@ -11156,10 +12775,10 @@ struct _KSTATIC_AFFINITY_BLOCK {
 	/*0000*/ _KAFFINITY_EX KeFlushTbAffinity;
 	/*0000*/ _KAFFINITY_EX KeFlushWbAffinity;
 	/*0000*/ _KAFFINITY_EX KeSyncContextAffinity;
-	/*00a8*/ _KAFFINITY_EX KeFlushTbDeepIdleAffinity;
-	/*0150*/ _KAFFINITY_EX KeIpiSendAffinity;
-	/*01f8*/ _KAFFINITY_EX KeIpiSendIpiSet;
-	/*02a0*/
+	/*0108*/ _KAFFINITY_EX KeFlushTbDeepIdleAffinity;
+	/*0210*/ _KAFFINITY_EX KeIpiSendAffinity;
+	/*0318*/ _KAFFINITY_EX KeIpiSendIpiSet;
+	/*0420*/
 };
 
 struct _KSYSTEM_TIME {
@@ -11205,7 +12824,7 @@ struct _KTHREAD {
 	/*0074*/ ULONG UserStackWalkActive : 01; // 0x00000020;
 	/*0074*/ ULONG ApcInterruptRequest : 01; // 0x00000040;
 	/*0074*/ ULONG QuantumEndMigrate : 01; // 0x00000080;
-	/*0074*/ ULONG UmsDirectedSwitchEnable : 01; // 0x00000100;
+	/*0074*/ ULONG SecureThread : 01; // 0x00000100;
 	/*0074*/ ULONG TimerActive : 01; // 0x00000200;
 	/*0074*/ ULONG SystemThread : 01; // 0x00000400;
 	/*0074*/ ULONG ProcessDetachActive : 01; // 0x00000800;
@@ -11213,15 +12832,18 @@ struct _KTHREAD {
 	/*0074*/ ULONG ScbReadyQueue : 01; // 0x00002000;
 	/*0074*/ ULONG ApcQueueable : 01; // 0x00004000;
 	/*0074*/ ULONG ReservedStackInUse : 01; // 0x00008000;
-	/*0074*/ ULONG UmsPerformingSyscall : 01; // 0x00010000;
+	/*0074*/ ULONG Spare : 01; // 0x00010000;
 	/*0074*/ ULONG TimerSuspended : 01; // 0x00020000;
 	/*0074*/ ULONG SuspendedWaitMode : 01; // 0x00040000;
 	/*0074*/ ULONG SuspendSchedulerApcWait : 01; // 0x00080000;
 	/*0074*/ ULONG CetUserShadowStack : 01; // 0x00100000;
 	/*0074*/ ULONG BypassProcessFreeze : 01; // 0x00200000;
-	/*0074*/ ULONG Reserved : 10; // 0xffc00000;
+	/*0074*/ ULONG CetKernelShadowStack : 01; // 0x00400000;
+	/*0074*/ ULONG StateSaveAreaDecoupled : 01; // 0x00800000;
+	/*0074*/ ULONG Reserved : 08; // 0xff000000;
 	/*0074*/ LONG MiscFlags;
-	/*0078*/ ULONG ThreadFlagsSpare : 02; // 0x00000003;
+	/*0078*/ ULONG UserIdealProcessorFixed : 01; // 0x00000001;
+	/*0078*/ ULONG IsolationWidth : 01; // 0x00000002;
 	/*0078*/ ULONG AutoAlignment : 01; // 0x00000004;
 	/*0078*/ ULONG DisableBoost : 01; // 0x00000008;
 	/*0078*/ ULONG AlertedByThreadId : 01; // 0x00000010;
@@ -11242,7 +12864,7 @@ struct _KTHREAD {
 	/*0078*/ ULONG ProcessStackCountDecremented : 01; // 0x00100000;
 	/*0078*/ ULONG RestrictedGuiThread : 01; // 0x00200000;
 	/*0078*/ ULONG VpBackingThread : 01; // 0x00400000;
-	/*0078*/ ULONG ThreadFlagsSpare2 : 01; // 0x00800000;
+	/*0078*/ ULONG EtwStackTraceCrimsonApcDisabled : 01; // 0x00800000;
 	/*0078*/ ULONG EtwStackTraceApcInserted : 08; // 0xff000000;
 	/*0078*/ LONG volatile ThreadFlags;
 	/*007c*/ UCHAR volatile Tag;
@@ -11289,20 +12911,21 @@ struct _KTHREAD {
 	/*0140*/ UCHAR WaitBlockFill10[0x88];
 	/*01c8*/ void * volatile Win32Thread;
 	/*0140*/ UCHAR WaitBlockFill11[0xb0];
-	/*01f0*/ _UMS_CONTROL_BLOCK * Ucb;
-	/*01f8*/ _KUMS_CONTEXT_HEADER * volatile Uch;
+	/*01f0*/ ULONGLONG Spare18;
+	/*01f8*/ ULONGLONG Spare19;
 	/*0200*/ LONG volatile ThreadFlags2;
 	/*0200*/ ULONG BamQosLevel : 08; // 0x000000ff;
 	/*0200*/ ULONG ThreadFlags2Reserved : 24; // 0xffffff00;
-	/*0204*/ ULONG Spare21;
+	/*0204*/ UCHAR HgsFeedbackClass;
+	/*0205*/ UCHAR Spare23[0x3];
 	/*0208*/ _LIST_ENTRY QueueListEntry;
 	/*0218*/ ULONG volatile NextProcessor;
 	/*0218*/ ULONG NextProcessorNumber : 31; // 0x7fffffff;
 	/*0218*/ ULONG SharedReadyQueue : 01; // 0x80000000;
 	/*021c*/ LONG QueuePriority;
 	/*0220*/ _KPROCESS * Process;
-	/*0228*/ _GROUP_AFFINITY UserAffinity;
-	/*0228*/ UCHAR UserAffinityFill[0xa];
+	/*0228*/ _KAFFINITY_EX * UserAffinity;
+	/*0230*/ USHORT UserAffinityPrimaryGroup;
 	/*0232*/ CHAR PreviousMode;
 	/*0233*/ CHAR BasePriority;
 	/*0234*/ CHAR PriorityDecrement;
@@ -11312,8 +12935,8 @@ struct _KTHREAD {
 	/*0236*/ UCHAR AdjustReason;
 	/*0237*/ CHAR AdjustIncrement;
 	/*0238*/ ULONGLONG AffinityVersion;
-	/*0240*/ _GROUP_AFFINITY Affinity;
-	/*0240*/ UCHAR AffinityFill[0xa];
+	/*0240*/ _KAFFINITY_EX * Affinity;
+	/*0248*/ USHORT AffinityPrimaryGroup;
 	/*024a*/ UCHAR ApcStateIndex;
 	/*024b*/ UCHAR WaitBlockCount;
 	/*024c*/ ULONG IdealProcessor;
@@ -11325,8 +12948,6 @@ struct _KTHREAD {
 	/*0285*/ CHAR Saturation;
 	/*0286*/ USHORT SListFaultCount;
 	/*0288*/ _KAPC SchedulerApc;
-	/*0288*/ UCHAR SchedulerApcFill0[0x1];
-	/*0289*/ UCHAR ResourceIndex;
 	/*0288*/ UCHAR SchedulerApcFill1[0x3];
 	/*028b*/ UCHAR QuantumReset;
 	/*0288*/ UCHAR SchedulerApcFill2[0x4];
@@ -11343,14 +12964,16 @@ struct _KTHREAD {
 	/*0308*/ _LIST_ENTRY MutantListHead;
 	/*0318*/ UCHAR AbEntrySummary;
 	/*0319*/ UCHAR AbWaitEntryCount;
-	/*031a*/ UCHAR AbAllocationRegionCount;
+	/*031a*/ UCHAR FreezeFlags;
+	/*031a*/ UCHAR FreezeCount2 : 01; // 0x01;
+	/*031a*/ UCHAR FreezeNormal : 01; // 0x02;
+	/*031a*/ UCHAR FreezeDeep : 01; // 0x04;
 	/*031b*/ CHAR SystemPriority;
 	/*031c*/ ULONG SecureThreadCookie;
-	/*0320*/ _KLOCK_ENTRY * LockEntries;
+	/*0320*/ void * Spare22;
 	/*0328*/ _SINGLE_LIST_ENTRY PropagateBoostsEntry;
 	/*0330*/ _SINGLE_LIST_ENTRY IoSelfBoostsEntry;
-	/*0338*/ UCHAR PriorityFloorCounts[0x10];
-	/*0348*/ UCHAR PriorityFloorCountsReserved[0x10];
+	/*0338*/ UCHAR PriorityFloorCounts[0x20];
 	/*0358*/ ULONG PriorityFloorSummary;
 	/*035c*/ LONG volatile AbCompletedIoBoostCount;
 	/*0360*/ LONG volatile AbCompletedIoQoSBoostCount;
@@ -11371,8 +12994,8 @@ struct _KTHREAD {
 	/*03b8*/ ULONG volatile ThreadTimerDelay;
 	/*03bc*/ LONG volatile ThreadFlags3;
 	/*03bc*/ ULONG ThreadFlags3Reserved : 08; // 0x000000ff;
-	/*03bc*/ ULONG PpmPolicy : 02; // 0x00000300;
-	/*03bc*/ ULONG ThreadFlags3Reserved2 : 22; // 0xfffffc00;
+	/*03bc*/ ULONG PpmPolicy : 03; // 0x00000700;
+	/*03bc*/ ULONG ThreadFlags3Reserved2 : 21; // 0xfffff800;
 	/*03c0*/ ULONGLONG TracingPrivate[0x1];
 	/*03c8*/ void * SchedulerAssist;
 	/*03d0*/ void * volatile AbWaitObject;
@@ -11383,9 +13006,33 @@ struct _KTHREAD {
 	/*03f0*/ _SINGLE_LIST_ENTRY UpdateVpThreadPriorityDpcStackListEntry;
 	/*03f8*/ ULONGLONG InGlobalUpdateVpThreadPriorityList;
 	/*0400*/ LONG SchedulerAssistPriorityFloor;
-	/*0404*/ ULONG Spare28;
-	/*0408*/ ULONGLONG EndPadding[0x5];
-	/*0430*/
+	/*0404*/ LONG RealtimePriorityFloor;
+	/*0408*/ void * KernelShadowStack;
+	/*0410*/ void * KernelShadowStackInitial;
+	/*0418*/ void * KernelShadowStackBase;
+	/*0420*/ _KERNEL_SHADOW_STACK_LIMIT KernelShadowStackLimit;
+	/*0428*/ ULONGLONG ExtendedFeatureDisableMask;
+	/*0430*/ ULONGLONG HgsFeedbackStartTime;
+	/*0438*/ ULONGLONG HgsFeedbackCycles;
+	/*0440*/ ULONG HgsInvalidFeedbackCount;
+	/*0444*/ ULONG HgsLowerPerfClassFeedbackCount;
+	/*0448*/ ULONG HgsHigherPerfClassFeedbackCount;
+	/*044c*/ ULONG Spare27;
+	/*0450*/ _SINGLE_LIST_ENTRY SystemAffinityTokenListHead;
+	/*0458*/ void * IptSaveArea;
+	/*0460*/ UCHAR ResourceIndex;
+	/*0461*/ UCHAR CoreIsolationReasons;
+	/*0462*/ UCHAR BamQosLevelFromAssistPage;
+	/*0463*/ UCHAR Spare31[0x1];
+	/*0464*/ ULONG Spare32;
+	/*0468*/ ULONGLONG EndPadding[0x3];
+	/*0480*/
+};
+
+enum _KTHREAD_CORE_ISOLATION_REASON {
+	KThreadCoreIsolationReasonSimulation = 0x0,
+	KThreadCoreIsolationReasonMitigationPolicy = 0x1,
+	KThreadCoreIsolationReasonMax = 0x2
 };
 
 struct _KTHREAD_COUNTERS {
@@ -11404,7 +13051,8 @@ enum _KTHREAD_PPM_POLICY {
 	ThreadPpmThrottle = 0x1,
 	ThreadPpmSemiThrottle = 0x2,
 	ThreadPpmNoThrottle = 0x3,
-	MaxThreadPpmPolicy = 0x4
+	ThreadPpmMaximumThrottle = 0x4,
+	MaxThreadPpmPolicy = 0x5
 };
 
 enum _KTHREAD_STATE {
@@ -11424,7 +13072,8 @@ enum _KTHREAD_TAG {
 	KThreadTagNone = 0x0,
 	KThreadTagMediaBuffering = 0x1,
 	KThreadTagDeadline = 0x2,
-	KThreadTagMax = 0x3
+	KThreadTagMediaOther = 0x3,
+	KThreadTagMax = 0x4
 };
 
 struct _KTIMER {
@@ -11560,6 +13209,15 @@ struct _KTMOBJECT_NAMESPACE_LINK {
 	/*0028*/
 };
 
+enum _KTOPOLOGY_LEVEL {
+	KTopologyLevelProcessor = 0x0,
+	KTopologyLevelCore = 0x1,
+	KTopologyLevelModule = 0x2,
+	KTopologyLevelDie = 0x3,
+	KTopologyLevelPackage = 0x4,
+	KTopologyLevelCount = 0x5
+};
+
 struct _KTRANSACTION {
 	/*0000*/ _KEVENT OutcomeEvent;
 	/*0018*/ ULONG cookie;
@@ -11670,6 +13328,8 @@ struct _KTRAP_FRAME {
 	/*00f0*/ ULONGLONG Dr3;
 	/*00f8*/ ULONGLONG Dr6;
 	/*0100*/ ULONGLONG Dr7;
+	/*00d8*/ ULONGLONG ShadowStackFrame;
+	/*00e0*/ ULONGLONG Spare[0x5];
 	/*0108*/ ULONGLONG DebugControl;
 	/*0110*/ ULONGLONG LastBranchToRip;
 	/*0118*/ ULONGLONG LastBranchFromRip;
@@ -11710,26 +13370,6 @@ struct _KTSS64 {
 	/*0064*/ USHORT Reserved2;
 	/*0066*/ USHORT IoMapBase;
 	/*0068*/
-};
-
-struct _KUMS_CONTEXT_HEADER {
-	/*0000*/ ULONGLONG P1Home;
-	/*0008*/ ULONGLONG P2Home;
-	/*0010*/ ULONGLONG P3Home;
-	/*0018*/ ULONGLONG P4Home;
-	/*0020*/ void * StackTop;
-	/*0028*/ ULONGLONG StackSize;
-	/*0030*/ ULONGLONG RspOffset;
-	/*0038*/ ULONGLONG Rip;
-	/*0040*/ _XSAVE_FORMAT * FltSave;
-	/*0048*/ ULONGLONG Volatile : 01; // 0x0000000000000001;
-	/*0048*/ ULONGLONG Reserved : 63; // 0xfffffffffffffffe;
-	/*0048*/ ULONGLONG Flags;
-	/*0050*/ _KTRAP_FRAME * TrapFrame;
-	/*0058*/ _KEXCEPTION_FRAME * ExceptionFrame;
-	/*0060*/ _KTHREAD * SourceThread;
-	/*0068*/ ULONGLONG Return;
-	/*0070*/
 };
 
 struct _KUSER_SHARED_DATA {
@@ -11831,9 +13471,10 @@ struct _KUSER_SHARED_DATA {
 	/*03c8*/ _LARGE_INTEGER TimeZoneBiasEffectiveStart;
 	/*03d0*/ _LARGE_INTEGER TimeZoneBiasEffectiveEnd;
 	/*03d8*/ _XSTATE_CONFIGURATION XState;
-	/*0710*/ _KSYSTEM_TIME FeatureConfigurationChangeStamp;
-	/*071c*/ ULONG Spare;
-	/*0720*/
+	/*0720*/ _KSYSTEM_TIME FeatureConfigurationChangeStamp;
+	/*072c*/ ULONG Spare;
+	/*0730*/ ULONGLONG UserPointerAuthMask;
+	/*0738*/
 };
 
 struct _KWAIT_BLOCK {
@@ -11844,6 +13485,7 @@ struct _KWAIT_BLOCK {
 	/*0014*/ LONG SpareLong;
 	/*0018*/ _KTHREAD * Thread;
 	/*0018*/ _KQUEUE * NotificationQueue;
+	/*0018*/ _KDPC * Dpc;
 	/*0020*/ void * Object;
 	/*0028*/ void * SparePtr;
 	/*0030*/
@@ -11869,7 +13511,8 @@ struct _KWAIT_CHAIN_ENTRY {
 	/*0000*/ _LIST_ENTRY ListEntry;
 	/*0010*/ _KTHREAD * Thread;
 	/*0018*/ _KEVENT Event;
-	/*0030*/
+	/*0030*/ void * AbLockHandle;
+	/*0038*/
 };
 
 enum _KWAIT_REASON {
@@ -11913,7 +13556,9 @@ enum _KWAIT_REASON {
 	WrAlertByThreadId = 0x25,
 	WrDeferredPreempt = 0x26,
 	WrPhysicalFault = 0x27,
-	MaximumWaitReason = 0x28
+	WrIoRing = 0x28,
+	WrMdlCache = 0x29,
+	MaximumWaitReason = 0x2a
 };
 
 enum _KWAIT_STATE {
@@ -11953,16 +13598,16 @@ union _LARGE_INTEGER {
 };
 
 struct _LAZY_WRITER {
-	/*0000*/ _KDPC ScanDpc;
-	/*0040*/ _KTIMER ScanTimer;
-	/*0080*/ UCHAR ScanActive;
-	/*0081*/ UCHAR OtherWork;
-	/*0082*/ UCHAR PendingTeardownScan;
-	/*0083*/ UCHAR PendingPeriodicScan;
-	/*0084*/ UCHAR PendingLowMemoryScan;
-	/*0085*/ UCHAR PendingPowerScan;
-	/*0086*/ UCHAR PendingCoalescingFlushScan;
-	/*0088*/
+	/*0000*/ _KTIMER ScanTimer;
+	/*0040*/ UCHAR TimerInitialized;
+	/*0041*/ UCHAR ScanActive;
+	/*0042*/ UCHAR OtherWork;
+	/*0043*/ UCHAR PendingTeardownScan;
+	/*0044*/ UCHAR PendingPeriodicScan;
+	/*0045*/ UCHAR PendingLowMemoryScan;
+	/*0046*/ UCHAR PendingPowerScan;
+	/*0047*/ UCHAR PendingCoalescingFlushScan;
+	/*0048*/
 };
 
 struct _LDRP_CSLIST {
@@ -12007,7 +13652,8 @@ struct _LDR_DATA_TABLE_ENTRY {
 	/*0068*/ ULONG DontRelocate : 01; // 0x00800000;
 	/*0068*/ ULONG CorILOnly : 01; // 0x01000000;
 	/*0068*/ ULONG ChpeImage : 01; // 0x02000000;
-	/*0068*/ ULONG ReservedFlags5 : 02; // 0x0c000000;
+	/*0068*/ ULONG ChpeEmulatorImage : 01; // 0x04000000;
+	/*0068*/ ULONG ReservedFlags5 : 01; // 0x08000000;
 	/*0068*/ ULONG Redirected : 01; // 0x10000000;
 	/*0068*/ ULONG ReservedFlags6 : 02; // 0x60000000;
 	/*0068*/ ULONG CompatDatabaseProcessed : 01; // 0x80000000;
@@ -12032,7 +13678,10 @@ struct _LDR_DATA_TABLE_ENTRY {
 	/*0114*/ ULONG ReferenceCount;
 	/*0118*/ ULONG DependentLoadFlags;
 	/*011c*/ UCHAR SigningLevel;
-	/*0120*/
+	/*0120*/ ULONG CheckSum;
+	/*0128*/ void * ActivePatchImageBase;
+	/*0130*/ _LDR_HOT_PATCH_STATE HotPatchState;
+	/*0138*/
 };
 
 struct _LDR_DDAG_NODE {
@@ -12077,7 +13726,17 @@ enum _LDR_DLL_LOAD_REASON {
 	LoadReasonAsDataLoad = 0x6,
 	LoadReasonEnclavePrimary = 0x7,
 	LoadReasonEnclaveDependency = 0x8,
+	LoadReasonPatchImage = 0x9,
 	LoadReasonUnknown = 0xffffffff
+};
+
+enum _LDR_HOT_PATCH_STATE {
+	LdrHotPatchBaseImage = 0x0,
+	LdrHotPatchNotApplied = 0x1,
+	LdrHotPatchAppliedReverse = 0x2,
+	LdrHotPatchAppliedForward = 0x3,
+	LdrHotPatchFailedToPatch = 0x4,
+	LdrHotPatchStateMax = 0x5
 };
 
 struct _LDR_SERVICE_TAG_RECORD {
@@ -12091,13 +13750,6 @@ struct _LEAP_SECOND_DATA {
 	/*0004*/ ULONG Count;
 	/*0008*/ _LARGE_INTEGER Data[0x1];
 	/*0010*/
-};
-
-struct _LEARNING_MODE_DATA {
-	/*0000*/ ULONG Settings;
-	/*0004*/ UCHAR Enabled;
-	/*0005*/ UCHAR PermissiveModeEnabled;
-	/*0008*/
 };
 
 union _LFH_RANDOM_DATA {
@@ -12161,11 +13813,18 @@ struct _LOADER_HIVE_RECOVERY_INFO {
 	/*0000*/ ULONG LegacyRecovery : 01; // 0x00000002;
 	/*0000*/ ULONG SoftRebootConflict : 01; // 0x00000004;
 	/*0000*/ ULONG MostRecentLog : 03; // 0x00000038;
+	/*0000*/ ULONG LoadedFromSnapshot : 01; // 0x00000040;
 	/*0004*/ ULONG Spare : 27; // 0x07ffffff;
 	/*0008*/ ULONG LogNextSequence;
 	/*000c*/ ULONG LogMinimumSequence;
 	/*0010*/ ULONG LogCurrentOffset;
 	/*0014*/
+};
+
+struct _LOADER_MEMORY_RANGE {
+	/*0000*/ ULONGLONG StartPage;
+	/*0008*/ ULONGLONG NumberOfPages;
+	/*0010*/
 };
 
 struct _LOADER_PARAMETER_BLOCK {
@@ -12205,7 +13864,8 @@ struct _LOADER_PARAMETER_BLOCK {
 	/*0148*/ CHAR * OsBootstatPathName;
 	/*0150*/ CHAR * ArcOSDataDeviceName;
 	/*0158*/ CHAR * ArcWindowsSysPartName;
-	/*0160*/
+	/*0160*/ _RTL_RB_TREE MemoryDescriptorTree;
+	/*0170*/
 };
 
 struct _LOADER_PARAMETER_CI_EXTENSION {
@@ -12266,7 +13926,11 @@ struct _LOADER_PARAMETER_EXTENSION {
 	/*0084*/ ULONG SuppressMonitorX : 01; // 0x00002000;
 	/*0084*/ ULONG KernelCetEnabled : 01; // 0x00004000;
 	/*0084*/ ULONG SuppressSmap : 01; // 0x00008000;
-	/*0084*/ ULONG Unused : 05; // 0x001f0000;
+	/*0084*/ ULONG PointerAuthKernelIpEnabled : 01; // 0x00010000;
+	/*0084*/ ULONG SplitLargeNumaNodes : 01; // 0x00020000;
+	/*0084*/ ULONG KernelCetAuditModeEnabled : 01; // 0x00040000;
+	/*0084*/ ULONG VerboseSELEnabled : 01; // 0x00080000;
+	/*0084*/ ULONG EarlyCrashDumpEnabled : 01; // 0x00100000;
 	/*0084*/ ULONG FeatureSimulations : 06; // 0x07e00000;
 	/*0084*/ ULONG MicrocodeSelfHosting : 01; // 0x08000000;
 	/*0084*/ ULONG XhciLegacyHandoffSkip : 01; // 0x10000000;
@@ -12290,66 +13954,95 @@ struct _LOADER_PARAMETER_EXTENSION {
 	/*09c8*/ _LOADER_PARAMETER_HYPERVISOR_EXTENSION HypervisorExtension;
 	/*0a08*/ _GUID HardwareConfigurationId;
 	/*0a18*/ _LIST_ENTRY HalExtensionModuleList;
-	/*0a28*/ _LARGE_INTEGER SystemTime;
-	/*0a30*/ ULONGLONG TimeStampAtSystemTimeRead;
-	/*0a38*/ ULONGLONG BootFlags;
-	/*0a38*/ ULONGLONG DbgMenuOsSelection : 01; // 0x0000000000000001;
-	/*0a38*/ ULONGLONG DbgHiberBoot : 01; // 0x0000000000000002;
-	/*0a38*/ ULONGLONG DbgSoftRestart : 01; // 0x0000000000000004;
-	/*0a38*/ ULONGLONG DbgMeasuredLaunch : 01; // 0x0000000000000008;
-	/*0a40*/ ULONGLONG InternalBootFlags;
-	/*0a40*/ ULONGLONG DbgUtcBootTime : 01; // 0x0000000000000001;
-	/*0a40*/ ULONGLONG DbgRtcBootTime : 01; // 0x0000000000000002;
-	/*0a40*/ ULONGLONG DbgNoLegacyServices : 01; // 0x0000000000000004;
-	/*0a48*/ void * WfsFPData;
-	/*0a50*/ ULONG WfsFPDataSize;
-	/*0a58*/ _LOADER_BUGCHECK_PARAMETERS BugcheckParameters;
-	/*0a80*/ void * ApiSetSchema;
-	/*0a88*/ ULONG ApiSetSchemaSize;
-	/*0a90*/ _LIST_ENTRY ApiSetSchemaExtensions;
-	/*0aa0*/ _UNICODE_STRING AcpiBiosVersion;
-	/*0ab0*/ _UNICODE_STRING SmbiosVersion;
-	/*0ac0*/ _UNICODE_STRING EfiVersion;
-	/*0ad0*/ _DEBUG_DEVICE_DESCRIPTOR * KdDebugDevice;
-	/*0ad8*/ _OFFLINE_CRASHDUMP_CONFIGURATION_TABLE_V2 OfflineCrashdumpConfigurationTable;
-	/*0af8*/ _UNICODE_STRING ManufacturingProfile;
-	/*0b08*/ void * BbtBuffer;
-	/*0b10*/ ULONGLONG XsaveAllowedFeatures;
-	/*0b18*/ ULONG XsaveFlags;
-	/*0b20*/ void * BootOptions;
-	/*0b28*/ ULONG IumEnablement;
-	/*0b2c*/ ULONG IumPolicy;
-	/*0b30*/ LONG IumStatus;
-	/*0b34*/ ULONG BootId;
-	/*0b38*/ _LOADER_PARAMETER_CI_EXTENSION * CodeIntegrityData;
-	/*0b40*/ ULONG CodeIntegrityDataSize;
-	/*0b44*/ _LOADER_HIVE_RECOVERY_INFO SystemHiveRecoveryInfo;
-	/*0b58*/ ULONG SoftRestartCount;
-	/*0b60*/ LONGLONG SoftRestartTime;
-	/*0b68*/ void * HypercallCodeVa;
-	/*0b70*/ void * HalVirtualAddress;
-	/*0b78*/ ULONGLONG HalNumberOfBytes;
-	/*0b80*/ _LEAP_SECOND_DATA * LeapSecondData;
-	/*0b88*/ ULONG MajorRelease;
-	/*0b8c*/ ULONG Reserved1;
-	/*0b90*/ CHAR NtBuildLab[0xe0];
-	/*0c70*/ CHAR NtBuildLabEx[0xe0];
-	/*0d50*/ _LOADER_RESET_REASON ResetReason;
-	/*0d80*/ ULONG MaxPciBusNumber;
-	/*0d84*/ ULONG FeatureSettings;
-	/*0d88*/ ULONG HotPatchReserveSize;
-	/*0d8c*/ ULONG RetpolineReserveSize;
+	/*0a28*/ _LIST_ENTRY PrmUpdateModuleList;
+	/*0a38*/ _LIST_ENTRY PrmFirmwareModuleList;
+	/*0a48*/ _LARGE_INTEGER SystemTime;
+	/*0a50*/ ULONGLONG TimeStampAtSystemTimeRead;
+	/*0a58*/ ULONGLONG BootFlags;
+	/*0a58*/ ULONGLONG DbgMenuOsSelection : 01; // 0x0000000000000001;
+	/*0a58*/ ULONGLONG DbgHiberBoot : 01; // 0x0000000000000002;
+	/*0a58*/ ULONGLONG DbgSoftRestart : 01; // 0x0000000000000004;
+	/*0a58*/ ULONGLONG DbgMeasuredLaunch : 01; // 0x0000000000000008;
+	/*0a60*/ ULONGLONG InternalBootFlags;
+	/*0a60*/ ULONGLONG DbgUtcBootTime : 01; // 0x0000000000000001;
+	/*0a60*/ ULONGLONG DbgRtcBootTime : 01; // 0x0000000000000002;
+	/*0a60*/ ULONGLONG DbgNoLegacyServices : 01; // 0x0000000000000004;
+	/*0a68*/ void * WfsFPData;
+	/*0a70*/ ULONG WfsFPDataSize;
+	/*0a78*/ _LOADER_BUGCHECK_PARAMETERS BugcheckParameters;
+	/*0aa0*/ void * ApiSetSchema;
+	/*0aa8*/ ULONG ApiSetSchemaSize;
+	/*0ab0*/ _LIST_ENTRY ApiSetSchemaExtensions;
+	/*0ac0*/ _UNICODE_STRING AcpiBiosVersion;
+	/*0ad0*/ _UNICODE_STRING SmbiosVersion;
+	/*0ae0*/ _UNICODE_STRING EfiVersion;
+	/*0af0*/ _DEBUG_DEVICE_DESCRIPTOR * KdDebugDevice;
+	/*0af8*/ _OFFLINE_CRASHDUMP_CONFIGURATION_TABLE_V2 OfflineCrashdumpConfigurationTable;
+	/*0b18*/ _UNICODE_STRING ManufacturingProfile;
+	/*0b28*/ void * BbtBuffer;
+	/*0b30*/ ULONGLONG XsaveAllowedFeatures;
+	/*0b38*/ ULONG XsaveFlags;
+	/*0b40*/ void * BootOptions;
+	/*0b48*/ ULONG IumEnablement;
+	/*0b4c*/ ULONG IumPolicy;
+	/*0b50*/ LONG IumStatus;
+	/*0b54*/ ULONG BootId;
+	/*0b58*/ _LOADER_PARAMETER_CI_EXTENSION * CodeIntegrityData;
+	/*0b60*/ ULONG CodeIntegrityDataSize;
+	/*0b64*/ _LOADER_HIVE_RECOVERY_INFO SystemHiveRecoveryInfo;
+	/*0b78*/ ULONG SoftRestartCount;
+	/*0b80*/ LONGLONG SoftRestartTime;
+	/*0b88*/ void * HypercallCodeVa;
+	/*0b90*/ void * HalVirtualAddress;
+	/*0b98*/ ULONGLONG HalNumberOfBytes;
+	/*0ba0*/ _LEAP_SECOND_DATA * LeapSecondData;
+	/*0ba8*/ ULONG MajorRelease;
+	/*0bac*/ ULONG Reserved1;
+	/*0bb0*/ CHAR NtBuildLab[0xe0];
+	/*0c90*/ CHAR NtBuildLabEx[0xe0];
+	/*0d70*/ _LOADER_RESET_REASON ResetReason;
+	/*0da0*/ ULONG MaxPciBusNumber;
+	/*0da4*/ ULONG FeatureSettings;
+	/*0da8*/ ULONG HotPatchReserveSize;
+	/*0dac*/ ULONG RetpolineReserveSize;
 	struct {
-		/*0d90*/ void * CodeBase;
-		/*0d98*/ ULONGLONG CodeSize;
-		/*0da0*/
+		/*0db0*/ void * CodeBase;
+		/*0db8*/ ULONGLONG CodeSize;
+		/*0dc0*/
 	} MiniExecutive;
-	/*0da0*/ _VSM_PERFORMANCE_DATA VsmPerformanceData;
-	/*0de0*/ _NUMA_MEMORY_RANGE * NumaMemoryRanges;
-	/*0de8*/ ULONG NumaMemoryRangeCount;
-	/*0dec*/ ULONG IommuFaultPolicy;
-	/*0df0*/ _LOADER_FEATURE_CONFIGURATION_INFORMATION FeatureConfigurationInformation;
-	/*0e38*/
+	/*0dc0*/ _VSM_PERFORMANCE_DATA VsmPerformanceData;
+	/*0e00*/ _NUMA_MEMORY_RANGE * NumaMemoryRanges;
+	/*0e08*/ ULONG NumaMemoryRangeCount;
+	/*0e0c*/ ULONG IommuFaultPolicy;
+	/*0e10*/ _LOADER_FEATURE_CONFIGURATION_INFORMATION FeatureConfigurationInformation;
+	/*0e58*/ _ETW_BOOT_CONFIG EtwBootConfig;
+	/*0e70*/ _BOOT_FIRMWARE_RAMDISK_INFO * FwRamdiskInfo;
+	/*0e78*/ void * IpmiHwContext;
+	/*0e80*/ ULONGLONG IdleThreadShadowStack;
+	/*0e88*/ ULONGLONG TransitionShadowStack;
+	/*0e90*/ ULONGLONG * IstShadowStacksTable;
+	/*0e98*/ ULONGLONG ReservedForKernelCet[0x2];
+	/*0ea8*/ _MEMORY_MIRRORING_DATA * MirroringData;
+	/*0eb0*/ _LARGE_INTEGER Luid;
+	struct {
+		/*0eb8*/ _INSTALLED_MEMORY_RANGE * Ranges;
+		/*0ec0*/ ULONG RangeCount;
+		/*0ec8*/
+	} InstalledMemory;
+	/*0ec8*/ _LIST_ENTRY HotPatchList;
+	/*0ed8*/ void * BSPMicrocodeData;
+	/*0ee0*/ ULONG BSPMicrocodeDataSize;
+	struct {
+		/*0ee8*/ _GUID TargetVolume;
+		/*0ef8*/ _UNICODE_STRING * CimFiles;
+		/*0f00*/ ULONG CimFilesCount;
+		/*0f08*/
+	} CimfsInformation;
+	/*0f08*/ _LARGE_INTEGER HalSoftRebootDatabase;
+	/*0f10*/ ULONG KasanEnabled : 01; // 0x00000001;
+	/*0f10*/ ULONG Unused2 : 31; // 0xfffffffe;
+	/*0f18*/ ULONGLONG PerformanceDataFrequency;
+	/*0f20*/
 };
 
 struct _LOADER_PARAMETER_HYPERVISOR_EXTENSION {
@@ -12362,6 +14055,8 @@ struct _LOADER_PARAMETER_HYPERVISOR_EXTENSION {
 	/*0028*/ ULONGLONG HypervisorLaunchStatusArg2;
 	/*0030*/ ULONGLONG HypervisorLaunchStatusArg3;
 	/*0038*/ ULONGLONG HypervisorLaunchStatusArg4;
+	/*0028*/ void * RangeArray;
+	/*0030*/ ULONG RangeCount;
 	/*0040*/
 };
 
@@ -12405,6 +14100,16 @@ struct _LOCAL_NMISOURCE {
 	/*0003*/ USHORT Flags;
 	/*0005*/ UCHAR LINTIN;
 	/*0006*/
+};
+
+struct _LOCAL_X2APIC_NMISOURCE {
+	/*0000*/ UCHAR Type;
+	/*0001*/ UCHAR Length;
+	/*0002*/ USHORT Flags;
+	/*0004*/ ULONG ProcessorID;
+	/*0008*/ UCHAR LINTIN;
+	/*0009*/ UCHAR Reserved[0x3];
+	/*000c*/
 };
 
 struct _LOCK_HEADER {
@@ -12451,7 +14156,7 @@ struct _LOGGED_STREAM_CALLBACK_V2 {
 struct _LOG_HANDLE_CONTEXT {
 	/*0000*/ void * LogHandle;
 	/*0008*/ void (* FlushToLsnRoutine)( void * , _LARGE_INTEGER );
-	/*0010*/ void (* QueryLogHandleInfoRoutine)( void * , WCHAR * );
+	/*0010*/ void (* QueryLogHandleInfoRoutine)( void * , USHORT * );
 	/*0018*/ _DIRTY_PAGE_STATISTICS DirtyPageStatistics;
 	/*0030*/ _DIRTY_PAGE_THRESHOLDS DirtyPageThresholds;
 	/*0068*/ ULONG AdditionalPagesToWrite;
@@ -12610,6 +14315,27 @@ struct _MBCB {
 	/*00c0*/
 };
 
+enum _MCA_AMD_BLOCK_TYPE {
+	McaAMDBlockTypeLS = 0x0,
+	McaAMDBlockTypeIF = 0x1,
+	McaAMDBlockTypeL2 = 0x2,
+	McaAMDBlockTypeDE = 0x3,
+	McaAMDBlockTypeRAZ = 0x4,
+	McaAMDBlockTypeEX = 0x5,
+	McaAMDBlockTypeFP = 0x6,
+	McaAMDBlockTypeL3 = 0x7,
+	McaAMDBlockTypeUMC = 0x8,
+	McaAMDBlockTypeSMU = 0x9,
+	McaAMDBlockTypePSP = 0xa,
+	McaAMDBlockTypePB = 0xb,
+	McaAMDBlockTypeCS = 0xc,
+	McaAMDBlockTypePIE = 0xd,
+	McaAMDBlockTypeMP5 = 0xe,
+	McaAMDBlockTypeNBIO = 0xf,
+	McaAMDBlockTypePCIe = 0x10,
+	McaAMDBlockTypeUnknown = 0x11
+};
+
 struct _MCGEN_TRACE_CONTEXT {
 	/*0000*/ ULONGLONG RegistrationHandle;
 	/*0008*/ ULONGLONG Logger;
@@ -12735,10 +14461,18 @@ struct _MDL {
 
 struct _MEMORY_ALLOCATION_DESCRIPTOR {
 	/*0000*/ _LIST_ENTRY ListEntry;
-	/*0010*/ _TYPE_OF_MEMORY MemoryType;
-	/*0018*/ ULONGLONG BasePage;
-	/*0020*/ ULONGLONG PageCount;
-	/*0028*/
+	/*0000*/ _RTL_BALANCED_NODE Node;
+	/*0018*/ _TYPE_OF_MEMORY MemoryType;
+	/*0020*/ ULONGLONG BasePage;
+	/*0028*/ ULONGLONG PageCount;
+	/*0030*/
+};
+
+struct _MEMORY_CACHING_REQUIREMENTS {
+	/*0000*/ ULONGLONG BasePage;
+	/*0008*/ ULONGLONG PageCount;
+	/*0010*/ _MEMORY_CACHING_TYPE MemoryCachingType;
+	/*0018*/
 };
 
 enum _MEMORY_CACHING_TYPE {
@@ -12756,6 +14490,14 @@ enum _MEMORY_CACHING_TYPE_ORIG {
 	MmFrameBufferCached = 0x2
 };
 
+struct _MEMORY_MIRRORING_DATA {
+	/*0000*/ ULONG MemoryRangeCount;
+	/*0004*/ ULONG IoSpaceRangeCount;
+	/*0008*/ _LOADER_MEMORY_RANGE * MemoryRanges;
+	/*0010*/ _LOADER_MEMORY_RANGE * IoSpaceRanges;
+	/*0018*/
+};
+
 enum _MEMORY_PHYSICAL_CONTIGUITY_UNIT_STATE {
 	MemoryNotContiguous = 0x0,
 	MemoryAlignedAndContiguous = 0x1,
@@ -12764,11 +14506,18 @@ enum _MEMORY_PHYSICAL_CONTIGUITY_UNIT_STATE {
 	MemoryContiguityStateMax = 0x4
 };
 
+enum _MEM_DEDICATED_ATTRIBUTE_TYPE {
+	MemDedicatedAttributeReadBandwidth = 0x0,
+	MemDedicatedAttributeReadLatency = 0x1,
+	MemDedicatedAttributeWriteBandwidth = 0x2,
+	MemDedicatedAttributeWriteLatency = 0x3,
+	MemDedicatedAttributeMax = 0x4
+};
+
 struct _MIPFNBLINK {
-	/*0000*/ ULONGLONG Blink : 36; // 0x0000000fffffffff;
-	/*0000*/ ULONGLONG NodeBlinkHigh : 20; // 0x00fffff000000000;
-	/*0000*/ ULONGLONG TbFlushStamp : 04; // 0x0f00000000000000;
-	/*0000*/ ULONGLONG Unused : 02; // 0x3000000000000000;
+	/*0000*/ ULONGLONG Blink : 40; // 0x000000ffffffffff;
+	/*0000*/ ULONGLONG NodeBlinkLow : 19; // 0x07ffff0000000000;
+	/*0000*/ ULONGLONG TbFlushStamp : 03; // 0x3800000000000000;
 	/*0000*/ ULONGLONG PageBlinkDeleteBit : 01; // 0x4000000000000000;
 	/*0000*/ ULONGLONG PageBlinkLockBit : 01; // 0x8000000000000000;
 	/*0000*/ ULONGLONG ShareCount : 62; // 0x3fffffffffffffff;
@@ -12830,20 +14579,22 @@ enum _MI_ALTERNATE_LOCK_VA_TYPE {
 };
 
 enum _MI_ASSIGNED_REGION_TYPES {
-	AssignedRegionNonPagedPool = 0x0,
-	AssignedRegionPagedPool = 0x1,
-	AssignedRegionSystemCache = 0x2,
-	AssignedRegionSystemPtes = 0x3,
-	AssignedRegionUltraZero = 0x4,
-	AssignedRegionPfnDatabase = 0x5,
-	AssignedRegionCfg = 0x6,
-	AssignedRegionHyperSpace = 0x7,
-	AssignedRegionKernelStacks = 0x8,
-	AssignedRegionPageTables = 0x9,
-	AssignedRegionSession = 0xa,
-	AssignedRegionSecureNonPagedPool = 0xb,
-	AssignedRegionSystemImages = 0xc,
-	AssignedRegionMaximum = 0xd
+	AssignedRegionPfnDatabase = 0x0,
+	AssignedRegionNonPagedPool = 0x1,
+	AssignedRegionPagedPool = 0x2,
+	AssignedRegionSystemCache = 0x3,
+	AssignedRegionSystemPtes = 0x4,
+	AssignedRegionKasan = 0x5,
+	AssignedRegionUltraZero = 0x6,
+	AssignedRegionCfg = 0x7,
+	AssignedRegionHyperSpace = 0x8,
+	AssignedRegionKernelStacks = 0x9,
+	AssignedRegionPageTables = 0xa,
+	AssignedRegionSession = 0xb,
+	AssignedRegionSecureNonPagedPool = 0xc,
+	AssignedRegionKernelShadowStacks = 0xd,
+	AssignedRegionSystemImages = 0xe,
+	AssignedRegionMaximum = 0xf
 };
 
 struct _MI_AVAILABLE_PAGE_WAIT_STATES {
@@ -12888,8 +14639,12 @@ enum _MI_CFG_BITMAP_TYPE {
 };
 
 struct _MI_CLONE_BLOCK_FLAGS {
-	/*0000*/ ULONGLONG ActualCloneCommit : 59; // 0x07ffffffffffffff;
-	/*0000*/ ULONGLONG CloneProtection : 05; // 0xf800000000000000;
+	/*0000*/ ULONGLONG ReducedCommitCount : 55; // 0x007fffffffffffff;
+	/*0000*/ ULONGLONG CloneProtection : 05; // 0x0f80000000000000;
+	/*0000*/ ULONGLONG OwningPartitionResidentCharged : 01; // 0x1000000000000000;
+	/*0000*/ ULONGLONG OwningPartitionCommitCharged : 01; // 0x2000000000000000;
+	/*0000*/ ULONGLONG OwningPartitionCommitFloating : 01; // 0x4000000000000000;
+	/*0000*/ ULONGLONG LockBit : 01; // 0x8000000000000000;
 	/*0008*/
 };
 
@@ -12905,6 +14660,7 @@ struct _MI_COMBINE_STATE {
 	/*0008*/ _RTL_AVL_TREE ActiveThreadTree;
 	/*0010*/ ULONGLONG CommonPageCombineDomain;
 	/*0018*/ ULONG CommonCombineDomainAssigned;
+	/*001c*/ LONG volatile CombineSequence;
 	/*0020*/
 };
 
@@ -12924,8 +14680,8 @@ struct _MI_COMMON_PAGE_STATE {
 	/*0030*/ void * OnesMapping;
 	/*0038*/ ULONGLONG ZeroCrc;
 	/*0040*/ ULONGLONG OnesCrc;
-	/*0048*/ ULONGLONG BitmapGapFrames[0x4];
-	/*0068*/ ULONGLONG PfnGapFrames[0x4];
+	/*0048*/ ULONGLONG OnesGapFrames[0x4];
+	/*0068*/ ULONGLONG ZeroesGapFrames[0x4];
 	/*0088*/ ULONGLONG PageTableOfZeroes;
 	/*0090*/ _MMPTE PdeOfZeroes;
 	/*0098*/ ULONGLONG PageTableOfOnes;
@@ -12945,19 +14701,21 @@ struct _MI_CROSS_PARTITION_CHARGES {
 	/*0000*/ ULONGLONG CurrentCharges;
 	/*0008*/ ULONGLONG ChargeFailures;
 	/*0010*/ ULONGLONG ChargePeak;
-	/*0018*/ ULONGLONG ChargeMinimum;
+	/*0018*/ ULONGLONG MaximumAllowed;
 	/*0020*/
 };
 
 enum _MI_CROSS_PARTITION_CHARGE_TYPE {
 	MiCrossPartitionSectionResAvailCharge = 0x0,
 	MiCrossPartitionSectionCommitCharge = 0x1,
-	MiCrossPartitionPageCombineResAvailCharge = 0x2,
-	MiCrossPartitionPageCombineCommitCharge = 0x3,
-	MiCrossPartitionLargePageResAvailCharge = 0x4,
-	MiCrossPartitionLargePageCommitCharge = 0x5,
+	MiCrossPartitionLargePageResAvailCharge = 0x2,
+	MiCrossPartitionLargePageCommitCharge = 0x3,
+	MiCrossPartitionSmallAweResAvailCharge = 0x4,
+	MiCrossPartitionSmallAweCommitCharge = 0x5,
 	MiCrossPartitionPageCloneResAvailCharge = 0x6,
-	MiCrossPartitionMaximumCharge = 0x7
+	MiCrossPartitionAggregateResAvailCharge = 0x7,
+	MiCrossPartitionAggregateCommitCharge = 0x8,
+	MiCrossPartitionMaximumCharge = 0x9
 };
 
 struct _MI_DEBUGGER_STATE {
@@ -12982,9 +14740,16 @@ struct _MI_DECAY_TIMER_LINK {
 struct _MI_DECAY_TIMER_LINKAGE {
 	/*0000*/ ULONGLONG Spare0 : 01; // 0x0000000000000001;
 	/*0000*/ ULONGLONG PreviousDecayPfn : 31; // 0x00000000fffffffe;
-	/*0000*/ ULONGLONG Spare1 : 01; // 0x0000000100000000;
+	/*0000*/ ULONGLONG TimerRemoved : 01; // 0x0000000100000000;
 	/*0000*/ ULONGLONG NextDecayPfn : 31; // 0xfffffffe00000000;
 	/*0008*/
+};
+
+struct _MI_DEFERRED_PFNS_TO_FREE {
+	/*0000*/ _LIST_ENTRY ListHead;
+	/*0010*/ ULONGLONG NumberOfPages;
+	/*0018*/ ULONG TbFlushStamp;
+	/*0020*/
 };
 
 struct _MI_DLL_OVERFLOW_AREA {
@@ -13045,28 +14810,44 @@ enum _MI_ENCLAVE_TYPE {
 	MiEnclaveMax = 0x3
 };
 
+enum _MI_ENGINE_TYPE {
+	MiEngineAccelerator = 0x0,
+	MiEngineFastProcessor = 0x1,
+	MiEngineSlowProcessor = 0x2,
+	MiEngineMaximumTypes = 0x3
+};
+
 struct _MI_ERROR_STATE {
 	/*0000*/ _MI_BAD_MEMORY_EVENT_ENTRY BadMemoryEventEntry;
-	/*0038*/ ULONGLONG PageOfInterest;
-	/*0040*/ _MI_PROBE_RAISE_TRACKER ProbeRaises;
-	/*0084*/ _MI_FORCED_COMMITS ForcedCommits;
-	/*008c*/ ULONG WsleFailures[0x1];
-	/*0090*/ ULONG PageHashErrors;
-	/*0094*/ ULONG CheckZeroCount;
-	/*0098*/ LONG volatile ZeroedPageSingleBitErrorsDetected;
-	/*009c*/ LONG volatile BadPagesDetected;
-	/*00a0*/ LONG ScrubPasses;
-	/*00a4*/ LONG ScrubBadPagesFound;
-	/*00a8*/ ULONG UserViewFailures;
-	/*00ac*/ ULONG UserViewCollisionFailures;
-	/*00b0*/ ULONG UserAllocateFailures;
-	/*00b4*/ ULONG UserAllocateCollisionFailures;
-	/*00b8*/ _MI_RESAVAIL_FAILURES ResavailFailures;
-	/*00c0*/ UCHAR PendingBadPages;
-	/*00c1*/ UCHAR FatalGraphicsFailures;
-	/*00c2*/ UCHAR InitFailure;
-	/*00c3*/ UCHAR StopBadMaps;
-	/*00c8*/
+	/*0038*/ _MI_PROBE_RAISE_TRACKER ProbeRaises;
+	/*0078*/ _MI_FORCED_COMMITS ForcedCommits;
+	/*0080*/ ULONG PrePhase0BugCheckParameter;
+	/*0084*/ ULONG WsleFailures;
+	/*0088*/ UCHAR PendingBadPages;
+	/*0089*/ UCHAR FatalGraphicsFailures;
+	/*008a*/ UCHAR InitFailure;
+	/*008b*/ UCHAR BadPagesInsertSignalState;
+	/*008c*/ _MI_PAGE_HASH_ERROR_BEHAVIOR PageHashErrorBehavior;
+	/*0090*/ ULONG PageHashReadErrors;
+	/*0094*/ ULONG PageHashStandbyErrors;
+	/*0098*/ ULONG PageHashTransferErrors;
+	/*009c*/ ULONG PageHashAllocationErrors;
+	/*00a0*/ ULONGLONG FailedHashPageFrameIndex;
+	/*00a8*/ ULONG CheckZeroCount;
+	/*00ac*/ LONG volatile ZeroedPageSingleBitErrorsDetected;
+	/*00b0*/ LONG volatile BadPagesDetected;
+	/*00b4*/ ULONG BadPagesInserted;
+	/*00b8*/ _WORK_QUEUE_ITEM BadPageInsertWorkItem;
+	/*00d8*/ LONG ScrubPasses;
+	/*00dc*/ LONG ScrubBadPagesFound;
+	/*00e0*/ ULONG UserViewFailures;
+	/*00e4*/ ULONG UserViewCollisionFailures;
+	/*00e8*/ ULONG UserAllocateFailures;
+	/*00ec*/ ULONG UserAllocateCollisionFailures;
+	/*00f0*/ _MI_RESAVAIL_FAILURES ResavailFailures;
+	/*00f8*/ LONG volatile BadPhysicalMapsEarly;
+	/*00fc*/ LONG volatile BadPhysicalMaps;
+	/*0100*/
 };
 
 struct _MI_EXTENT_DELETION_WAIT_BLOCK {
@@ -13089,8 +14870,13 @@ struct _MI_EXTRA_IMAGE_INFORMATION {
 	/*0010*/
 };
 
-union _MI_FLAGS {
-	/*0000*/ LONG EntireFlags;
+enum _MI_FILE_EXTENT_TYPES {
+	MiExtentCopyImage = 0x0,
+	MiExtentCopyData = 0x1,
+	MiExtentCopyMaximum = 0x2
+};
+
+struct _MI_FLAGS {
 	/*0000*/ ULONG VerifierEnabled : 01; // 0x00000001;
 	/*0000*/ ULONG KernelVerifierEnabled : 01; // 0x00000002;
 	/*0000*/ ULONG LargePageKernel : 01; // 0x00000004;
@@ -13101,24 +14887,29 @@ union _MI_FLAGS {
 	/*0000*/ ULONG ProcessorPrewalks : 01; // 0x00000100;
 	/*0000*/ ULONG ProcessorPostwalks : 01; // 0x00000200;
 	/*0000*/ ULONG CoverageBuild : 01; // 0x00000400;
-	/*0000*/ ULONG AccessBitReplacementDisabled : 01; // 0x00000800;
-	/*0000*/ ULONG CheckExecute : 01; // 0x00001000;
-	/*0000*/ ULONG ProtectedPagesEnabled : 01; // 0x00002000;
-	/*0000*/ ULONG SecureRelocations : 01; // 0x00004000;
-	/*0000*/ ULONG StrongPageIdentity : 01; // 0x00008000;
-	/*0000*/ ULONG StrongCodeGuarantees : 01; // 0x00010000;
-	/*0000*/ ULONG HardCodeGuarantees : 01; // 0x00020000;
-	/*0000*/ ULONG ExecutePagePrivilegeRequired : 01; // 0x00040000;
-	/*0000*/ ULONG SecureKernelCfgEnabled : 01; // 0x00080000;
-	/*0000*/ ULONG FullHvci : 01; // 0x00100000;
-	/*0000*/ ULONG BootDebuggerActive : 01; // 0x00200000;
-	/*0000*/ ULONG ExceptionHandlingReady : 01; // 0x00400000;
-	/*0000*/ ULONG ShadowStacksSupported : 01; // 0x00800000;
-	/*0000*/ ULONG AccessBitFenceRequired : 01; // 0x01000000;
-	/*0000*/ ULONG PfnDatabaseExists : 01; // 0x02000000;
-	/*0000*/ ULONG DeferredHotAddsCompleted : 01; // 0x04000000;
-	/*0000*/ ULONG SystemPtesReady : 01; // 0x08000000;
-	/*0004*/
+	/*0000*/ ULONG CheckExecute : 01; // 0x00000800;
+	/*0000*/ ULONG ProtectedPagesEnabled : 01; // 0x00001000;
+	/*0000*/ ULONG SecureRelocations : 01; // 0x00002000;
+	/*0000*/ ULONG StrongPageIdentity : 01; // 0x00004000;
+	/*0000*/ ULONG StrongCodeGuarantees : 01; // 0x00008000;
+	/*0000*/ ULONG HardCodeGuarantees : 01; // 0x00010000;
+	/*0000*/ ULONG ExecutePagePrivilegeRequired : 01; // 0x00020000;
+	/*0000*/ ULONG SecureKernelCfgEnabled : 01; // 0x00040000;
+	/*0000*/ ULONG FullHvci : 01; // 0x00080000;
+	/*0000*/ ULONG BootDebuggerActive : 01; // 0x00100000;
+	/*0000*/ ULONG ExceptionHandlingReady : 01; // 0x00200000;
+	/*0000*/ ULONG ShadowStacksSupported : 01; // 0x00400000;
+	/*0000*/ ULONG AccessBitFenceRequired : 01; // 0x00800000;
+	/*0000*/ ULONG AccessBitReplacementCapability : 02; // 0x03000000;
+	/*0000*/ ULONG PfnDatabaseExists : 01; // 0x04000000;
+	/*0000*/ ULONG PfnDatabaseGapsFilled : 01; // 0x08000000;
+	/*0000*/ ULONG SystemPtesReady : 01; // 0x10000000;
+	/*0000*/ ULONG BootImageUnprivilegedPagesUnregistered : 01; // 0x20000000;
+	/*0000*/ ULONG ImageProtectedSlabExecutableOnly : 01; // 0x40000000;
+	/*0000*/ ULONG SpecialReadOnlyProtectedSlabPages : 01; // 0x80000000;
+	/*0004*/ ULONG SlabAllocatorsReady : 01; // 0x00000001;
+	/*0004*/ ULONG KasanEnabled : 01; // 0x00000002;
+	/*0008*/
 };
 
 struct _MI_FORCED_COMMITS {
@@ -13143,22 +14934,25 @@ struct _MI_FREE_LARGE_PAGE_LIST {
 
 struct _MI_HARDWARE_STATE {
 	/*0000*/ ULONG NodeMask;
-	/*0004*/ ULONG NumaHintIndex;
+	/*0004*/ ULONG volatile NumaHintIndex;
 	/*0008*/ ULONG NumaLastRangeIndexInclusive;
-	/*000c*/ UCHAR NodeShift;
-	/*000d*/ UCHAR ChannelShift;
+	/*000c*/ UCHAR MemoryNodeWithNoProcessorsFound;
+	/*000d*/ UCHAR NodeShift;
+	/*000e*/ UCHAR ChannelShift;
+	/*000f*/ UCHAR AccessBitReplacementHonored;
 	/*0010*/ ULONG ChannelHintIndex;
 	/*0014*/ ULONG ChannelLastRangeIndexInclusive;
 	/*0018*/ _MI_NODE_NUMBER_ZERO_BASED * NodeGraph;
-	/*0020*/ _MI_SYSTEM_NODE_INFORMATION * SystemNodeInformation;
+	/*0020*/ _MI_SYSTEM_NODE_NONPAGED_POOL * SystemNodeNonPagedPool;
 	/*0028*/ _HAL_NODE_RANGE TemporaryNumaRanges[0x2];
 	/*0048*/ _HAL_NODE_RANGE * NumaMemoryRanges;
 	/*0050*/ _HAL_CHANNEL_MEMORY_RANGES * ChannelMemoryRanges;
 	/*0058*/ ULONG SecondLevelCacheSize;
 	/*005c*/ ULONG FirstLevelCacheSize;
 	/*0060*/ ULONG PhysicalAddressBits;
-	/*0064*/ ULONG LogicalProcessorsPerCore;
+	/*0064*/ ULONG PfnDatabasePageBits;
 	/*0068*/ UCHAR ProcessorCachesFlushedOnPowerLoss;
+	/*0069*/ UCHAR PageTableReuseRequiresFlush;
 	/*0070*/ ULONGLONG TotalPagesAllowed;
 	/*0078*/ ULONG SecondaryColorMask;
 	/*007c*/ ULONG SecondaryColors;
@@ -13166,21 +14960,48 @@ struct _MI_HARDWARE_STATE {
 	/*0084*/ ULONG FlushCacheForAttributeChange;
 	/*0088*/ ULONG FlushCacheForPageAttributeChange;
 	/*008c*/ ULONG CacheFlushPromoteThreshold;
-	/*0090*/ _LARGE_INTEGER PerformanceCounterFrequency;
 	/*00c0*/ ULONGLONG InvalidPteMask;
 	/*0100*/ ULONG LargePageColors[0x3];
 	/*0110*/ ULONGLONG FlushTbThreshold;
-	/*0118*/ _MI_PFN_CACHE_ATTRIBUTE OptimalZeroingAttribute[0x4][0x4];
-	/*0158*/ UCHAR AttributeChangeRequiresReZero;
-	/*0160*/ _MI_ZERO_COST_COUNTS ZeroCostCounts[0x2];
-	/*0180*/ ULONGLONG VsmKernelPageCount;
-	/*01c0*/
+	/*0118*/ UCHAR AttributeChangeRequiresReZero;
+	/*0120*/ ULONGLONG HighestPossiblePhysicalPage;
+	/*0128*/ ULONGLONG VsmKernelPageCount;
+	/*0130*/ ULONGLONG HugePageRemoveTracker[0x200];
+	/*1130*/ ULONGLONG volatile HotAddSequenceNumber;
+	/*1138*/ ULONGLONG volatile SpecialPurposeMemoryTypeId;
+	/*1140*/ ULONG SpecialPurposeMemoryQueryTypeExtraSpace;
+	/*1180*/
 };
 
 struct _MI_HARD_FAULT_STATE {
 	/*0000*/ _MMPFN * SwapPfn;
 	/*0008*/ _MI_STORE_INPAGE_COMPLETE_FLAGS StoreFlags;
 	/*0010*/
+};
+
+struct _MI_HOT_PATCH_PROCESS_CONTEXT {
+	/*0000*/ _EPROCESS * Process;
+	/*0008*/ void * ProcessHandle;
+	/*0010*/ ULONG TbFlushStamp;
+	/*0018*/
+};
+
+struct _MI_HOT_PATCH_STATE {
+	/*0000*/ _RTL_AVL_TREE UserSidPatchLists;
+	/*0008*/ _RTL_AVL_TREE GlobalHotPatchList;
+	/*0010*/ _RTL_AVL_TREE PreviouslyRegisteredHotPatchList;
+	/*0018*/ _RTL_AVL_TREE SecureImageActivePatches;
+	/*0020*/ _EX_PUSH_LOCK HotPatchListLock;
+	/*0028*/ _MI_HOT_PATCH_PROCESS_CONTEXT HotPatchProcessContext;
+	/*0040*/ _KLDR_DATA_TABLE_ENTRY * InProgressPatchTableEntry;
+	/*0048*/ _KLDR_DATA_TABLE_ENTRY * InProgressBaseTableEntry;
+	/*0050*/ CHAR volatile ReadyForPatchOperations;
+	/*0054*/ ULONG HotPatchReserveSize;
+	/*0058*/ ULONG HotPatchingEnabled : 01; // 0x00000001;
+	/*0058*/ ULONG EnforcePatchSequenceNumbers : 01; // 0x00000002;
+	/*0058*/ ULONG HotPatchTestExecuted : 01; // 0x00000004;
+	/*0058*/ ULONG Spare : 29; // 0xfffffff8;
+	/*0060*/
 };
 
 struct _MI_HUGE_PFN {
@@ -13190,15 +15011,37 @@ struct _MI_HUGE_PFN {
 			/*0008*/
 		} e1;
 		struct {
-			/*0000*/ ULONGLONG Flink : 18; // 0x000000000003ffff;
-			/*0000*/ ULONGLONG PageState : 03; // 0x00000000001c0000;
-			/*0000*/ ULONGLONG Blink : 18; // 0x0000007fffe00000;
-			/*0000*/ ULONGLONG WriteInProgress : 01; // 0x0000008000000000;
-			/*0000*/ ULONGLONG HasError : 01; // 0x0000010000000000;
-			/*0000*/ ULONGLONG Partition : 11; // 0x000ffe0000000000;
-			/*0000*/ ULONGLONG Reserved : 12; // 0xfff0000000000000;
+			/*0000*/ ULONGLONG PageState : 03; // 0x0000000000000007;
+			/*0000*/ ULONGLONG HasError : 01; // 0x0000000000000008;
+			/*0000*/ ULONGLONG Partition : 11; // 0x0000000000007ff0;
+			/*0000*/ ULONGLONG ZeroedDuringStateChanges : 49; // 0xffffffffffff8000;
 			/*0008*/
 		} e2;
+		struct {
+			/*0000*/ ULONGLONG PageState : 03; // 0x0000000000000007;
+			/*0000*/ ULONGLONG HasError : 01; // 0x0000000000000008;
+			/*0000*/ ULONGLONG Partition : 11; // 0x0000000000007ff0;
+			/*0000*/ ULONGLONG Flink : 22; // 0x0000001fffff8000;
+			/*0000*/ ULONGLONG Blink : 22; // 0x07ffffe000000000;
+			/*0000*/ ULONGLONG WriteInProgress : 01; // 0x0800000000000000;
+			/*0008*/
+		} OnList;
+		struct {
+			/*0000*/ ULONGLONG PageState : 03; // 0x0000000000000007;
+			/*0000*/ ULONGLONG HasError : 01; // 0x0000000000000008;
+			/*0000*/ ULONGLONG Partition : 11; // 0x0000000000007ff0;
+			/*0000*/ ULONGLONG DeleteBit : 01; // 0x0000000000008000;
+			/*0000*/ ULONGLONG ContentsWereNonZeroWhenInitiallyUnlinked : 01; // 0x0000000000010000;
+			/*0000*/ ULONGLONG ShareCount : 22; // 0x0000007ffffe0000;
+			/*0008*/
+		} Active;
+		struct {
+			/*0000*/ ULONGLONG PageState : 03; // 0x0000000000000007;
+			/*0000*/ ULONGLONG HasError : 01; // 0x0000000000000008;
+			/*0000*/ ULONGLONG Partition : 11; // 0x0000000000007ff0;
+			/*0000*/ ULONGLONG DanglingIoNodes : 09; // 0x0000000000ff8000;
+			/*0008*/
+		} Transition;
 		/*0008*/
 	} u1;
 	/*0008*/
@@ -13233,46 +15076,38 @@ enum _MI_INPAGE_SUPPORT_TYPES {
 };
 
 struct _MI_IO_CACHE_STATS {
-	/*0000*/ ULONGLONG UnusedBlocks;
-	/*0008*/ ULONG ActiveCacheMatch;
-	/*000c*/ ULONG ActiveCacheOverride;
-	/*0010*/ ULONG UnmappedCacheFlush;
-	/*0014*/ ULONG UnmappedCacheMatch;
-	/*0018*/ ULONG UnmappedCacheConflict;
-	/*001c*/ ULONG PermanentIoAttributeConflict;
-	/*0020*/ ULONG PermanentIoNodeConflict;
-	/*0028*/
+	/*0000*/ ULONG UnmappedCacheFlush;
+	/*0004*/ ULONG UnmappedCacheConflict;
+	/*0008*/ ULONG PermanentIoAttributeConflict;
+	/*000c*/ ULONG PermanentIoNodeConflict;
+	/*0010*/
 };
 
 struct _MI_IO_PAGE_STATE {
-	/*0000*/ LONG volatile IoPfnLock;
-	/*0008*/ _RTL_AVL_TREE IoPfnRoot[0x3];
-	/*0020*/ _LIST_ENTRY UnusedCachedMaps;
-	/*0030*/ ULONG OldestCacheFlushTimeStamp;
-	/*0038*/ _MI_IO_CACHE_STATS IoCacheStats;
-	/*0060*/ _RTL_AVL_TREE InvariantIoSpace;
-	/*0068*/
+	/*0000*/ _RTL_AVL_TREE IoPfnRoot[0x2];
+	/*0010*/ ULONGLONG UnmappedNodeCount[0x2];
+	/*0020*/ ULONGLONG volatile UnmappedHugeIoSpaceNodeCount;
+	/*0040*/ ULONGLONG UnmappedNodeCountMaximum;
+	/*0048*/ ULONGLONG TotalNodeCount[0x2];
+	/*0058*/ _RTL_AVL_TREE InvariantIoSpace;
+	/*0060*/ LONG volatile IoPfnPruneLock;
+	/*0068*/ ULONGLONG ResumePageForDeleteScans[0x2];
+	/*0078*/ _WORK_QUEUE_ITEM UnmappedNodeWorkItem;
+	/*0098*/ _MI_IO_CACHE_STATS IoCacheStats;
+	/*00c0*/
 };
 
 enum _MI_IO_PFN_TYPE {
 	MiIoPfnProbes = 0x0,
 	MiIoPfnMaps = 0x1,
-	MiIoPfnUnmapped = 0x2,
-	MiMaximumIoPfnType = 0x3
+	MiMaximumIoPfnType = 0x2
 };
 
 enum _MI_KSTACK_TYPE {
 	MiRegularKstack = 0x0,
 	MiShortLivedKstack = 0x1,
-	MiMaximumKstack = 0x2
-};
-
-struct _MI_LARGEPAGE_VAD_INFO {
-	/*0000*/ UCHAR LargeImageBias;
-	/*0001*/ UCHAR Spare[0x3];
-	/*0008*/ ULONGLONG ActualImageViewSize;
-	/*0010*/ _EPARTITION * ReferencedPartition;
-	/*0018*/
+	MiXStateStateKstack = 0x2,
+	MiMaximumKstack = 0x3
 };
 
 struct _MI_LARGE_PAGE_LISTS_CHANGING {
@@ -13337,50 +15172,51 @@ struct _MI_MODWRITE_DATA {
 struct _MI_NODE_INFORMATION {
 	/*0000*/ _MI_FREE_LARGE_PAGES FreeLargePages[0x3];
 	/*0c90*/ _MI_REBUILD_LARGE_PAGE_TIMER LargePageRebuildTimer;
-	/*0cb8*/ _MMPFNLIST_SHORT StandbyPageList[0x4][0x8];
-	/*0fc0*/ _RTL_BITMAP FreePageListHeadsBitmap[0x2];
-	/*0fe0*/ ULONG FreePageListHeadsBitmapBuffer[0x10];
-	/*1020*/ ULONGLONG volatile FreeCount[0x2];
-	/*1030*/ ULONGLONG TotalPages[0x4];
-	/*1050*/ ULONGLONG TotalPagesEntireNode;
-	/*1058*/ ULONG CurrentHugeRangeColor;
-	/*1060*/ ULONGLONG HugeIoRangeFreeCount[0x2];
-	/*1070*/ ULONG MmShiftedColor;
-	/*1074*/ ULONG Color;
-	/*1078*/ ULONGLONG volatile ChannelFreeCount[0x4][0x2];
+	/*0cb8*/ _MMPFNLIST StandbyPageList[0x4][0x8];
+	/*17c0*/ _MI_STANDBY_LOOKASIDE StandbyPageCachePerChannel[0x4][0x8];
+	/*57c0*/ _RTL_BITMAP_EX FreePageListHeadsBitmap[0x3][0x2];
+	/*5820*/ ULONGLONG FreePageListHeadsBitmapBuffer[0x18];
+	/*58e0*/ ULONGLONG volatile FreeCount[0x2];
+	/*58f0*/ ULONGLONG volatile FreeZeroCountByAttribute[0x4];
+	/*5910*/ ULONGLONG TotalPages[0x4];
+	/*5930*/ ULONGLONG TotalPagesEntireNode;
+	/*5938*/ _MI_PARTITION * Partition;
+	/*5940*/ ULONG CurrentHugeRangeColor;
+	/*5948*/ ULONGLONG TotalHugeIoPages;
+	/*5950*/ ULONGLONG HugeIoRangeFreeCount[0x2][0x4];
+	/*5990*/ ULONG MmShiftedColor;
+	/*5994*/ ULONG Color;
+	/*5998*/ ULONGLONG volatile ChannelFreeCount[0x4][0x2];
 	struct {
-		/*10b8*/ ULONG ChannelsHotCold : 01; // 0x00000001;
-		/*10b8*/ ULONG Spare : 31; // 0xfffffffe;
-		/*10bc*/
+		/*59d8*/ ULONG ChannelsHotCold : 01; // 0x00000001;
+		/*59d8*/ ULONG Spare : 31; // 0xfffffffe;
+		/*59dc*/
 	} Flags;
-	/*10bc*/ ULONG LargeListMoveInProgress;
-	/*10c0*/ _MI_LARGE_PAGE_LISTS_CHANGING * LargeListWaiters;
-	/*10c8*/ _EX_PUSH_LOCK NodeLock;
-	/*10d0*/ ULONGLONG ZeroThreadHugeMapLock;
-	/*10d8*/ UCHAR ChannelStatus;
-	/*10d9*/ UCHAR ChannelOrdering[0x4];
-	/*10dd*/ UCHAR LockedChannelOrdering[0x4];
-	/*10e1*/ UCHAR PowerAttribute[0x4];
-	/*10e8*/ ULONGLONG LargePageLock;
-	/*10f0*/ _MI_PAGE_COLORS PageColorTable;
-	/*1100*/ ULONGLONG NumberOfPagesGoingBad;
-	/*1108*/ _MI_WRITE_CALIBRATION WriteCalibration;
-	/*1128*/ void * BootZeroContext;
-	/*1130*/ void * BootZeroPageTimesPerProcessor;
-	/*1138*/ void * ZeroingVaBase;
-	/*1140*/ ULONGLONG TotalBytesToZero;
-	/*1148*/ ULONGLONG PerProcessorNumberOfBytesToZero;
-	/*1150*/ void * ZeroingContext;
-	/*1158*/ ULONG volatile ZeroingProcessorCount;
-	/*115c*/ LONG volatile ZeroHand;
-	/*1160*/ LONG volatile FinishedProcessors;
-	/*1168*/ ULONGLONG CyclesToZeroOneLargePage;
-	/*1170*/ ULONGLONG * ScaledCyclesToZeroOneLargePage;
-	/*1178*/ _GROUP_AFFINITY GroupAffinity;
-	/*1188*/ USHORT ProcessorCount;
-	/*118a*/ UCHAR BackgroundZeroingActive;
-	/*1190*/ _PHYSICAL_MEMORY_DESCRIPTOR * ZeroingPhysicalMemoryBlock;
-	/*11c0*/
+	/*59dc*/ ULONG LargeListMoveInProgress;
+	/*59e0*/ _MI_LARGE_PAGE_LISTS_CHANGING * LargeListWaiters;
+	/*59e8*/ LONG volatile NodeLock;
+	/*59f0*/ ULONGLONG ZeroThreadHugeMapLock;
+	/*59f8*/ UCHAR ChannelStatus;
+	/*59f9*/ UCHAR ChannelOrdering[0x4];
+	/*59fd*/ UCHAR LockedChannelOrdering[0x4];
+	/*5a01*/ UCHAR PowerAttribute[0x4];
+	/*5a40*/ LONG volatile LargePageLock;
+	/*5a48*/ ULONGLONG ScrubResumePage;
+	/*5a50*/ _MI_PAGE_COLORS PageColorTable;
+	/*5a60*/ ULONGLONG NumberOfPagesGoingBad;
+	/*5a68*/ void * BootZeroContext;
+	/*5a70*/ void * ZeroingContext;
+	/*5a78*/ LONG volatile ZeroContextLock;
+	/*5a80*/ void * ZeroThreadConductor;
+	/*5a88*/ UCHAR BackgroundZeroingActive;
+	/*5a90*/ _PHYSICAL_MEMORY_DESCRIPTOR * ZeroingPhysicalMemoryBlock;
+	/*5aa0*/ _CACHED_KSTACK_LIST CachedKernelStacks[0x3];
+	/*5b00*/ _CACHED_KSTACK_LIST CachedKernelShadowStackLists[0x3];
+	/*5b60*/ _MI_SLAB_ALLOCATOR_CONTEXT SlabContexts[0x7];
+	/*6298*/ _MI_SLAB_ALLOCATOR_CONTEXT * volatile FreePageSlabContextHint;
+	/*62a0*/ ULONGLONG MdlSlabFragmentionLastDemoteTime;
+	/*62c0*/ _MMPFNLIST EnclavePageListHead;
+	/*6340*/
 };
 
 struct _MI_NODE_NUMBER_ZERO_BASED {
@@ -13397,24 +15233,40 @@ struct _MI_PAGEFILE_BITMAPS_CACHE_ENTRY {
 	/*0038*/
 };
 
+struct _MI_PAGEFILE_METADATA_LAYOUT {
+	/*0000*/ ULONG EntryInBytes;
+	/*0004*/ ULONG OwningPteOffset;
+	/*0008*/
+};
+
 struct _MI_PAGEFILE_TRACES {
 	/*0000*/ LONG Status;
-	/*0004*/ USHORT PartitionId;
-	/*0006*/ UCHAR Priority;
-	/*0007*/ UCHAR IrpPriority;
-	/*0008*/ UCHAR ReservationWrite;
-	/*0010*/ _LARGE_INTEGER CurrentTime;
-	/*0018*/ ULONGLONG AvailablePages;
-	/*0020*/ ULONGLONG ModifiedPagesTotal;
-	/*0028*/ ULONGLONG ModifiedPagefilePages;
-	/*0030*/ ULONGLONG ModifiedNoWritePages;
-	/*0038*/ ULONGLONG ModifiedPagefileNoReservationPages;
+	/*0004*/ UCHAR PagefileNumber;
+	/*0005*/ UCHAR Priority;
+	/*0006*/ UCHAR IrpPriority;
+	/*0007*/ UCHAR ReservationWrite;
+	/*0008*/ _LARGE_INTEGER CurrentTime;
+	/*0010*/ ULONGLONG AvailablePages;
+	/*0018*/ ULONGLONG ModifiedPagesTotal;
+	/*0020*/ ULONGLONG ModifiedPagefilePages;
+	/*0028*/ ULONGLONG ModifiedNoWritePages;
+	/*0030*/ ULONGLONG ModifiedPagefileNoReservationPages;
+	/*0038*/ ULONGLONG ModifiedPageFileNoReservationCompressPages;
+	/*0040*/ ULONGLONG ModifiedPagefileReservationPages;
 	struct {
-		/*0040*/ _MDL Mdl;
-		/*0070*/ ULONGLONG Page[0x1];
-		/*0078*/
+		/*0048*/ _MDL Mdl;
+		/*0078*/ ULONGLONG Page[0x1];
+		/*0080*/
 	} MdlHack;
-	/*0078*/
+	/*0080*/
+};
+
+enum _MI_PAGELIST_LOCK_TYPES {
+	MiPageListPreviousGlobal = 0x0,
+	MiPageListNextGlobal = 0x1,
+	MiPageListPreviousNode = 0x2,
+	MiPageListNextNode = 0x3,
+	MiPageListPageMaximum = 0x4
 };
 
 struct _MI_PAGELIST_STATE {
@@ -13425,7 +15277,18 @@ struct _MI_PAGELIST_STATE {
 	/*0020*/ _MMPFN LargePfnTemplate;
 	/*0050*/ _MMPFN LargePfnBasePageTemplate;
 	/*0080*/ ULONG NumberOfLargePageListHeads;
-	/*0088*/
+	/*0088*/ _KEVENT Phase1BootComplete;
+	/*00a0*/ _RTL_AVL_TREE PendingBadPageTree;
+	/*00a8*/ ULONGLONG PendingBadPageCount;
+	/*00b0*/ LONG volatile PendingBadPageTreeLock;
+	/*00b8*/ ULONGLONG PendingBadPagesWithoutNodesCount;
+	/*00c0*/ _LIST_ENTRY PendingBadPageNodesAwaitingDeleteList;
+	/*00d0*/ ULONGLONG PendingBadPageNodesAwaitingDeleteCount;
+	/*00d8*/ UCHAR PendingBadPageNodeDeleteActive;
+	/*00e0*/ _WORK_QUEUE_ITEM PendingBadPageNodeDeleteWorkItem;
+	/*0100*/ _RTL_AVL_TREE BadHugePageTree;
+	/*0108*/ ULONGLONG BadHugePageCount;
+	/*0110*/
 };
 
 struct _MI_PAGE_COLORS {
@@ -13440,6 +15303,7 @@ struct _MI_PAGE_COMBINE_STATISTICS {
 	/*0018*/ ULONG CombineScanCount;
 	/*001c*/ LONG CombinedBlocksInUse;
 	/*0020*/ LONG SumCombinedBlocksReferenceCount;
+	/*0024*/ ULONG NonSlabPagesUsedForInPage;
 	/*0028*/
 };
 
@@ -13456,6 +15320,19 @@ struct _MI_PAGE_COMBINING_SUPPORT {
 	/*0190*/
 };
 
+struct _MI_PAGE_HASH {
+	/*0000*/ ULONG HashValue;
+	/*0004*/ ULONG PageFileOffset;
+	/*0008*/ _MMPTE * OwningPte;
+	/*0010*/
+};
+
+enum _MI_PAGE_HASH_ERROR_BEHAVIOR {
+	MiPageHashErrorBugcheck = 0x0,
+	MiPageHashErrorReturnError = 0x1,
+	MiPageHashErrorIgnore = 0x2
+};
+
 struct _MI_PAGING_FILE_SPACE_BITMAPS {
 	/*0000*/ ULONG RefCount;
 	/*0000*/ _MI_PAGING_FILE_SPACE_BITMAPS * Anchor;
@@ -13468,8 +15345,9 @@ struct _MI_PAGING_FILE_SPACE_BITMAPS {
 struct _MI_PAGING_IO_STATE {
 	/*0000*/ _RTL_AVL_TREE PageFileHead;
 	/*0008*/ LONG volatile PageFileHeadSpinLock;
-	/*000c*/ LONG PrefetchSeekThreshold;
-	/*0010*/ ULONG InPageSinglePages;
+	/*000c*/ _MI_PAGEFILE_METADATA_LAYOUT PageFileMetadata;
+	/*0014*/ LONG PrefetchSeekThreshold;
+	/*0018*/ ULONG InPageSinglePages;
 	/*0020*/ _SLIST_HEADER InPageSupportSListHead[0x2];
 	/*0040*/ _SLIST_HEADER ReservedInPageSupportSListHead[0x2];
 	/*0060*/ UCHAR InPageSupportSListMinimum[0x2];
@@ -13481,23 +15359,26 @@ struct _MI_PAGING_IO_STATE {
 	/*009c*/ LONG volatile DelayPageFaults;
 	/*00a0*/ ULONG FileCompressionBoundary;
 	/*00a4*/ UCHAR MdlsAdjusted;
+	/*00a8*/ _MMPTE * FileOnlyReservePtes;
 	/*00b0*/
 };
 
 struct _MI_PARTITION {
 	/*0000*/ _MI_PARTITION_CORE Core;
-	/*01b8*/ _MI_PARTITION_MODWRITES Modwriter;
-	/*0480*/ _MI_PARTITION_STORES Store;
-	/*0540*/ _MI_PARTITION_SEGMENTS Segments;
-	/*0880*/ _MI_PARTITION_PAGE_LISTS PageLists;
-	/*1840*/ _MI_PARTITION_COMMIT Commit;
-	/*1880*/ _MI_PARTITION_ZEROING Zeroing;
-	/*1930*/ _MI_PAGE_COMBINING_SUPPORT PageCombine;
-	/*1ac0*/ void * WorkingSetControl;
-	/*1ac8*/ _MMWORKING_SET_EXPANSION_HEAD WorkingSetExpansionHead;
-	/*1ad8*/ ULONG SessionDetachTimeStamp;
-	/*1b00*/ _MI_VISIBLE_PARTITION Vp;
-	/*2d00*/
+	/*01e0*/ _MI_PARTITION_MODWRITES Modwriter;
+	/*04a0*/ _MI_PARTITION_STORES Store;
+	/*0580*/ _MI_PARTITION_SEGMENTS Segments;
+	/*09c0*/ _MI_PARTITION_PAGE_LISTS PageLists;
+	/*4000*/ _MI_PARTITION_COMMIT Commit;
+	/*4040*/ _MI_PARTITION_ZEROING Zeroing;
+	/*4088*/ _MI_PAGE_COMBINING_SUPPORT PageCombine;
+	/*4218*/ void * WorkingSetControl;
+	/*4220*/ _MMWORKING_SET_EXPANSION_HEAD WorkingSetExpansionHead;
+	/*4230*/ _MI_SPECIAL_PURPOSE_MEMORY_STATE SpecialPurposeMemory;
+	/*4268*/ ULONG SessionDetachTimeStamp;
+	/*4270*/ ULONGLONG LastPeriodicTelemetryLogTime;
+	/*4280*/ _MI_VISIBLE_PARTITION Vp;
+	/*5600*/
 };
 
 struct _MI_PARTITION_COMMIT {
@@ -13530,20 +15411,22 @@ struct _MI_PARTITION_CORE {
 	/*0058*/ void * PfnUnmapWaitList;
 	/*0060*/ _PHYSICAL_MEMORY_DESCRIPTOR * MemoryRuns;
 	/*0068*/ _KEVENT ExitEvent;
-	/*0080*/ void * SystemThreadHandles[0x6];
-	/*00b0*/ _EPARTITION * PartitionObject;
-	/*00b8*/ _EX_PUSH_LOCK PartitionSystemThreadsLock;
-	/*00c0*/ _EX_PUSH_LOCK DynamicMemoryPushLock;
-	/*00c8*/ LONG volatile DynamicMemoryLock;
-	/*00cc*/ UCHAR PfnUnmapActive;
-	/*00d0*/ _KEVENT TemporaryMemoryEvent;
-	/*00e8*/ void * RootDirectory;
-	/*00f0*/ void * KernelObjectsDirectory;
-	/*00f8*/ _KEVENT * MemoryEvents[0xb];
-	/*0150*/ void * MemoryEventHandles[0xb];
-	/*01a8*/ ULONGLONG TotalHugeIoRanges;
-	/*01b0*/ ULONGLONG NonChargedSecurePages;
-	/*01b8*/
+	/*0080*/ _KEVENT ConductorNeededEvent;
+	/*0098*/ void * SystemThreadHandles[0x6];
+	/*00c8*/ _EPARTITION * PartitionObject;
+	/*00d0*/ _EX_PUSH_LOCK PartitionSystemThreadsLock;
+	/*00d8*/ _EX_PUSH_LOCK DynamicMemoryPushLock;
+	/*00e0*/ LONG volatile DynamicMemoryLock;
+	/*00e4*/ UCHAR PfnUnmapActive;
+	/*00e8*/ _KEVENT TemporaryMemoryEvent;
+	/*0100*/ void * RootDirectory;
+	/*0108*/ void * KernelObjectsDirectory;
+	/*0110*/ _KEVENT * MemoryEvents[0xb];
+	/*0168*/ void * MemoryEventHandles[0xb];
+	/*01c0*/ ULONGLONG TotalHugeIoRanges;
+	/*01c8*/ ULONGLONG NonChargedSecurePages;
+	/*01d0*/ _SLIST_HEADER FreeKernelShadowStackCacheEntries;
+	/*01e0*/
 };
 
 struct _MI_PARTITION_FLAGS {
@@ -13551,10 +15434,10 @@ struct _MI_PARTITION_FLAGS {
 	/*0000*/ ULONG PageListsInitialized : 01; // 0x00000002;
 	/*0000*/ ULONG StoreReservedPagesCharged : 01; // 0x00000004;
 	/*0000*/ ULONG UseProtectedSlabAllocators : 01; // 0x00000008;
-	/*0000*/ ULONG UseUnprotectedSlabAllocators : 01; // 0x00000010;
-	/*0000*/ ULONG PureHoldingPartition : 01; // 0x00000020;
-	/*0000*/ ULONG ZeroPagesOptional : 01; // 0x00000040;
-	/*0000*/ ULONG BackgroundZeroingDisabled : 01; // 0x00000080;
+	/*0000*/ ULONG PureHoldingPartition : 01; // 0x00000010;
+	/*0000*/ ULONG ZeroPagesOptional : 01; // 0x00000020;
+	/*0000*/ ULONG BackgroundZeroingDisabled : 01; // 0x00000040;
+	/*0000*/ ULONG SpecialPurposeMemoryPartition : 01; // 0x00000080;
 	/*0004*/
 };
 
@@ -13607,46 +15490,67 @@ struct _MI_PARTITION_MODWRITES {
 struct _MI_PARTITION_PAGE_LISTS {
 	/*0000*/ _MMPFNLIST * FreePagesByColor[0x2];
 	/*0040*/ _MMPFNLIST ZeroedPageListHead;
-	/*0080*/ _MMPFNLIST FreePageListHead;
-	/*00c0*/ _MMPFNLIST StandbyPageListHead;
-	/*0100*/ _MMPFNLIST StandbyPageListByPriority[0x8];
-	/*0240*/ _MMPFNLIST ModifiedPageListNoReservation;
-	/*0280*/ _MMPFNLIST ModifiedPageListByReservation[0x10];
-	/*0500*/ _MMPFNLIST MappedPageListHead[0x10];
-	/*0780*/ _MMPFNLIST BadPageListHead;
-	/*07c0*/ _MMPFNLIST EnclavePageListHead;
-	/*07e8*/ _SLIST_HEADER * FreePageSlist[0x2];
-	/*07f8*/ _MMPFNLIST * PageLocationList[0x8];
-	/*0838*/ ULONG volatile StandbyRepurposedByPriority[0x8];
-	/*0880*/ ULONGLONG volatile TransitionSharedPages;
-	/*0888*/ ULONGLONG TransitionSharedPagesPeak[0x6];
-	/*08b8*/ _KEVENT MappedPageListHeadEvent[0x10];
-	/*0a38*/ _MI_DECAY_TIMER_LINK DecayClusterTimerHeads[0x4];
-	/*0a58*/ ULONG DecayHand;
-	/*0a5c*/ UCHAR StandbyListDiscard;
-	/*0a5d*/ UCHAR FreeListDiscard;
-	/*0a5e*/ UCHAR PfnBitMapsReady;
-	/*0a60*/ ULONGLONG LastDecayHandUpdateTime;
-	/*0a68*/ _MI_LDW_WORK_CONTEXT LastChanceLdwContext;
-	/*0aa0*/ _RTL_AVL_TREE HugePfnBadPages;
-	/*0ac0*/ ULONGLONG AvailableEventsLock;
-	/*0ac8*/ _MI_AVAILABLE_PAGE_WAIT_STATES AvailablePageWaitStates[0x3];
-	/*0b28*/ void * MirrorListLocks;
-	/*0b40*/ ULONGLONG volatile TransitionPrivatePages;
-	/*0b48*/ _RTL_BITMAP_EX LargePfnBitMap[0x2];
-	/*0b68*/ _MI_FREE_LARGE_PAGE_LIST * LargePageListHeads;
-	/*0b70*/ UCHAR * MediumPagesOnFreeZeroList;
-	/*0b78*/ _RTL_BITMAP_EX LargePageRebuildCandidates;
-	/*0b88*/ WCHAR * LargePagesOnFreeZeroList;
-	/*0b90*/ LONG volatile HugePageRebuildCandidatesExist;
-	/*0b98*/ _KEVENT LargePageCandidatesExistEvent;
-	/*0bb0*/ ULONGLONG LowMemoryThreshold;
-	/*0bb8*/ ULONGLONG HighMemoryThreshold;
-	/*0bc0*/ _MI_SLAB_ALLOCATOR_CONTEXT SlabContexts[0x2][0x4];
-	/*0f80*/ _RTL_BITMAP_EX SlabPfnBitMap;
-	/*0f90*/ void * HugePfnLists;
-	/*0f98*/ ULONGLONG AvailableHugeIoRanges;
-	/*0fc0*/
+	/*00c0*/ _MMPFNLIST FreePageListHead;
+	/*0140*/ _MMPFNLIST StandbyPageListHead;
+	/*01c0*/ _MMPFNLIST StandbyPageListByPriority[0x8];
+	/*0480*/ _MMPFNLIST ModifiedPageListNoReservation;
+	/*0500*/ _MMPFNLIST ModifiedPageListNoReservationCompress;
+	/*0580*/ _MMPFNLIST ModifiedPageListByReservation[0x10];
+	/*0b00*/ _MMPFNLIST MappedPageListHead[0x10];
+	/*1080*/ _MMPFNLIST BadPageListHead;
+	/*10d8*/ _SLIST_HEADER * FreePageSlist[0x2];
+	/*10e8*/ _MMPFNLIST * PageLocationList[0x8];
+	/*1128*/ ULONG volatile StandbyRepurposedByPriority[0x8];
+	/*1180*/ ULONGLONG volatile TransitionSharedPages;
+	/*1188*/ ULONGLONG TransitionSharedPagesPeak[0x6];
+	/*11b8*/ _KEVENT MappedPageListHeadEvent[0x10];
+	/*1340*/ _MI_STANDBY_LOOKASIDE OldestStandbyPageCache[0x8];
+	/*2340*/ _MI_STANDBY_LOOKASIDE NewestStandbyPageCache[0x8];
+	/*3340*/ ULONGLONG NewestStandbyPageCacheInserts[0x2][0x8];
+	/*33c0*/ _MI_DECAY_TIMER_LINK DecayClusterTimerHeads[0x4];
+	/*33e0*/ ULONG DecayHand;
+	/*33e4*/ UCHAR StandbyListDiscard;
+	/*33e5*/ UCHAR FreeListDiscard;
+	/*33e6*/ UCHAR PfnBitMapsReady;
+	/*33e8*/ ULONGLONG LastDecayHandUpdateTime;
+	/*33f0*/ _MI_LDW_WORK_CONTEXT LastChanceLdwContext;
+	/*3440*/ ULONGLONG AvailableEventsLock;
+	/*3448*/ _MI_AVAILABLE_PAGE_WAIT_STATES AvailablePageWaitStates[0x3];
+	/*34c0*/ ULONGLONG volatile TransitionPrivatePages;
+	/*34c8*/ _RTL_BITMAP_EX LargePfnBitMap[0x2];
+	/*34e8*/ _MI_FREE_LARGE_PAGE_LIST * LargePageListHeads;
+	/*34f0*/ CHAR volatile * MediumPagesOnFreeZeroList;
+	/*34f8*/ _RTL_BITMAP_EX LargePageRebuildCandidates;
+	/*3508*/ SHORT volatile * LargePagesOnFreeZeroList;
+	/*3510*/ LONG volatile HugePageRebuildCandidatesExist;
+	/*3514*/ LONG volatile ProcessLargePageCacheLock;
+	/*3518*/ _LIST_ENTRY ProcessLargePageCacheLinks;
+	/*3528*/ ULONG ProcessLargePageCachePeriodicCount;
+	/*3530*/ _KEVENT LargePageCandidatesExistEvent;
+	/*3548*/ ULONGLONG LowMemoryConfiguredThreshold;
+	/*3550*/ ULONGLONG HighMemoryConfiguredThreshold;
+	/*3558*/ ULONGLONG LowMemoryThreshold;
+	/*3560*/ ULONGLONG HighMemoryThreshold;
+	/*3568*/ _RTL_BITMAP_EX SlabPfnBitMap[0x2];
+	/*3588*/ UCHAR SlabPagesNotAvailable[0x7];
+	/*3590*/ void * HugePfnLists;
+	/*3598*/ ULONGLONG AvailableHugeIoRanges;
+	/*35a0*/ ULONGLONG SlabEntriesDemoted;
+	/*35a8*/ LONG volatile SlabDemoteInProgress;
+	/*35ac*/ ULONG SlabTypeAcquiresCharges;
+	/*35b0*/ ULONGLONG DriverPageCount;
+	/*35b8*/ ULONGLONG DriverLastPage;
+	/*35c0*/ ULONGLONG DriverNonSlabAttempted;
+	/*35c8*/ ULONGLONG DriverSlabLastFailTime;
+	/*35d0*/ ULONGLONG MdlPagesByListsTotal;
+	/*35d8*/ ULONGLONG MdlPagesByListsFromSlab;
+	/*35e0*/ ULONGLONG MdlPagesByListsSlabNotEligible;
+	/*35e8*/ ULONGLONG MdlPagesPreferContiguousSlabEligible;
+	/*35f0*/ ULONGLONG MdlPagesPreferContiguousFromSlab;
+	/*35f8*/ ULONGLONG MdlSlabPagesFreeZeroedTotal;
+	/*3600*/ ULONG MdlSlabPagesFreeZeroedBuckets[0x4];
+	/*3610*/ ULONGLONG SystemPageTablePagesNoSlab;
+	/*3640*/
 };
 
 struct _MI_PARTITION_SEGMENTS {
@@ -13671,19 +15575,21 @@ struct _MI_PARTITION_SEGMENTS {
 	/*0188*/ _LIST_ENTRY DeleteSubsectionList;
 	/*0198*/ _KEVENT ControlAreaDeleteEvent;
 	/*01b0*/ _SINGLE_LIST_ENTRY ControlAreaDeleteList;
-	/*01b8*/ _MI_PTE_CHAIN_HEAD FreeSystemCache;
-	/*01d0*/ _KEVENT CloneDereferenceEvent;
-	/*01f0*/ _SLIST_HEADER CloneProtosSListHead;
-	/*0200*/ _EX_PUSH_LOCK SystemCacheInitLock;
-	/*0208*/ ULONG PagefileExtensionWaiters;
-	/*020c*/ ULONG PagefileExtensionRequests;
-	/*0210*/ _KEVENT PagefileExtensionWaitEvent;
-	/*0228*/ _MI_CROSS_PARTITION_CHARGES SharedCharges[0x7];
-	/*0308*/ _KEVENT * SharedChargesDrainEvent;
-	/*0310*/ _KEVENT * ControlAreasDrainEvent;
-	/*0318*/ _KEVENT * CloneHeaderDrainEvent;
-	/*0320*/ _EX_RUNDOWN_REF_CACHE_AWARE * ProbeRundownReference;
-	/*0340*/
+	/*01b8*/ _MI_DEFERRED_PFNS_TO_FREE FreedSystemCacheViews[0x4];
+	/*0238*/ _MI_DEFERRED_PFNS_TO_FREE FreedSystemCacheViewsReady;
+	/*0258*/ _MI_DEFERRED_PFNS_TO_FREE FreedSystemCachePdesReady;
+	/*0278*/ _KEVENT CloneDereferenceEvent;
+	/*0290*/ _SLIST_HEADER CloneProtosSListHead;
+	/*02a0*/ _EX_PUSH_LOCK SystemCacheInitLock;
+	/*02a8*/ ULONG PagefileExtensionWaiters;
+	/*02ac*/ ULONG PagefileExtensionRequests;
+	/*02b0*/ _KEVENT PagefileExtensionWaitEvent;
+	/*02c8*/ _MI_CROSS_PARTITION_CHARGES SharedCharges[0x9];
+	/*03e8*/ _KEVENT * SharedChargesDrainEvent;
+	/*03f0*/ _KEVENT * ControlAreasDrainEvent;
+	/*03f8*/ _KEVENT * CloneHeaderDrainEvent;
+	/*0400*/ _EX_RUNDOWN_REF_CACHE_AWARE * ProbeRundownReference;
+	/*0440*/
 };
 
 struct _MI_PARTITION_STATE {
@@ -13695,13 +15601,16 @@ struct _MI_PARTITION_STATE {
 	/*0030*/ _RTL_BITMAP InitialPartitionIdBitmap;
 	/*0040*/ _MI_PARTITION * TempPartitionPointers[0x1];
 	/*0048*/ _MI_PARTITION * * Partition;
-	/*0050*/ ULONGLONG TotalPagesInChildPartitions;
-	/*0058*/ ULONG CrossPartitionDenials;
-	/*005c*/ UCHAR MultiplePartitionsExist;
-	/*0060*/ _RTL_BITMAP_EX HugeIoPfnBitMap;
-	/*0070*/ _MI_HUGE_PFN * HugePfnDatabase;
-	/*0080*/ ULONGLONG HugeRangesLock;
-	/*00c0*/
+	/*0050*/ ULONGLONG TotalNodePagesInChildPartitions[0x40];
+	/*0250*/ ULONGLONG TotalSpecialPurposeMemoryInChildPartitions[0x40][0x4];
+	/*0a50*/ ULONG CrossPartitionDenials;
+	/*0a54*/ UCHAR MultiplePartitionsExist;
+	/*0a58*/ ULONGLONG ChildPartitionBytes;
+	/*0a60*/ _RTL_BITMAP_EX HugeIoPfnBitMap;
+	/*0a70*/ _MI_HUGE_PFN * HugePfnDatabase;
+	/*0a78*/ ULONG * HugePfnLockArray;
+	/*0a80*/ ULONGLONG HugeRangesLock;
+	/*0ac0*/
 };
 
 struct _MI_PARTITION_STORES {
@@ -13710,7 +15619,7 @@ struct _MI_PARTITION_STORES {
 		/*0000*/ LONG FlushInProgress : 31; // 0xfffffffe;
 		/*0000*/ LONG volatile Long;
 		/*0004*/
-	} WriteAllStoreHintedPages;
+	} WriteAllStoreSwapPages;
 	/*0004*/ ULONG VirtualPageFileNumber;
 	/*0008*/ ULONG Registered;
 	/*000c*/ ULONG ReadClusterSizeMax;
@@ -13718,15 +15627,18 @@ struct _MI_PARTITION_STORES {
 	/*0014*/ ULONG ModifiedWriteDisableCount;
 	/*0018*/ ULONG WriteIssueFailures;
 	/*001c*/ ULONG WritesOutstanding;
-	/*0020*/ LONG volatile EvictFlushLock;
-	/*0028*/ _ETHREAD * EvictionThread;
-	/*0030*/ _KEVENT EvictEvent;
-	/*0050*/ _SLIST_HEADER WriteSupportSListHead;
-	/*0060*/ _KEVENT EvictFlushCompleteEvent;
-	/*0078*/ _RTL_BITMAP * ModifiedWriteFailedBitmap;
-	/*0080*/ _EPROCESS * StoreProcess;
-	/*0088*/ ULONG DeleteStoredPages;
-	/*0090*/
+	/*0020*/ _KEVENT * RundownWrites;
+	/*0028*/ LONG volatile EvictFlushLock;
+	/*0030*/ _ETHREAD * EvictionThread;
+	/*0038*/ _KEVENT EvictEvent;
+	/*0050*/ _KEVENT EvictThreadExitEvent;
+	/*0070*/ _SLIST_HEADER WriteSupportSListHead;
+	/*0080*/ _KEVENT EvictFlushCompleteEvent;
+	/*0098*/ _RTL_BITMAP * ModifiedWriteFailedBitmap;
+	/*00a0*/ _EPROCESS * StoreProcess;
+	/*00a8*/ LONG volatile MemoryConditionsLock;
+	/*00ac*/ ULONG DeleteStoredPages;
+	/*00b0*/
 };
 
 enum _MI_PARTITION_THREAD {
@@ -13740,21 +15652,12 @@ enum _MI_PARTITION_THREAD {
 };
 
 struct _MI_PARTITION_ZEROING {
-	/*0000*/ _KEVENT PageEvent;
-	/*0018*/ UCHAR ThreadPriorityStatic;
-	/*0019*/ UCHAR AdaptiveZeroingEnabled;
-	/*001c*/ LONG ZeroFreePageSlistMinimum;
-	/*0020*/ _WORK_QUEUE_ITEM RebalanceZeroFreeWorkItem;
-	/*0040*/ LONG volatile NodeCount;
-	/*0044*/ LONG volatile BackgroundZeroingDisabled;
-	/*0048*/ _KGATE LargeBootZeroingComplete;
-	/*0060*/ _MI_WRITE_CALIBRATION WriteCalibration;
-	/*0080*/ UCHAR IpiCalibrationFailed;
-	/*0084*/ LONG volatile ActiveProcessorsForIpiCalibration;
-	/*0088*/ LONG volatile NodesReadyForIpiCalibration;
-	/*0090*/ _KEVENT ReleaseNodeZeroingThreads;
-	/*00a8*/ _MI_ZERO_THREAD_CONTEXT * ThreadContext;
-	/*00b0*/
+	/*0000*/ _WORK_QUEUE_ITEM RebalanceZeroFreeWorkItem;
+	/*0020*/ LONG volatile BackgroundZeroingDisabled;
+	/*0024*/ LONG volatile BootEnginesCalibrating;
+	/*0028*/ _KEVENT BootEnginesCalibrationWaiters;
+	/*0040*/ LONG ZeroFreePageSlistMinimum;
+	/*0048*/
 };
 
 struct _MI_PER_SESSION_PROTOS {
@@ -13781,33 +15684,41 @@ enum _MI_PFN_CACHE_ATTRIBUTE {
 	MiNotMapped = 0x3
 };
 
-struct _MI_PHYSICAL_VIEW {
-	/*0000*/ _RTL_BALANCED_NODE PhysicalNode;
-	/*0018*/ _MMVAD_SHORT * Vad;
-	/*0020*/ _AWEINFO * AweInfo;
-	union {
-		/*0028*/ ULONG ViewPageSize : 02; // 0x00000003;
-		/*0028*/ _CONTROL_AREA * ControlArea;
-		/*0030*/
-	} u1;
-	/*0030*/
+struct _MI_PFN_ULONG5 {
+	/*0000*/ ULONG EntireField;
+	struct {
+		/*0000*/ ULONG NodeBlinkHigh : 21; // 0x001fffff;
+		/*0000*/ ULONG NodeFlinkMiddle : 11; // 0xffe00000;
+		/*0004*/
+	} StandbyList;
+	struct {
+		/*0000*/ UCHAR ModifiedListBucketIndex : 04; // 0x0f;
+		/*0001*/
+	} MappedPageList;
+	struct {
+		/*0000*/ UCHAR AnchorLargePageSize : 02; // 0x03;
+		/*0000*/ UCHAR Spare0 : 06; // 0xfc;
+		/*0001*/ UCHAR Spare1 : 08; // 0xff;
+		/*0002*/ USHORT Spare2;
+		/*0004*/
+	} Active;
+	/*0004*/
 };
 
 struct _MI_POOL_STATE {
 	/*0000*/ ULONGLONG MaximumNonPagedPoolThreshold;
 	/*0008*/ ULONGLONG volatile AllocatedNonPagedPool;
 	/*0010*/ ULONGLONG volatile AllocatedSecureNonPagedPool;
-	/*0018*/ _SINGLE_LIST_ENTRY BadPoolHead;
-	/*0020*/ ULONG HighEventSets;
-	/*0024*/ UCHAR HighEventSetsValid;
-	/*0028*/ ULONGLONG LowPagedPoolThreshold;
-	/*0030*/ ULONGLONG HighPagedPoolThreshold;
-	/*0038*/ LONG volatile PermittedFaultsLock;
-	/*0040*/ _RTL_AVL_TREE PermittedFaultsTree;
-	/*0048*/ _MI_ACCESS_VIOLATION_RANGE PermittedFaultsInitialNode[0x2];
-	/*0098*/ ULONGLONG TotalPagedPoolQuota;
-	/*00a0*/ ULONGLONG TotalNonPagedPoolQuota;
-	/*00a8*/
+	/*0018*/ ULONG HighEventSets;
+	/*001c*/ UCHAR HighEventSetsValid;
+	/*0020*/ ULONGLONG LowPagedPoolThreshold;
+	/*0028*/ ULONGLONG HighPagedPoolThreshold;
+	/*0030*/ LONG volatile PermittedFaultsLock;
+	/*0038*/ _RTL_AVL_TREE PermittedFaultsTree;
+	/*0040*/ _MI_ACCESS_VIOLATION_RANGE PermittedFaultsInitialNode[0x2];
+	/*0090*/ ULONGLONG TotalPagedPoolQuota;
+	/*0098*/ ULONGLONG TotalNonPagedPoolQuota;
+	/*00a0*/
 };
 
 struct _MI_PROBE_RAISE_TRACKER {
@@ -13819,16 +15730,15 @@ struct _MI_PROBE_RAISE_TRACKER {
 	/*0014*/ ULONG BadPageLocation;
 	/*0018*/ ULONG InsufficientCharge;
 	/*001c*/ ULONG PageTableCharge;
-	/*0020*/ ULONG NoPhysicalMapping;
-	/*0024*/ ULONG NoIoReference;
-	/*0028*/ ULONG ProbeFailed;
-	/*002c*/ ULONG PteIsZero;
-	/*0030*/ ULONG StrongCodeWrite;
-	/*0034*/ ULONG ReducedCloneCommitChargeFailed;
-	/*0038*/ ULONG CopyOnWriteAtDispatchNoPages;
-	/*003c*/ ULONG NoPageTablesAllowed;
-	/*0040*/ ULONG EnclavePageFailed;
-	/*0044*/
+	/*0020*/ ULONG NoIoReference;
+	/*0024*/ ULONG ProbeFailed;
+	/*0028*/ ULONG PteIsZero;
+	/*002c*/ ULONG StrongCodeWrite;
+	/*0030*/ ULONG ReducedCloneCommitChargeFailed;
+	/*0034*/ ULONG CopyOnWriteAtDispatchNoPages;
+	/*0038*/ ULONG NoPageTablesAllowed;
+	/*003c*/ ULONG EnclavePageFailed;
+	/*0040*/
 };
 
 struct _MI_PROCESS_STATE {
@@ -13860,13 +15770,6 @@ struct _MI_PROTOTYPE_PTES_NODE {
 	/*0020*/
 };
 
-struct _MI_PTE_CHAIN_HEAD {
-	/*0000*/ _MMPTE Flink;
-	/*0008*/ _MMPTE Blink;
-	/*0010*/ _MMPTE * PteBase;
-	/*0018*/
-};
-
 struct _MI_REBUILD_LARGE_PAGE_TIMER {
 	/*0000*/ _WORK_QUEUE_ITEM WorkItem;
 	/*0020*/ UCHAR SecondsLeft;
@@ -13874,6 +15777,13 @@ struct _MI_REBUILD_LARGE_PAGE_TIMER {
 	/*0022*/ UCHAR NextPassDelta;
 	/*0023*/ UCHAR LargeSubPagesActive;
 	/*0028*/
+};
+
+struct _MI_REMOVAL_REQUESTED_PAGE {
+	/*0000*/ _RTL_BALANCED_NODE TreeNode;
+	/*0000*/ _LIST_ENTRY Link;
+	/*0018*/ _MMPFN * Pfn;
+	/*0020*/
 };
 
 struct _MI_RESAVAIL_FAILURES {
@@ -13911,8 +15821,16 @@ struct _MI_REVERSE_VIEW_MAP {
 	/*0018*/ _SUBSECTION * Subsection;
 	/*0018*/ ULONGLONG SubsectionType : 01; // 0x0000000000000001;
 	/*0020*/ _MI_SYSTEM_CACHE_VIEW_ATTRIBUTES SystemCacheAttributes;
+	/*0020*/ ULONGLONG AllAttributes;
 	/*0020*/ ULONGLONG SectionOffset;
 	/*0028*/
+};
+
+enum _MI_RVA_LIST_FILTER_TYPE {
+	MiRvaListFilterCfgValid = 0x0,
+	MiRvaListFilterCfgFirst = 0x0,
+	MiRvaListFilterCfgLast = 0x1,
+	MiRvaListFilterInvalid = 0x2
 };
 
 struct _MI_SECTION_IMAGE_INFORMATION {
@@ -13929,52 +15847,52 @@ struct _MI_SECTION_STATE {
 	/*0020*/ ULONG DataSectionProtectionMask;
 	/*0028*/ void * HighSectionBase;
 	/*0030*/ _MSUBSECTION PhysicalSubsection;
-	/*00c0*/ _CONTROL_AREA PhysicalControlArea;
-	/*0140*/ _MMPFNLIST PurgingExtentPages;
-	/*0168*/ _MMPFN * DanglingExtentPages;
-	/*0170*/ _WORK_QUEUE_ITEM DanglingExtentsWorkItem;
-	/*0190*/ _MI_EXTENT_DELETION_WAIT_BLOCK DanglingExtentsDeletionWaitList;
-	/*01b0*/ UCHAR FileOnlyMemoryPfnsCreated;
-	/*01b1*/ UCHAR DanglingExtentsWorkerActive;
-	/*01b2*/ UCHAR PurgingExtentsNeedWatchdog;
-	/*01b8*/ _RTL_AVL_TREE PrototypePtesTree;
-	/*01c0*/ LONG volatile PrototypePtesTreeSpinLock;
-	/*01c8*/ _EX_PUSH_LOCK RelocateBitmapsLock;
-	/*01d0*/ _RTL_BITMAP_EX ImageBitMapNative;
-	/*01e0*/ ULONGLONG ImageBiasNative;
-	/*01e8*/ _MI_DLL_OVERFLOW_AREA OverflowArea;
-	/*0208*/ _MI_SECTION_WOW_STATE Wow[0x1];
-	/*0248*/ ULONGLONG ImageBiasWow;
-	/*0250*/ _RTL_BITMAP_EX ImageBitMapWowScratch;
-	/*0260*/ _RTL_BITMAP_EX ImageBitMap64Low;
-	/*0270*/ ULONGLONG ImageBias64Low;
-	/*0278*/ void * ApiSetSection;
-	/*0280*/ void * ApiSetSchema;
-	/*0288*/ ULONGLONG ApiSetSchemaSize;
-	/*0290*/ ULONG LostDataFiles;
-	/*0294*/ ULONG LostDataPages;
-	/*0298*/ ULONG ImageFailureReason;
-	/*02a0*/ _SECTION * CfgBitMapSection;
-	/*02a8*/ _CONTROL_AREA * CfgBitMapControlArea;
-	/*02b0*/ _RTL_BITMAP_EX KernelCfgBitMap;
-	/*02c0*/ _EX_PUSH_LOCK KernelCfgBitMapLock;
-	/*02c8*/ ULONG ImageCfgFailure;
-	/*02cc*/ ULONG RetpolineReservePages;
-	/*02d0*/ _MDL * RetpolineStubMdl;
-	/*02d8*/ _RTL_BITMAP_EX KernelRetpolineBitMap;
-	/*02e8*/ _RTL_RETPOLINE_ROUTINES * RetpolineRoutines;
-	/*02f0*/ _MMPTE * RetpolineRevertPte;
-	/*02f8*/ _LIST_ENTRY NonRetpolineImageLoadList;
-	/*0308*/ ULONG RetpolineStubPages;
-	/*030c*/ LONG RetpolineBootStatus;
-	/*0310*/ ULONG ImageBreakpointEnabled;
-	/*0314*/ ULONG ImageBreakpointChecksum;
-	/*0318*/ ULONG ImageBreakpointSize;
-	/*031c*/ LONG volatile ImageValidationFailed;
-	/*0320*/ _RTL_AVL_TREE ImageExtentTree;
-	/*0328*/ _EX_PUSH_LOCK ImageExtentTreeLock;
-	/*0330*/ ULONG HotPatchReserveSize;
-	/*0340*/
+	/*00c8*/ _CONTROL_AREA PhysicalControlArea;
+	/*0148*/ _MMPFNLIST PurgingExtentPages;
+	/*01a0*/ _MMPFN * DanglingExtentPages;
+	/*01a8*/ _WORK_QUEUE_ITEM DanglingExtentsWorkItem;
+	/*01c8*/ _MI_EXTENT_DELETION_WAIT_BLOCK DanglingExtentsDeletionWaitList;
+	/*01e8*/ UCHAR FileOnlyMemoryPfnsCreated;
+	/*01e9*/ UCHAR DanglingExtentsWorkerActive;
+	/*01ea*/ UCHAR PurgingExtentsNeedWatchdog;
+	/*01f0*/ _RTL_AVL_TREE PrototypePtesTree;
+	/*01f8*/ LONG volatile PrototypePtesTreeSpinLock;
+	/*0200*/ _EX_PUSH_LOCK RelocateBitmapsLock;
+	/*0208*/ _RTL_BITMAP_EX ImageBitMapNative;
+	/*0218*/ ULONGLONG ImageBiasNative;
+	/*0220*/ _MI_DLL_OVERFLOW_AREA OverflowArea;
+	/*0240*/ _MI_SECTION_WOW_STATE Wow[0x1];
+	/*0280*/ ULONGLONG ImageBiasWow;
+	/*0288*/ _RTL_BITMAP_EX ImageBitMapWowScratch;
+	/*0298*/ _RTL_BITMAP_EX ImageBitMap64Low;
+	/*02a8*/ ULONGLONG ImageBias64Low;
+	/*02b0*/ void * ApiSetSection;
+	/*02b8*/ void * ApiSetSchema;
+	/*02c0*/ ULONGLONG ApiSetSchemaSize;
+	/*02c8*/ ULONG LostDataFiles;
+	/*02cc*/ ULONG LostDataPages;
+	/*02d0*/ ULONG ImageFailureReason;
+	/*02d8*/ _SECTION * CfgBitMapSection;
+	/*02e0*/ _CONTROL_AREA * CfgBitMapControlArea;
+	/*02e8*/ _RTL_BITMAP_EX KernelCfgBitMap;
+	/*02f8*/ _EX_PUSH_LOCK KernelCfgBitMapLock;
+	/*0300*/ ULONG ImageCfgFailure;
+	/*0304*/ ULONG RetpolineReservePages;
+	/*0308*/ _MDL * RetpolineStubMdl;
+	/*0310*/ _RTL_BITMAP_EX KernelRetpolineBitMap;
+	/*0320*/ _RTL_RETPOLINE_ROUTINES * RetpolineRoutines;
+	/*0328*/ _MMPTE * RetpolineRevertPte;
+	/*0330*/ _LIST_ENTRY NonRetpolineImageLoadList;
+	/*0340*/ ULONG RetpolineStubPages;
+	/*0344*/ LONG RetpolineBootStatus;
+	/*0348*/ ULONG ImageBreakpointEnabled;
+	/*034c*/ ULONG ImageBreakpointChecksum;
+	/*0350*/ ULONG ImageBreakpointSize;
+	/*0354*/ LONG volatile ImageValidationFailed;
+	/*0358*/ _RTL_AVL_TREE ExtentTree[0x2];
+	/*0368*/ _EX_PUSH_LOCK ExtentTreeLock;
+	/*0370*/ _EX_PUSH_LOCK ExtentForwardProgressMappingLock;
+	/*0380*/
 };
 
 struct _MI_SECTION_WOW_STATE {
@@ -13992,24 +15910,13 @@ struct _MI_SESSION_DRIVER_UNLOAD {
 };
 
 struct _MI_SESSION_STATE {
-	/*0000*/ _MMSESSION SystemSession;
-	/*0020*/ UCHAR CodePageEdited;
-	/*0028*/ ULONGLONG * DynamicVaBitBuffer;
-	/*0030*/ ULONGLONG DynamicVaBitBufferPages;
-	/*0038*/ void * DynamicVaStart;
-	/*0040*/ void * ImageVaStart;
-	/*0048*/ _MI_HUGE_SYSTEM_VIEW_HEAD SystemViewBuckets[0x100];
-	/*1048*/ ULONG * DynamicPtesBitBuffer;
-	/*1050*/ _EX_PUSH_LOCK IdLock;
-	/*1058*/ _EPROCESS * LeaderProcess;
-	/*1060*/ _EX_PUSH_LOCK InitializeLock;
-	/*1068*/ _MMWSL_INSTANCE * WorkingSetList;
-	/*1070*/ void * SessionBase;
-	/*1078*/ void * SessionCore;
-	/*1080*/ _RTL_AVL_TREE SessionIdNodes;
-	/*1088*/ _KEVENT DeleteInProgressEvent;
-	/*10a0*/ ULONG DeleteInProgressCount;
-	/*10a8*/
+	/*0000*/ _EX_PUSH_LOCK IdLock;
+	/*0008*/ _EPROCESS * LeaderProcess;
+	/*0010*/ _EX_PUSH_LOCK InitializeLock;
+	/*0018*/ void * SessionBase;
+	/*0020*/ _RTL_AVL_TREE SessionIdNodes;
+	/*0028*/ void * ImageVaStart;
+	/*0030*/
 };
 
 enum _MI_SHARED_USER_PAGE_TYPES {
@@ -14035,47 +15942,79 @@ struct _MI_SHUTDOWN_STATE {
 struct _MI_SLAB_ALLOCATOR_CONTEXT {
 	/*0000*/ _RTL_RB_TREE AllocationsTree;
 	/*0010*/ LONG volatile Lock;
-	/*0018*/ _MI_SLAB_ALLOCATOR_ENTRY * SlabEntryHint;
-	/*0020*/ ULONGLONG FreePageCount;
-	/*0028*/ ULONGLONG SlabEntryCount;
-	/*0030*/ _MI_SLAB_ALLOCATOR_TYPE Type;
-	/*0034*/ _MI_SLAB_ALLOCATOR_PROTECTION Protection;
+	/*0018*/ _MI_PARTITION * Partition;
+	/*0020*/ _MI_SLAB_ALLOCATOR_ENTRY * SlabEntryAllocationHint;
+	/*0028*/ _MI_SLAB_ALLOCATOR_ENTRY * SlabEntryFreeHint;
+	/*0030*/ ULONGLONG FreePageCount;
+	/*0038*/ ULONGLONG AvailablePagesGoal;
+	/*0040*/ ULONGLONG ChargedPageCount;
+	/*0048*/ ULONGLONG SlabEntryCount;
+	/*0050*/ _MI_SLAB_ALLOCATOR_TYPE Type;
+	/*0054*/ _MI_NODE_NUMBER_ZERO_BASED NumaNodeIndex;
 	union {
-		/*0038*/ ULONG EntryBecameEmpty : 01; // 0x00000001;
-		/*0038*/ ULONG Spare : 31; // 0xfffffffe;
-		/*0038*/ ULONG AllFlags;
-		/*003c*/
+		/*0058*/ ULONG EntryBecameEmpty : 01; // 0x00000001;
+		/*0058*/ ULONG DemoteInProgress : 01; // 0x00000002;
+		/*0058*/ ULONG ZeroedPages : 01; // 0x00000004;
+		/*0058*/ ULONG Spare : 29; // 0xfffffff8;
+		/*0058*/ ULONG AllFlags;
+		/*005c*/
 	} Flags;
-	/*0040*/ _MMPFNLIST StandbyList;
-	/*0068*/ ULONGLONG LastReplenishTime;
-	/*0070*/ ULONGLONG LastFailureTime;
-	/*0078*/
+	/*005c*/ ULONG SlabEntriesAllocated;
+	/*0060*/ ULONG SlabEntriesDemoted;
+	/*0064*/ ULONG SlabEntriesFailedFast;
+	/*0068*/ ULONG SlabEntriesFailedSlow;
+	/*006c*/ ULONG SlabPagesFreedNonZeroed;
+	/*0070*/ _MMPFNLIST StandbyList;
+	/*00c8*/ ULONGLONG LastReplenishTime;
+	/*00d0*/ ULONGLONG LastFailureTime;
+	/*00d8*/ _WORK_QUEUE_ITEM ReplenishWorkItem;
+	/*00f8*/ _LIST_ENTRY ReplenishWaitList;
+	/*0108*/
 };
 
 struct _MI_SLAB_ALLOCATOR_ENTRY;
 
-enum _MI_SLAB_ALLOCATOR_PROTECTION {
-	MiSlabAllocatorProtectionReadExecute = 0x0,
-	MiSlabAllocatorProtectionReadOnly = 0x1,
-	MiSlabAllocatorProtectionNoAccess = 0x2,
-	MiSlabAllocatorProtectionReadWrite = 0x3,
-	MiSlabAllocatorProtectionMax = 0x4
+enum _MI_SLAB_ALLOCATOR_TYPE {
+	MiSlabAllocatorTypeSlatProtectedStart = 0x0,
+	MiSlabAllocatorTypeExecuteProtected = 0x0,
+	MiSlabAllocatorTypeReadOnlyProtected = 0x1,
+	MiSlabAllocatorTypeNoAccessProtected = 0x2,
+	MiSlabAllocatorTypeKernelShadowStackProtected = 0x3,
+	MiSlabAllocatorTypeSlatProtectedLast = 0x3,
+	MiSlabAllocatorTypeSlatUnprotectedStart = 0x4,
+	MiSlabAllocatorTypeImageUnprotected = 0x4,
+	MiSlabAllocatorTypeGenericUnprotected = 0x5,
+	MiSlabAllocatorTypeNonPagedUnprotected = 0x6,
+	MiSlabAllocatorTypeSlatUnprotectedLast = 0x6,
+	MiSlabAllocatorTypeMax = 0x7
 };
 
-enum _MI_SLAB_ALLOCATOR_TYPE {
-	MiSlabAllocatorTypeSlatProtected = 0x0,
-	MiSlabAllocatorTypeUnprotected = 0x1,
-	MiSlabAllocatorTypeMax = 0x2
+struct _MI_SPECIAL_PURPOSE_MEMORY_STATE {
+	/*0000*/ _LIST_ENTRY TypesList;
+	/*0010*/ _LIST_ENTRY CacheEligibleList;
+	/*0000*/ _EPARTITION * RegularMemoryParentPartitionObject;
+	/*0008*/ void * SpecialPurposeMemoryParentHandle;
+	/*0010*/ ULONGLONG Attributes[0x4];
+	/*0030*/ _EX_PUSH_LOCK Lock;
+	/*0038*/
+};
+
+struct _MI_STANDBY_LOOKASIDE {
+	/*0000*/ ULONGLONG Array[0x40];
+	/*0200*/
 };
 
 struct _MI_STANDBY_STATE {
 	/*0000*/ ULONGLONG FirstDecayPage;
 	/*0010*/ _SLIST_HEADER PfnDecayFreeSList;
-	/*0020*/ _MM_PAGE_ACCESS_INFO_HEADER * PfnRepurposeLog;
-	/*0028*/ _KDPC AllocatePfnRepurposeDpc;
-	/*0070*/ _SLIST_HEADER PageHeatListSlist;
-	/*0080*/ LONG volatile PageHeatListDisableAllocation;
-	/*0090*/
+	/*0020*/ LONG volatile DecayPfnLock;
+	/*0028*/ _RTL_BITMAP DecayPfnsToBeFreed;
+	/*0038*/ ULONG DecayPfnsToBeFreedBuffer[0x40];
+	/*0138*/ _MM_PAGE_ACCESS_INFO_HEADER * PfnRepurposeLog;
+	/*0140*/ _KDPC AllocatePfnRepurposeDpc;
+	/*0180*/ _SLIST_HEADER PageHeatListSlist;
+	/*0190*/ LONG volatile PageHeatListDisableAllocation;
+	/*01a0*/
 };
 
 struct _MI_STORE_INPAGE_COMPLETE_FLAGS {
@@ -14087,15 +16026,13 @@ struct _MI_STORE_INPAGE_COMPLETE_FLAGS {
 	/*0004*/
 };
 
-struct _MI_SUB64K_FREE_RANGES {
-	/*0000*/ _RTL_BITMAP_EX BitMap;
-	/*0010*/ _LIST_ENTRY ListEntry;
-	/*0020*/ _MMVAD_SHORT * Vad;
-	/*0028*/ ULONG SetBits;
-	/*002c*/ ULONG FullSetBits;
-	/*0030*/ ULONG SubListIndex : 02; // 0x00000003;
-	/*0030*/ ULONG Hint : 30; // 0xfffffffc;
-	/*0038*/
+enum _MI_STORE_VIRTUAL_PAGEFILE_VALUE {
+	MiStoreVirtualPagefileValueInvalid = 0x0,
+	MiStoreVirtualPagefileValueStart = 0x2,
+	MiStoreVirtualPagefileSwap = 0x2,
+	MiStoreVirtualPagefileCompress = 0x3,
+	MiStoreVirtualPagefileNoCompress = 0x4,
+	MiStoreVirtualPagefileMax = 0x5
 };
 
 struct _MI_SUBSECTION_ENTRY1 {
@@ -14106,14 +16043,25 @@ struct _MI_SUBSECTION_ENTRY1 {
 
 enum _MI_SUBVAD_LISTS {
 	MiSubVadPebTebAny = 0x0,
-	MiSubVadPebTebBelow4gb = 0x1,
-	MiSubVadMaximum = 0x2
+	MiSubVadMaximum = 0x1
+};
+
+struct _MI_SYSTEM_ACCELERATORS {
+	/*0000*/ _LIST_ENTRY HardwareInstances;
+	/*0010*/ ULONG NumberOfHardwareInstances;
+	/*0014*/ UCHAR ShuttingDown;
+	/*0015*/ UCHAR AllocationFailures;
+	/*0016*/ UCHAR AllocationQueryFailures;
+	/*0018*/ void * * OpaqueContext;
+	/*0020*/ LONG volatile Lock;
+	/*0028*/
 };
 
 struct _MI_SYSTEM_CACHE_VIEW_ATTRIBUTES {
 	/*0000*/ ULONGLONG NumberOfPtes : 06; // 0x000000000000003f;
 	/*0000*/ ULONGLONG PartitionId : 10; // 0x000000000000ffc0;
-	/*0000*/ ULONGLONG SectionOffset : 48; // 0xffffffffffff0000;
+	/*0000*/ ULONGLONG SectionOffset : 46; // 0x3fffffffffff0000;
+	/*0000*/ ULONGLONG ViewState : 02; // 0xc000000000000000;
 	/*0008*/
 };
 
@@ -14123,63 +16071,88 @@ struct _MI_SYSTEM_IMAGE_STATE {
 	/*0018*/ _ETHREAD * LoadLockOwner;
 	/*0020*/ ULONG LoadLockCount;
 	/*0024*/ LONG volatile FixupLock;
-	/*0028*/ UCHAR FirstLoadEver;
-	/*0029*/ UCHAR LargePageAll;
-	/*0030*/ ULONGLONG LastPage;
+	/*0028*/ _EX_PUSH_LOCK EncodeDecodeLock;
+	/*0030*/ ULONG EncodeDecodeDepth;
+	/*0034*/ UCHAR FirstLoadEver;
+	/*0035*/ UCHAR LargePageAll;
+	/*0036*/ UCHAR SystemImagesLoaded;
 	/*0038*/ _LIST_ENTRY LargePageList;
 	/*0048*/ _LIST_ENTRY StrongCodeLoadFailureList;
 	/*0058*/ _KLDR_DATA_TABLE_ENTRY * SystemBase[0x1];
-	/*0060*/ _KLDR_DATA_TABLE_ENTRY * BeingDeleted;
-	/*0068*/ _EX_PUSH_LOCK MappingRangesPushLock;
-	/*0070*/ _MI_DRIVER_VA * MappingRanges[0x2];
-	/*0080*/ ULONGLONG PageCount;
-	/*0088*/ _MM_SYSTEM_PAGE_COUNTS PageCounts;
-	/*0098*/ _EX_PUSH_LOCK CollidedLock;
-	/*00a0*/ _RTL_AVL_TREE ImageTree;
-	/*00a8*/
+	/*0060*/ _RTL_BITMAP_EX BaseImageDiscardedBitmaps[0x1];
+	/*0070*/ _KLDR_DATA_TABLE_ENTRY * BeingDeleted;
+	/*0078*/ _EX_PUSH_LOCK MappingRangesPushLock;
+	/*0080*/ _MI_DRIVER_VA * MappingRanges[0x2];
+	/*0090*/ _MM_SYSTEM_PAGE_COUNTS PageCounts;
+	/*00a0*/ _EX_PUSH_LOCK CollidedLock;
+	/*00a8*/ _RTL_AVL_TREE ImageTree;
+	/*00b0*/ _KLDR_DATA_TABLE_ENTRY * LoadInProgress;
+	/*00b8*/ ULONGLONG ImportEntriesReplaced;
+	/*00c0*/ _RTL_FUNCTION_OVERRIDE_CAPABILITIES FunctionOverrideCapabilities;
+	/*0110*/
 };
 
 struct _MI_SYSTEM_INFORMATION {
 	/*0000*/ _MI_POOL_STATE Pools;
 	/*00c0*/ _MI_SECTION_STATE Sections;
-	/*0400*/ _MI_SYSTEM_IMAGE_STATE SystemImages;
-	/*04a8*/ _MI_SESSION_STATE Sessions;
-	/*1550*/ _MI_PROCESS_STATE Processes;
-	/*15c0*/ _MI_HARDWARE_STATE Hardware;
+	/*0440*/ _MI_SYSTEM_IMAGE_STATE SystemImages;
+	/*0550*/ _MI_SESSION_STATE Sessions;
+	/*0580*/ _MI_PROCESS_STATE Processes;
+	/*0600*/ _MI_HARDWARE_STATE Hardware;
 	/*1780*/ _MI_SYSTEM_VA_STATE SystemVa;
-	/*1c40*/ _MI_COMBINE_STATE PageCombines;
-	/*1c60*/ _MI_PAGELIST_STATE PageLists;
-	/*1d00*/ _MI_PARTITION_STATE Partitions;
-	/*1dc0*/ _MI_SHUTDOWN_STATE Shutdowns;
-	/*1e38*/ _MI_ERROR_STATE Errors;
-	/*1f00*/ _MI_ACCESS_LOG_STATE AccessLog;
-	/*1f80*/ _MI_DEBUGGER_STATE Debugger;
-	/*20a0*/ _MI_STANDBY_STATE Standby;
-	/*2140*/ _MI_SYSTEM_PTE_STATE SystemPtes;
-	/*2340*/ _MI_IO_PAGE_STATE IoPages;
-	/*23b0*/ _MI_PAGING_IO_STATE PagingIo;
-	/*2460*/ _MI_COMMON_PAGE_STATE CommonPages;
-	/*2540*/ _MI_SYSTEM_TRIM_STATE Trims;
-	/*2580*/ _MI_ENCLAVE_STATE Enclaves;
-	/*25c8*/ ULONGLONG Cookie;
-	/*25d0*/ void * volatile * BootRegistryRuns;
-	/*25d8*/ LONG volatile ZeroingDisabled;
-	/*25dc*/ UCHAR FullyInitialized;
-	/*25dd*/ UCHAR SafeBooted;
-	/*25e0*/ _tlgProvider_t const * TraceLogging;
-	/*2600*/ _MI_VISIBLE_STATE Vs;
-	/*32c0*/
+	/*1c80*/ _MI_COMBINE_STATE PageCombines;
+	/*1ca0*/ _MI_PAGELIST_STATE PageLists;
+	/*1dc0*/ _MI_PARTITION_STATE Partitions;
+	/*2880*/ _MI_SHUTDOWN_STATE Shutdowns;
+	/*28f8*/ _MI_ERROR_STATE Errors;
+	/*2a00*/ _MI_ACCESS_LOG_STATE AccessLog;
+	/*2a80*/ _MI_DEBUGGER_STATE Debugger;
+	/*2ba0*/ _MI_STANDBY_STATE Standby;
+	/*2d40*/ _MI_SYSTEM_PTE_STATE SystemPtes;
+	/*3fc0*/ _MI_IO_PAGE_STATE IoPages;
+	/*4080*/ _MI_PAGING_IO_STATE PagingIo;
+	/*4130*/ _MI_COMMON_PAGE_STATE CommonPages;
+	/*4200*/ _MI_SYSTEM_TRIM_STATE Trims;
+	/*4240*/ _MI_SYSTEM_ACCELERATORS Accelerators;
+	/*4268*/ _MI_HOT_PATCH_STATE HotPatch;
+	/*42c8*/ _MI_ENCLAVE_STATE Enclaves;
+	/*4310*/ ULONGLONG Cookie;
+	/*4318*/ void * volatile * BootRegistryRuns;
+	/*4320*/ LONG volatile ZeroingDisabled;
+	/*4324*/ UCHAR FullyInitialized;
+	/*4325*/ UCHAR SafeBooted;
+	/*4328*/ _tlgProvider_t const * TraceLogging;
+	/*4340*/ _MI_VISIBLE_STATE Vs;
+	/*5040*/
 };
 
 struct _MI_SYSTEM_NODE_INFORMATION {
-	/*0000*/ _CACHED_KSTACK_LIST CachedKernelStacks[0x2];
-	/*0040*/ _MI_DYNAMIC_BITMAP DynamicBitMapNonPagedPool;
-	/*0088*/ ULONGLONG CachedNonPagedPoolCount;
-	/*0090*/ ULONGLONG NonPagedPoolSpinLock;
-	/*0098*/ _MMPFN * CachedNonPagedPool;
-	/*00a0*/ void * NonPagedPoolFirstVa;
-	/*00a8*/ void * NonPagedPoolLastVa;
-	/*00b0*/
+	/*0000*/ _GROUP_AFFINITY * GroupAffinity;
+	/*0008*/ USHORT GroupAffinityCount;
+	/*000a*/ USHORT ProcessorCount[0x3];
+	/*0010*/ USHORT UsableProcessorCount[0x3];
+	/*0018*/ _MI_NODE_NUMBER_ZERO_BASED ProcessorNode;
+	/*0020*/ _GROUP_AFFINITY ForwardProgressGroupAffinity;
+	/*0030*/ LONG volatile LargePageListOpLock;
+	/*0038*/ _MI_WRITE_CALIBRATION WriteCalibration[0x3][0x3];
+	/*0180*/ LONG volatile IoPfnLock;
+	/*0188*/ _MI_DEFERRED_PFNS_TO_FREE DeferredPfnsToFree[0x4];
+	/*0208*/ _MI_DEFERRED_PFNS_TO_FREE DeferredPfnsReady;
+	/*0228*/ LONG volatile DeferredPfnsToFreeLock;
+	/*0240*/
+};
+
+struct _MI_SYSTEM_NODE_NONPAGED_POOL {
+	/*0000*/ _MI_DYNAMIC_BITMAP DynamicBitMapNonPagedPool;
+	/*0048*/ ULONGLONG CachedNonPagedPoolCount;
+	/*0050*/ ULONGLONG NonPagedPoolSpinLock;
+	/*0058*/ _MMPFN * CachedNonPagedPool;
+	/*0060*/ void * NonPagedPoolFirstVa;
+	/*0068*/ void * NonPagedPoolLastVa;
+	/*0070*/ _MI_PFN_CACHE_ATTRIBUTE OptimalZeroingAttribute[0x4][0x4];
+	/*00b0*/ _MI_ZERO_COST_COUNTS ZeroCostCounts[0x3][0x2][0x2];
+	/*0170*/ _MI_SYSTEM_NODE_INFORMATION * SystemNodeInformation;
+	/*0178*/
 };
 
 struct _MI_SYSTEM_PTE_STATE {
@@ -14188,23 +16161,27 @@ struct _MI_SYSTEM_PTE_STATE {
 	/*0090*/ ULONGLONG PteTrackerLock;
 	/*0098*/ _RTL_BITMAP_EX PteTrackingBitmap;
 	/*00a8*/ _MI_CACHED_PTES volatile * CachedPteHeads;
-	/*00b0*/ _MI_CACHED_PTES volatile * CachedKernelStackPteHeads;
-	/*00b8*/ _MI_SYSTEM_PTE_TYPE SystemViewPteInfo;
-	/*0118*/ _MI_SYSTEM_PTE_TYPE KernelStackPteInfo;
-	/*0178*/ ULONG StackGrowthFailures;
-	/*017c*/ UCHAR KernelStackPages;
-	/*017d*/ UCHAR TrackPtesAborted;
-	/*017e*/ UCHAR AdjustCounter;
-	/*0180*/ LONG volatile ReservedMappingLock;
-	/*0188*/ _RTL_AVL_TREE ReservedMappingTree;
-	/*0190*/ _MMPFN * ReservedMappingPageTablePfns;
-	/*0198*/ _RTL_AVL_TREE OutswappedKernelStackRoot;
-	/*01a0*/ LONG volatile OutswappedKernelStackLock;
-	/*01a8*/ _MMPTE * BreakMakePte;
-	/*01b0*/ _MI_ULTRA_VA_CONTEXT UltraSpaceContext;
-	/*01f0*/ ULONG NumberOfUltraMdlMaps;
-	/*01f8*/ _MI_ULTRA_MDL_NODE * UltraMdlNodeMappings;
-	/*0200*/
+	/*00b0*/ _MI_SYSTEM_PTE_TYPE SystemViewPteInfo;
+	/*0108*/ _MI_SYSTEM_PTE_TYPE KernelStackPteInfo[0x2];
+	/*01b8*/ ULONG StackGrowthFailures;
+	/*01bc*/ UCHAR KernelStackPages;
+	/*01bd*/ UCHAR TrackPtesAborted;
+	/*01be*/ UCHAR AdjustCounter;
+	/*01c0*/ LONG volatile ReservedMappingLock;
+	/*01c8*/ _RTL_AVL_TREE ReservedMappingTree;
+	/*01d0*/ _MMPFN * ReservedMappingPageTablePfns;
+	/*01d8*/ _RTL_AVL_TREE OutswappedKernelStackRoot;
+	/*01e0*/ LONG volatile OutswappedKernelStackLock;
+	/*01e8*/ _MMPTE * BreakMakePte;
+	/*01f0*/ _MI_ULTRA_VA_CONTEXT UltraSpaceContext;
+	/*0230*/ ULONG NumberOfUltraMdlMaps;
+	/*0238*/ _MI_ULTRA_MDL_NODE * UltraMdlNodeMappings;
+	/*0240*/ _EX_PUSH_LOCK SystemSpaceViewLock;
+	/*0248*/ _RTL_AVL_TREE ViewRoot;
+	/*0250*/ ULONG ViewCount;
+	/*0254*/ UCHAR CodePageEdited;
+	/*0258*/ _MI_HUGE_SYSTEM_VIEW_HEAD SystemViewBuckets[0x100];
+	/*1280*/
 };
 
 struct _MI_SYSTEM_PTE_TYPE {
@@ -14212,16 +16189,14 @@ struct _MI_SYSTEM_PTE_TYPE {
 	/*0010*/ _MMPTE * BasePte;
 	/*0018*/ ULONG Flags;
 	/*001c*/ _MI_SYSTEM_VA_TYPE VaType;
-	/*0020*/ ULONG * FailureCount;
-	/*0028*/ ULONG PteFailures;
-	/*0030*/ ULONGLONG SpinLock;
-	/*0030*/ _EX_PUSH_LOCK * GlobalPushLock;
-	/*0038*/ ULONGLONG volatile TotalSystemPtes;
-	/*0040*/ ULONGLONG Hint;
-	/*0048*/ ULONGLONG LowestBitEverAllocated;
-	/*0050*/ _MI_CACHED_PTES volatile * CachedPtes;
-	/*0058*/ ULONGLONG volatile TotalFreeSystemPtes;
-	/*0060*/
+	/*0020*/ ULONG PteFailures;
+	/*0028*/ ULONGLONG SpinLock;
+	/*0030*/ ULONGLONG volatile TotalSystemPtes;
+	/*0038*/ ULONGLONG Hint;
+	/*0040*/ ULONGLONG LowestBitEverAllocated;
+	/*0048*/ _MI_CACHED_PTES volatile * CachedPtes;
+	/*0050*/ ULONGLONG volatile TotalFreeSystemPtes;
+	/*0058*/
 };
 
 struct _MI_SYSTEM_TRIM_STATE {
@@ -14242,28 +16217,29 @@ struct _MI_SYSTEM_VA_STATE {
 	/*0000*/ ULONGLONG SystemTablesLock;
 	/*0008*/ ULONGLONG AvailableSystemCacheVa;
 	/*0010*/ _MI_DYNAMIC_BITMAP DynamicBitMapKernelStacks;
-	/*0058*/ _MI_DYNAMIC_BITMAP DynamicBitMapSystemPtes;
-	/*00a0*/ _MI_DYNAMIC_BITMAP DynamicBitMapDriverImages[0x2];
-	/*0130*/ _MI_DYNAMIC_BITMAP DynamicBitMapPagedPool;
-	/*0178*/ _MI_DYNAMIC_BITMAP DynamicBitMapSystemCache;
-	/*01c0*/ _MI_DYNAMIC_BITMAP DynamicBitMapSecureNonPagedPool;
-	/*0208*/ void * HalPrivateVaStart;
-	/*0210*/ ULONGLONG HalPrivateVaSize;
-	/*0218*/ ULONG SystemVaAssignment[0x8];
-	/*0238*/ ULONG SystemVaAssignmentHint;
-	/*023c*/ ULONG TopLevelPteLockBits[0x20];
-	/*02bc*/ LONG volatile DeleteKvaLock;
-	/*02c0*/ _MI_WSLE * WsleArrays[0x8];
-	/*0300*/ void * PagableHyperSpace;
-	/*0308*/ void * HyperSpaceEnd;
-	/*0310*/ ULONGLONG PagableHyperSpaceBytes;
-	/*0318*/ ULONGLONG PageTableCommitmentOffset[0x2];
-	/*0328*/ _KEVENT FreeSystemCacheVa;
-	/*0340*/ ULONGLONG SystemVaLock;
-	/*0348*/ ULONGLONG SystemCacheViewLock;
-	/*0350*/ _MMWSL_INSTANCE SystemWorkingSetList[0x8];
-	/*0490*/ ULONGLONG SelfmapLock[0x4];
-	/*04c0*/
+	/*0058*/ _MI_DYNAMIC_BITMAP DynamicBitMapKernelShadowStacks;
+	/*00a0*/ _MI_DYNAMIC_BITMAP DynamicBitMapSystemPtes;
+	/*00e8*/ _MI_DYNAMIC_BITMAP DynamicBitMapDriverImages[0x2];
+	/*0178*/ _MI_DYNAMIC_BITMAP DynamicBitMapPagedPool;
+	/*01c0*/ _MI_DYNAMIC_BITMAP DynamicBitMapSystemCache;
+	/*0208*/ _MI_DYNAMIC_BITMAP DynamicBitMapSecureNonPagedPool;
+	/*0250*/ void * HalPrivateVaStart;
+	/*0258*/ ULONGLONG HalPrivateVaSize;
+	/*0260*/ ULONG SystemVaAssignment[0x8];
+	/*0280*/ ULONG SystemVaAssignmentHint;
+	/*0284*/ ULONG TopLevelPteLockBits[0x20];
+	/*0304*/ LONG volatile DeleteKvaLock;
+	/*0308*/ _MI_WSLE * WsleArrays[0x8];
+	/*0348*/ void * PagableHyperSpace;
+	/*0350*/ void * HyperSpaceEnd;
+	/*0358*/ ULONGLONG PagableHyperSpaceBytes;
+	/*0360*/ ULONGLONG PageTableCommitmentOffset[0x2];
+	/*0370*/ _KEVENT FreeSystemCacheVa;
+	/*0388*/ ULONGLONG SystemVaLock;
+	/*0390*/ ULONGLONG SystemCacheViewLock;
+	/*0398*/ _MMWSL_INSTANCE SystemWorkingSetList[0x8];
+	/*04d8*/ ULONGLONG SelfmapLock[0x4];
+	/*0500*/
 };
 
 enum _MI_SYSTEM_VA_TYPE {
@@ -14278,12 +16254,14 @@ enum _MI_SYSTEM_VA_TYPE {
 	MiVaSystemCache = 0x8,
 	MiVaSystemPtes = 0x9,
 	MiVaHal = 0xa,
-	MiVaSessionGlobalSpace = 0xb,
+	MiVaFormerlySessionGlobalSpace = 0xb,
 	MiVaDriverImages = 0xc,
 	MiVaSystemPtesLarge = 0xd,
 	MiVaKernelStacks = 0xe,
 	MiVaSecureNonPagedPool = 0xf,
-	MiVaMaximumType = 0x10
+	MiVaKernelShadowStacks = 0x10,
+	MiVaKasan = 0x11,
+	MiVaMaximumType = 0x12
 };
 
 struct _MI_TRIAGE_DUMP_DATA {
@@ -14296,8 +16274,8 @@ struct _MI_TRIAGE_DUMP_DATA {
 	/*0020*/ ULONGLONG FeatureBits;
 	/*0028*/ ULONG TimeZoneId;
 	/*002c*/ _MI_FLAGS Flags;
-	/*0030*/ void * VsmConnection;
-	/*0038*/
+	/*0038*/ void * VsmConnection;
+	/*0040*/
 };
 
 struct _MI_ULTRA_MDL_NODE {
@@ -14328,21 +16306,6 @@ enum _MI_VAD_ALLOCATION_CELL_TYPE {
 	MiVadAllocationCellMaximum = 0x3
 };
 
-struct _MI_VAD_EVENT_BLOCK {
-	/*0000*/ _MI_VAD_EVENT_BLOCK * Next;
-	/*0008*/ _KGATE Gate;
-	/*0008*/ _MMADDRESS_LIST SecureInfo;
-	/*0008*/ _RTL_BITMAP_EX BitMap;
-	/*0008*/ _MMINPAGE_SUPPORT * InPageSupport;
-	/*0008*/ _MI_LARGEPAGE_VAD_INFO LargePage;
-	/*0008*/ _MI_PHYSICAL_VIEW AweView;
-	/*0008*/ _ETHREAD * CreatingThread;
-	/*0008*/ _MI_SUB64K_FREE_RANGES PebTeb;
-	/*0008*/ _MMVAD_SHORT * PlaceholderVad;
-	/*0040*/ ULONG WaitReason;
-	/*0048*/
-};
-
 struct _MI_VAD_SEQUENTIAL_INFO {
 	/*0000*/ ULONGLONG Length : 12; // 0x0000000000000fff;
 	/*0000*/ ULONGLONG Vpn : 52; // 0xfffffffffffff000;
@@ -14362,17 +16325,21 @@ struct _MI_VISIBLE_PARTITION {
 	/*0200*/ _MMWSL_INSTANCE PartitionWorkingSetLists[0x1];
 	/*0228*/ ULONGLONG volatile TotalCommittedPages;
 	/*0240*/ _MMPFNLIST ModifiedPageListHead;
-	/*0280*/ _MMPFNLIST ModifiedNoWritePageListHead;
-	/*02a8*/ ULONGLONG TotalCommitLimit;
-	/*02b0*/ ULONGLONG TotalPagesForPagingFile;
-	/*02b8*/ ULONGLONG VadPhysicalPages;
-	/*02c0*/ ULONGLONG ProcessLockedFilePages;
-	/*02c8*/ ULONGLONG volatile SharedCommit;
-	/*02d0*/ ULONGLONG SlabAllocatorPages;
-	/*02d8*/ ULONG ChargeCommitmentFailures[0x4];
-	/*02e8*/ LONG volatile PageFileTraceIndex;
-	/*02f0*/ _MI_PAGEFILE_TRACES PageFileTraces[0x20];
-	/*1200*/
+	/*02c0*/ _MMPFNLIST ModifiedNoWritePageListHead;
+	/*0318*/ ULONGLONG TotalCommitLimit;
+	/*0320*/ ULONGLONG TotalPagesForPagingFile;
+	/*0328*/ ULONGLONG VadPhysicalPages;
+	/*0330*/ ULONGLONG ProcessLockedFilePages;
+	/*0338*/ ULONGLONG volatile SharedCommit;
+	/*0340*/ ULONGLONG SlabAllocatorPages;
+	/*0348*/ ULONGLONG SlabAllocatorPagesUncharged;
+	/*0350*/ ULONGLONG BootSlabPages;
+	/*0358*/ ULONGLONG SecureKernelPagesFromNonChargedSlabs;
+	/*0360*/ ULONGLONG KernelShadowStackPages;
+	/*0368*/ ULONG ChargeCommitmentFailures[0x4];
+	/*0378*/ LONG volatile PageFileTraceIndex;
+	/*0380*/ _MI_PAGEFILE_TRACES PageFileTraces[0x20];
+	/*1380*/
 };
 
 struct _MI_VISIBLE_STATE {
@@ -14382,10 +16349,11 @@ struct _MI_VISIBLE_STATE {
 	/*0030*/ ULONGLONG MaximumNonPagedPoolInPages;
 	/*0038*/ ULONGLONG SizeOfPagedPoolInPages;
 	/*0040*/ _MI_SYSTEM_PTE_TYPE SystemPteInfo;
-	/*00a0*/ ULONGLONG volatile NonPagedPoolCommit;
-	/*00a8*/ ULONGLONG volatile SmallNonPagedPtesCommit;
-	/*00b0*/ ULONGLONG volatile BootCommit;
-	/*00b8*/ ULONGLONG volatile MdlPagesAllocated;
+	/*0098*/ ULONGLONG volatile NonPagedPoolCommit;
+	/*00a0*/ ULONGLONG volatile SmallNonPagedPtesCommit;
+	/*00a8*/ ULONGLONG volatile BootCommit;
+	/*00b0*/ ULONGLONG volatile MdlPagesAllocated;
+	/*00b8*/ ULONGLONG volatile ContiguousPagesAllocated;
 	/*00c0*/ ULONGLONG volatile SystemPageTableCommit;
 	/*00c8*/ ULONGLONG volatile ProcessCommit;
 	/*00d0*/ LONG volatile DriverCommit;
@@ -14397,10 +16365,10 @@ struct _MI_VISIBLE_STATE {
 	/*0920*/ ULONG MapCacheFailures;
 	/*0928*/ ULONGLONG PagefileHashPages;
 	/*0930*/ _SYSPTES_HEADER PteHeader;
-	/*0a48*/ ULONGLONG SystemVaTypeCount[0x10];
-	/*0ac8*/ UCHAR SystemVaType[0x100];
-	/*0bc8*/ _MI_SYSTEM_VA_ASSIGNMENT SystemVaRegions[0xd];
-	/*0cc0*/
+	/*0a48*/ ULONGLONG SystemVaTypeCount[0x12];
+	/*0ad8*/ UCHAR SystemVaType[0x100];
+	/*0bd8*/ _MI_SYSTEM_VA_ASSIGNMENT SystemVaRegions[0xf];
+	/*0d00*/
 };
 
 enum _MI_WORKING_SET_TYPE {
@@ -14417,10 +16385,12 @@ enum _MI_WORKING_SET_TYPE {
 
 struct _MI_WRITE_CALIBRATION {
 	/*0000*/ ULONG MaximumNumberProcessors;
-	/*0004*/ _MI_WRITE_TYPES OptimalWriteType;
+	/*0004*/ UCHAR OptimalWriteType;
+	/*0005*/ UCHAR CalibrationCompleted;
+	/*0006*/ UCHAR CalibrationFinal[0x2];
 	/*0008*/ ULONGLONG PerProcessorNumberOfBytes;
 	/*0010*/ ULONG OptimalWriteProcessors[0x2];
-	/*0018*/ _MI_WRITE_MODES * RawTimeStamps;
+	/*0018*/ _MI_WRITE_MODES * PureZeroing;
 	/*0020*/
 };
 
@@ -14454,29 +16424,19 @@ struct _MI_WSLE {
 
 struct _MI_ZERO_COST_COUNTS {
 	/*0000*/ ULONGLONG NativeSum;
-	/*0008*/ ULONGLONG CachedSum;
-	/*0010*/
-};
-
-struct _MI_ZERO_THREAD_CONTEXT;
-
-struct _MMADDRESS_LIST {
-	union {
-		/*0000*/ _MMSECURE_FLAGS Flags;
-		/*0000*/ ULONG FlagsLong;
-		/*0000*/ void * StartVa;
-		/*0008*/
-	} u1;
-	/*0008*/ void * EndVa;
+	/*0008*/ ULONGLONG AlternateSum;
 	/*0010*/
 };
 
 struct _MMCLONE_BLOCK {
 	/*0000*/ _MMPTE ProtoPte;
 	/*0008*/ ULONGLONG CrossPartitionReferences;
-	/*0010*/ ULONGLONG volatile CloneCommitCount;
-	/*0010*/ _MI_CLONE_BLOCK_FLAGS u1;
-	/*0018*/ ULONGLONG volatile CloneRefCount;
+	union {
+		/*0010*/ LONGLONG volatile EntireField;
+		/*0010*/ _MI_CLONE_BLOCK_FLAGS Flags;
+		/*0018*/
+	} u1;
+	/*0018*/ ULONGLONG UseCount;
 	/*0020*/
 };
 
@@ -14573,9 +16533,8 @@ struct _MMINPAGE_SUPPORT {
 	} u1;
 	/*00c8*/ _FILE_OBJECT * FilePointer;
 	/*00c8*/ _MMPAGING_FILE * PagingFile;
-	/*00d0*/ _CONTROL_AREA * ControlArea;
 	/*00d0*/ _SUBSECTION * Subsection;
-	/*00d8*/ void * Autoboost;
+	/*00d8*/ void * AutoBoostLock;
 	/*00e0*/ void * FaultingAddress;
 	/*00e8*/ _MMPTE * PointerPte;
 	/*00f0*/ _MMPTE * BasePte;
@@ -14713,12 +16672,13 @@ struct _MMPAGING_FILE {
 	/*00cf*/ UCHAR Spare2 : 07; // 0xfe;
 	/*00d0*/ ULONG PageHashPages;
 	/*00d4*/ ULONG PageHashPagesPeak;
-	/*00d8*/ ULONG * PageHash;
+	/*00d8*/ _MI_PAGE_HASH * PageHash;
 	/*00e0*/ void * FileHandle;
 	/*00e8*/ LONG volatile SpinLock;
 	/*00f0*/ _RTL_AVL_TREE FlowThroughReadRoot;
 	/*00f8*/ _MI_PARTITION * Partition;
 	/*0100*/ _RTL_BALANCED_NODE FileObjectNode;
+	/*0100*/ _RTL_RB_TREE ExtentsTree;
 	/*0120*/
 };
 
@@ -14728,8 +16688,8 @@ struct _MMPFN {
 	union {
 		/*0000*/ _SINGLE_LIST_ENTRY NextSlistPfn;
 		/*0000*/ void * Next;
-		/*0000*/ ULONGLONG Flink : 36; // 0x0000000fffffffff;
-		/*0000*/ ULONGLONG NodeFlinkHigh : 28; // 0xfffffff000000000;
+		/*0000*/ ULONGLONG Flink : 40; // 0x000000ffffffffff;
+		/*0000*/ ULONGLONG NodeFlinkLow : 24; // 0xffffff0000000000;
 		/*0000*/ _MI_ACTIVE_PFN Active;
 		/*0008*/
 	} u1;
@@ -14751,22 +16711,16 @@ struct _MMPFN {
 		} e4;
 		/*0024*/
 	} u3;
-	/*0024*/ USHORT NodeBlinkLow;
-	/*0026*/ UCHAR Unused : 04; // 0x0f;
-	/*0026*/ UCHAR Unused2 : 04; // 0xf0;
-	/*0027*/ UCHAR ViewCount;
-	/*0027*/ UCHAR NodeFlinkLow;
-	/*0027*/ UCHAR ModifiedListBucketIndex : 04; // 0x0f;
-	/*0027*/ UCHAR AnchorLargePageSize : 02; // 0x03;
+	/*0024*/ _MI_PFN_ULONG5 u5;
 	union {
-		/*0028*/ ULONGLONG PteFrame : 36; // 0x0000000fffffffff;
-		/*0028*/ ULONGLONG ResidentPage : 01; // 0x0000001000000000;
-		/*0028*/ ULONGLONG Unused1 : 01; // 0x0000002000000000;
-		/*0028*/ ULONGLONG Unused2 : 01; // 0x0000004000000000;
-		/*0028*/ ULONGLONG Partition : 10; // 0x0001ff8000000000;
-		/*0028*/ ULONGLONG FileOnly : 01; // 0x0002000000000000;
-		/*0028*/ ULONGLONG PfnExists : 01; // 0x0004000000000000;
-		/*0028*/ ULONGLONG Spare : 09; // 0x0ff8000000000000;
+		/*0028*/ ULONGLONG PteFrame : 40; // 0x000000ffffffffff;
+		/*0028*/ ULONGLONG ResidentPage : 01; // 0x0000010000000000;
+		/*0028*/ ULONGLONG Unused1 : 01; // 0x0000020000000000;
+		/*0028*/ ULONGLONG Unused2 : 01; // 0x0000040000000000;
+		/*0028*/ ULONGLONG Partition : 10; // 0x001ff80000000000;
+		/*0028*/ ULONGLONG FileOnly : 01; // 0x0020000000000000;
+		/*0028*/ ULONGLONG PfnExists : 01; // 0x0040000000000000;
+		/*0028*/ ULONGLONG NodeFlinkHigh : 05; // 0x0f80000000000000;
 		/*0028*/ ULONGLONG PageIdentity : 03; // 0x7000000000000000;
 		/*0028*/ ULONGLONG PrototypePte : 01; // 0x8000000000000000;
 		/*0028*/ ULONGLONG EntireField;
@@ -14795,19 +16749,13 @@ struct _MMPFNENTRY3 {
 };
 
 struct _MMPFNLIST {
-	/*0000*/ ULONGLONG Total;
+	/*0000*/ ULONGLONG volatile Total;
 	/*0008*/ _MMLISTS ListName;
 	/*0010*/ ULONGLONG Flink;
 	/*0018*/ ULONGLONG Blink;
-	/*0020*/ ULONGLONG Lock;
-	/*0028*/
-};
-
-struct _MMPFNLIST_SHORT {
-	/*0000*/ ULONGLONG Total;
-	/*0008*/ ULONGLONG Flink;
-	/*0010*/ ULONGLONG Blink;
-	/*0018*/
+	/*0020*/ LONG volatile Lock;
+	/*0028*/ _MMPFN EmbeddedPfn;
+	/*0058*/
 };
 
 struct _MMPTE {
@@ -14839,8 +16787,7 @@ struct _MMPTE_HARDWARE {
 	/*0000*/ ULONGLONG CopyOnWrite : 01; // 0x0000000000000200;
 	/*0000*/ ULONGLONG Unused : 01; // 0x0000000000000400;
 	/*0000*/ ULONGLONG Write : 01; // 0x0000000000000800;
-	/*0000*/ ULONGLONG PageFrameNumber : 36; // 0x0000fffffffff000;
-	/*0000*/ ULONGLONG ReservedForHardware : 04; // 0x000f000000000000;
+	/*0000*/ ULONGLONG PageFrameNumber : 40; // 0x000ffffffffff000;
 	/*0000*/ ULONGLONG ReservedForSoftware : 04; // 0x00f0000000000000;
 	/*0000*/ ULONGLONG WsleAge : 04; // 0x0f00000000000000;
 	/*0000*/ ULONGLONG WsleProtection : 03; // 0x7000000000000000;
@@ -14887,19 +16834,21 @@ struct _MMPTE_SOFTWARE {
 	/*0000*/ ULONGLONG PageFileLow : 04; // 0x000000000000f000;
 	/*0000*/ ULONGLONG UsedPageTableEntries : 10; // 0x0000000003ff0000;
 	/*0000*/ ULONGLONG ShadowStack : 01; // 0x0000000004000000;
-	/*0000*/ ULONGLONG Unused : 05; // 0x00000000f8000000;
+	/*0000*/ ULONGLONG OnStandbyLookaside : 01; // 0x0000000008000000;
+	/*0000*/ ULONGLONG Unused : 04; // 0x00000000f0000000;
 	/*0000*/ ULONGLONG PageFileHigh : 32; // 0xffffffff00000000;
 	/*0008*/
 };
 
 struct _MMPTE_SUBSECTION {
 	/*0000*/ ULONGLONG Valid : 01; // 0x0000000000000001;
-	/*0000*/ ULONGLONG Unused0 : 03; // 0x000000000000000e;
+	/*0000*/ ULONGLONG Unused0 : 02; // 0x0000000000000006;
+	/*0000*/ ULONGLONG OnStandbyLookaside : 01; // 0x0000000000000008;
 	/*0000*/ ULONGLONG SwizzleBit : 01; // 0x0000000000000010;
 	/*0000*/ ULONGLONG Protection : 05; // 0x00000000000003e0;
 	/*0000*/ ULONGLONG Prototype : 01; // 0x0000000000000400;
 	/*0000*/ ULONGLONG ColdPage : 01; // 0x0000000000000800;
-	/*0000*/ ULONGLONG Unused1 : 03; // 0x0000000000007000;
+	/*0000*/ ULONGLONG Unused2 : 03; // 0x0000000000007000;
 	/*0000*/ ULONGLONG ExecutePrivilege : 01; // 0x0000000000008000;
 	/*0000*/ LONGLONG SubsectionAddress : 48; // 0xffffffffffff0000;
 	/*0008*/
@@ -14921,14 +16870,14 @@ struct _MMPTE_TIMESTAMP {
 struct _MMPTE_TRANSITION {
 	/*0000*/ ULONGLONG Valid : 01; // 0x0000000000000001;
 	/*0000*/ ULONGLONG Write : 01; // 0x0000000000000002;
-	/*0000*/ ULONGLONG Spare : 01; // 0x0000000000000004;
+	/*0000*/ ULONGLONG OnStandbyLookaside : 01; // 0x0000000000000004;
 	/*0000*/ ULONGLONG IoTracker : 01; // 0x0000000000000008;
 	/*0000*/ ULONGLONG SwizzleBit : 01; // 0x0000000000000010;
 	/*0000*/ ULONGLONG Protection : 05; // 0x00000000000003e0;
 	/*0000*/ ULONGLONG Prototype : 01; // 0x0000000000000400;
 	/*0000*/ ULONGLONG Transition : 01; // 0x0000000000000800;
-	/*0000*/ ULONGLONG PageFrameNumber : 36; // 0x0000fffffffff000;
-	/*0000*/ ULONGLONG Unused : 16; // 0xffff000000000000;
+	/*0000*/ ULONGLONG PageFrameNumber : 40; // 0x000ffffffffff000;
+	/*0000*/ ULONGLONG Unused : 12; // 0xfff0000000000000;
 	/*0008*/
 };
 
@@ -14953,12 +16902,11 @@ struct _MMSECTION_FLAGS {
 	/*0000*/ UINT GlobalMemory : 01; // 0x00020000;
 	/*0000*/ UINT DeleteOnClose : 01; // 0x00040000;
 	/*0000*/ UINT FilePointerNull : 01; // 0x00080000;
-	/*0000*/ ULONG PreferredNode : 06; // 0x03f00000;
-	/*0000*/ UINT GlobalOnlyPerSession : 01; // 0x04000000;
-	/*0000*/ UINT UserWritable : 01; // 0x08000000;
-	/*0000*/ UINT SystemVaAllocated : 01; // 0x10000000;
-	/*0000*/ UINT PreferredFsCompressionBoundary : 01; // 0x20000000;
-	/*0000*/ UINT UsingFileExtents : 01; // 0x40000000;
+	/*0000*/ ULONG PreferredNode : 07; // 0x07f00000;
+	/*0000*/ UINT GlobalOnlyPerSession : 01; // 0x08000000;
+	/*0000*/ UINT UserWritable : 01; // 0x10000000;
+	/*0000*/ UINT SystemVaAllocated : 01; // 0x20000000;
+	/*0000*/ UINT PreferredFsCompressionBoundary : 01; // 0x40000000;
 	/*0000*/ UINT PageSize64K : 01; // 0x80000000;
 	/*0004*/
 };
@@ -14967,30 +16915,8 @@ struct _MMSECTION_FLAGS2 {
 	/*0000*/ USHORT PartitionId : 10; // 0x03ff;
 	/*0002*/ UCHAR NoCrossPartitionAccess : 01; // 0x01;
 	/*0002*/ UCHAR SubsectionCrossPartitionReferenceOverflow : 01; // 0x02;
+	/*0002*/ UCHAR UsingFileExtents : 02; // 0x0c;
 	/*0004*/
-};
-
-struct _MMSECURE_FLAGS {
-	/*0000*/ ULONG ReadOnly : 01; // 0x00000001;
-	/*0000*/ ULONG ReadWrite : 01; // 0x00000002;
-	/*0000*/ ULONG SecNoChange : 01; // 0x00000004;
-	/*0000*/ ULONG NoDelete : 01; // 0x00000008;
-	/*0000*/ ULONG RequiresPteReversal : 01; // 0x00000010;
-	/*0000*/ ULONG ExclusiveSecure : 01; // 0x00000020;
-	/*0000*/ ULONG UserModeOnly : 01; // 0x00000040;
-	/*0000*/ ULONG NoInherit : 01; // 0x00000080;
-	/*0000*/ ULONG CheckVad : 01; // 0x00000100;
-	/*0000*/ ULONG Spare : 03; // 0x00000e00;
-	/*0004*/
-};
-
-struct _MMSESSION {
-	/*0000*/ _EX_PUSH_LOCK SystemSpaceViewLock;
-	/*0008*/ _EX_PUSH_LOCK * SystemSpaceViewLockPointer;
-	/*0010*/ _RTL_AVL_TREE ViewRoot;
-	/*0018*/ ULONG ViewCount;
-	/*001c*/ ULONG BitmapFailures;
-	/*0020*/
 };
 
 struct _MMSUBSECTION_FLAGS {
@@ -15042,24 +16968,25 @@ struct _MMSUPPORT_FULL {
 
 struct _MMSUPPORT_INSTANCE {
 	/*0000*/ ULONG NextPageColor;
-	/*0004*/ ULONG PageFaultCount;
+	/*0004*/ ULONG volatile PageFaultCount;
 	/*0008*/ ULONGLONG TrimmedPageCount;
 	/*0010*/ _MMWSL_INSTANCE * VmWorkingSetList;
 	/*0018*/ _LIST_ENTRY WorkingSetExpansionLinks;
-	/*0028*/ ULONGLONG AgeDistribution[0x8];
+	/*0028*/ ULONGLONG volatile AgeDistribution[0x8];
 	/*0068*/ _KGATE * ExitOutswapGate;
 	/*0070*/ ULONGLONG MinimumWorkingSetSize;
-	/*0078*/ ULONGLONG WorkingSetLeafSize;
-	/*0080*/ ULONGLONG WorkingSetLeafPrivateSize;
-	/*0088*/ ULONGLONG WorkingSetSize;
-	/*0090*/ ULONGLONG WorkingSetPrivateSize;
-	/*0098*/ ULONGLONG MaximumWorkingSetSize;
+	/*0078*/ ULONGLONG MaximumWorkingSetSize;
+	/*0080*/ ULONGLONG volatile WorkingSetLeafSize;
+	/*0088*/ ULONGLONG volatile WorkingSetLeafPrivateSize;
+	/*0090*/ ULONGLONG volatile WorkingSetSize;
+	/*0098*/ ULONGLONG volatile WorkingSetPrivateSize;
 	/*00a0*/ ULONGLONG PeakWorkingSetSize;
 	/*00a8*/ ULONG HardFaultCount;
 	/*00ac*/ USHORT LastTrimStamp;
 	/*00ae*/ USHORT PartitionId;
 	/*00b0*/ ULONGLONG SelfmapLock;
 	/*00b8*/ _MMSUPPORT_FLAGS Flags;
+	/*00bc*/ LONG InterlockedFlags;
 	/*00c0*/
 };
 
@@ -15073,7 +17000,7 @@ struct _MMSUPPORT_SHARED {
 	/*0028*/ void * AccessLog;
 	/*0030*/ ULONGLONG volatile ChargedWslePages;
 	/*0038*/ ULONGLONG ActualWslePages;
-	/*0040*/ ULONGLONG WorkingSetCoreLock;
+	/*0040*/ LONG volatile WorkingSetCoreLock;
 	/*0048*/ void * ShadowMapping;
 	/*0080*/
 };
@@ -15106,9 +17033,9 @@ struct _MMVAD_FLAGS {
 	/*0000*/ ULONG NoChange : 01; // 0x00000008;
 	/*0000*/ ULONG VadType : 03; // 0x00000070;
 	/*0000*/ ULONG Protection : 05; // 0x00000f80;
-	/*0000*/ ULONG PreferredNode : 06; // 0x0003f000;
-	/*0000*/ ULONG PageSize : 02; // 0x000c0000;
-	/*0000*/ ULONG PrivateMemory : 01; // 0x00100000;
+	/*0000*/ ULONG PreferredNode : 07; // 0x0007f000;
+	/*0000*/ ULONG PageSize : 02; // 0x00180000;
+	/*0000*/ ULONG PrivateMemory : 01; // 0x00200000;
 	/*0004*/
 };
 
@@ -15155,7 +17082,11 @@ struct _MMVAD_SHORT {
 		/*0034*/ _MMVAD_FLAGS1 VadFlags1;
 		/*0038*/
 	} u1;
-	/*0038*/ _MI_VAD_EVENT_BLOCK * EventList;
+	union {
+		/*0038*/ ULONGLONG EventListULongPtr;
+		/*0038*/ UCHAR StartingVpnHigher : 04; // 0x0f;
+		/*0040*/
+	} u5;
 	/*0040*/
 };
 
@@ -15187,30 +17118,31 @@ struct _MM_DRIVER_VERIFIER_DATA {
 	/*0024*/ ULONG Trims;
 	/*0028*/ ULONG AllocationsFailed;
 	/*002c*/ ULONG volatile AllocationsFailedDeliberately;
-	/*0030*/ ULONG volatile Loads;
-	/*0034*/ ULONG volatile Unloads;
-	/*0038*/ ULONG UnTrackedPool;
-	/*003c*/ ULONG UserTrims;
-	/*0040*/ ULONG volatile CurrentPagedPoolAllocations;
-	/*0044*/ ULONG volatile CurrentNonPagedPoolAllocations;
-	/*0048*/ ULONG PeakPagedPoolAllocations;
-	/*004c*/ ULONG PeakNonPagedPoolAllocations;
-	/*0050*/ ULONGLONG volatile PagedBytes;
-	/*0058*/ ULONGLONG volatile NonPagedBytes;
-	/*0060*/ ULONGLONG PeakPagedBytes;
-	/*0068*/ ULONGLONG PeakNonPagedBytes;
-	/*0070*/ ULONG volatile BurstAllocationsFailedDeliberately;
-	/*0074*/ ULONG SessionTrims;
-	/*0078*/ ULONG volatile OptionChanges;
-	/*007c*/ ULONG volatile VerifyMode;
-	/*0080*/ _UNICODE_STRING PreviousBucketName;
-	/*0090*/ ULONG volatile ExecutePoolTypes;
-	/*0094*/ ULONG volatile ExecutePageProtections;
-	/*0098*/ ULONG volatile ExecutePageMappings;
-	/*009c*/ ULONG volatile ExecuteWriteSections;
-	/*00a0*/ ULONG volatile SectionAlignmentFailures;
-	/*00a4*/ ULONG volatile IATInExecutableSection;
-	/*00a8*/
+	/*0030*/ ULONG volatile AllocationFreed;
+	/*0034*/ ULONG volatile Loads;
+	/*0038*/ ULONG volatile Unloads;
+	/*003c*/ ULONG UnTrackedPool;
+	/*0040*/ ULONG UserTrims;
+	/*0044*/ ULONG volatile CurrentPagedPoolAllocations;
+	/*0048*/ ULONG volatile CurrentNonPagedPoolAllocations;
+	/*004c*/ ULONG PeakPagedPoolAllocations;
+	/*0050*/ ULONG PeakNonPagedPoolAllocations;
+	/*0058*/ ULONGLONG volatile PagedBytes;
+	/*0060*/ ULONGLONG volatile NonPagedBytes;
+	/*0068*/ ULONGLONG PeakPagedBytes;
+	/*0070*/ ULONGLONG PeakNonPagedBytes;
+	/*0078*/ ULONG volatile BurstAllocationsFailedDeliberately;
+	/*007c*/ ULONG SessionTrims;
+	/*0080*/ ULONG volatile OptionChanges;
+	/*0084*/ ULONG volatile VerifyMode;
+	/*0088*/ _UNICODE_STRING PreviousBucketName;
+	/*0098*/ ULONG volatile ExecutePoolTypes;
+	/*009c*/ ULONG volatile ExecutePageProtections;
+	/*00a0*/ ULONG volatile ExecutePageMappings;
+	/*00a4*/ ULONG volatile ExecuteWriteSections;
+	/*00a8*/ ULONG volatile SectionAlignmentFailures;
+	/*00ac*/ ULONG volatile IATInExecutableSection;
+	/*00b0*/
 };
 
 struct _MM_GRAPHICS_VAD_FLAGS {
@@ -15220,16 +17152,16 @@ struct _MM_GRAPHICS_VAD_FLAGS {
 	/*0000*/ ULONG NoChange : 01; // 0x00000008;
 	/*0000*/ ULONG VadType : 03; // 0x00000070;
 	/*0000*/ ULONG Protection : 05; // 0x00000f80;
-	/*0000*/ ULONG PreferredNode : 06; // 0x0003f000;
-	/*0000*/ ULONG PageSize : 02; // 0x000c0000;
-	/*0000*/ ULONG PrivateMemoryAlwaysSet : 01; // 0x00100000;
-	/*0000*/ ULONG WriteWatch : 01; // 0x00200000;
-	/*0000*/ ULONG FixedLargePageSize : 01; // 0x00400000;
-	/*0000*/ ULONG ZeroFillPagesOptional : 01; // 0x00800000;
-	/*0000*/ ULONG GraphicsAlwaysSet : 01; // 0x01000000;
-	/*0000*/ ULONG GraphicsUseCoherentBus : 01; // 0x02000000;
-	/*0000*/ ULONG GraphicsNoCache : 01; // 0x04000000;
-	/*0000*/ ULONG GraphicsPageProtection : 03; // 0x38000000;
+	/*0000*/ ULONG PreferredNode : 07; // 0x0007f000;
+	/*0000*/ ULONG PageSize : 02; // 0x00180000;
+	/*0000*/ ULONG PrivateMemoryAlwaysSet : 01; // 0x00200000;
+	/*0000*/ ULONG WriteWatch : 01; // 0x00400000;
+	/*0000*/ ULONG FixedLargePageSize : 01; // 0x00800000;
+	/*0000*/ ULONG ZeroFillPagesOptional : 01; // 0x01000000;
+	/*0000*/ ULONG GraphicsAlwaysSet : 01; // 0x02000000;
+	/*0000*/ ULONG GraphicsUseCoherentBus : 01; // 0x04000000;
+	/*0000*/ ULONG GraphicsNoCache : 01; // 0x08000000;
+	/*0000*/ ULONG GraphicsPageProtection : 03; // 0x70000000;
 	/*0004*/
 };
 
@@ -15297,16 +17229,16 @@ struct _MM_PRIVATE_VAD_FLAGS {
 	/*0000*/ ULONG NoChange : 01; // 0x00000008;
 	/*0000*/ ULONG VadType : 03; // 0x00000070;
 	/*0000*/ ULONG Protection : 05; // 0x00000f80;
-	/*0000*/ ULONG PreferredNode : 06; // 0x0003f000;
-	/*0000*/ ULONG PageSize : 02; // 0x000c0000;
-	/*0000*/ ULONG PrivateMemoryAlwaysSet : 01; // 0x00100000;
-	/*0000*/ ULONG WriteWatch : 01; // 0x00200000;
-	/*0000*/ ULONG FixedLargePageSize : 01; // 0x00400000;
-	/*0000*/ ULONG ZeroFillPagesOptional : 01; // 0x00800000;
-	/*0000*/ ULONG Graphics : 01; // 0x01000000;
-	/*0000*/ ULONG Enclave : 01; // 0x02000000;
-	/*0000*/ ULONG ShadowStack : 01; // 0x04000000;
-	/*0000*/ ULONG PhysicalMemoryPfnsReferenced : 01; // 0x08000000;
+	/*0000*/ ULONG PreferredNode : 07; // 0x0007f000;
+	/*0000*/ ULONG PageSize : 02; // 0x00180000;
+	/*0000*/ ULONG PrivateMemoryAlwaysSet : 01; // 0x00200000;
+	/*0000*/ ULONG WriteWatch : 01; // 0x00400000;
+	/*0000*/ ULONG FixedLargePageSize : 01; // 0x00800000;
+	/*0000*/ ULONG ZeroFillPagesOptional : 01; // 0x01000000;
+	/*0000*/ ULONG Graphics : 01; // 0x02000000;
+	/*0000*/ ULONG Enclave : 01; // 0x04000000;
+	/*0000*/ ULONG ShadowStack : 01; // 0x08000000;
+	/*0000*/ ULONG PhysicalMemoryPfnsReferenced : 01; // 0x10000000;
 	/*0004*/
 };
 
@@ -15320,63 +17252,38 @@ struct _MM_SESSION_SPACE {
 	/*0008*/ ULONG SessionId;
 	/*000c*/ LONG volatile ProcessReferenceToSession;
 	/*0010*/ _LIST_ENTRY ProcessList;
-	/*0020*/ ULONGLONG SessionPageDirectoryIndex;
-	/*0028*/ ULONGLONG volatile NonPagablePages;
-	/*0030*/ ULONGLONG volatile CommittedPages;
-	/*0038*/ void * PagedPoolStart;
-	/*0040*/ void * PagedPoolEnd;
-	/*0048*/ void * SessionObject;
-	/*0050*/ void * SessionObjectHandle;
-	/*0058*/ _RTL_AVL_TREE ImageTree;
-	/*0060*/ ULONG LocaleId;
-	/*0064*/ ULONG AttachCount;
-	/*0068*/ _KGATE AttachGate;
-	/*0080*/ _LIST_ENTRY WsListEntry;
-	/*0090*/ _RTL_BALANCED_NODE WsTreeEntry;
-	/*00a8*/ _MM_PAGED_POOL_INFO PagedPoolInfo;
-	/*00c0*/ _MMSESSION Session;
-	/*00e0*/ ULONGLONG CombineDomain;
-	/*0100*/ _MMSUPPORT_FULL Vm;
-	/*0240*/ _MMWSL_INSTANCE WorkingSetList;
-	/*0280*/ _MMSUPPORT_AGGREGATION AggregateSessionWs;
-	/*02a0*/ void * HeapState;
-	/*02a8*/ _MI_SESSION_DRIVER_UNLOAD DriverUnload;
-	/*02b0*/ ULONG TopLevelPteLockBits[0x20];
-	/*0330*/ _MMPTE PageDirectory;
-	/*0338*/ _EX_PUSH_LOCK SessionVaLock;
-	/*0340*/ _RTL_BITMAP_EX DynamicVaBitMap;
-	/*0350*/ ULONGLONG DynamicVaHint;
-	/*0358*/ _EX_PUSH_LOCK SessionPteLock;
-	/*0360*/ LONG PoolBigEntriesInUse;
-	/*0364*/ LONG volatile PagedPoolPdeCount;
-	/*0368*/ ULONG DynamicSessionPdeCount;
-	/*0370*/ _MI_SYSTEM_PTE_TYPE SystemPteInfo;
-	/*03d0*/ void * PoolTrackTableExpansion;
-	/*03d8*/ ULONGLONG PoolTrackTableExpansionSize;
-	/*03e0*/ void * PoolTrackBigPages;
-	/*03e8*/ ULONGLONG PoolTrackBigPagesSize;
-	/*03f0*/ _RTL_AVL_TREE PermittedFaultsTree;
-	/*03f8*/ _IO_SESSION_STATE IoState;
-	/*03fc*/ ULONG IoStateSequence;
-	/*0400*/ _KEVENT IoNotificationEvent;
-	/*0418*/ _EJOB * ServerSilo;
-	/*0420*/ ULONGLONG CreateTime;
-	/*1000*/ UCHAR PoolTags[0x4000];
-	/*5000*/
+	/*0020*/ ULONGLONG volatile NonPagablePages;
+	/*0028*/ ULONGLONG volatile CommittedPages;
+	/*0030*/ void * SessionObject;
+	/*0038*/ void * SessionObjectHandle;
+	/*0040*/ _RTL_AVL_TREE ImageTree;
+	/*0048*/ ULONG LocaleId;
+	/*004c*/ ULONG AttachCount;
+	/*0050*/ _KGATE AttachGate;
+	/*0068*/ _EPROCESS * AttachersUsingPxeCopies[0x2];
+	/*0078*/ _LIST_ENTRY WsListEntry;
+	/*0088*/ _RTL_BALANCED_NODE WsTreeEntry;
+	/*00a0*/ ULONGLONG CombineDomain;
+	/*00c0*/ _MMSUPPORT_FULL Vm;
+	/*0200*/ _MMWSL_INSTANCE WorkingSetList;
+	/*0240*/ _MMSUPPORT_AGGREGATION AggregateSessionWs;
+	/*0260*/ _MI_SESSION_DRIVER_UNLOAD DriverUnload;
+	/*0268*/ ULONG TopLevelPteLockBits[0x20];
+	/*02e8*/ _MMPTE PageTables[0x1];
+	/*02f0*/ _IO_SESSION_STATE IoState;
+	/*02f4*/ ULONG IoStateSequence;
+	/*02f8*/ _KEVENT IoNotificationEvent;
+	/*0310*/ _EJOB * ServerSilo;
+	/*0318*/ ULONGLONG CreateTime;
+	/*0340*/
 };
 
 struct _MM_SESSION_SPACE_FLAGS {
 	/*0000*/ ULONG Initialized : 01; // 0x00000001;
 	/*0000*/ ULONG DeletePending : 01; // 0x00000002;
-	/*0000*/ ULONG PoolInitialized : 01; // 0x00000004;
-	/*0000*/ ULONG DynamicVaInitialized : 01; // 0x00000008;
-	/*0000*/ ULONG WsInitialized : 01; // 0x00000010;
-	/*0000*/ ULONG PoolDestroyed : 01; // 0x00000020;
-	/*0000*/ ULONG ObjectInitialized : 01; // 0x00000040;
-	/*0000*/ ULONG SessionHeapInitialized : 01; // 0x00000080;
-	/*0000*/ ULONG SessionHeapDestroyed : 01; // 0x00000100;
-	/*0000*/ ULONG LeakedPoolDeliberately : 01; // 0x00000200;
-	/*0000*/ ULONG Filler : 22; // 0xfffffc00;
+	/*0000*/ ULONG WsInitialized : 01; // 0x00000004;
+	/*0000*/ ULONG ObjectInitialized : 01; // 0x00000008;
+	/*0000*/ ULONG Filler : 28; // 0xfffffff0;
 	/*0004*/
 };
 
@@ -15387,11 +17294,11 @@ struct _MM_SHARED_VAD_FLAGS {
 	/*0000*/ ULONG NoChange : 01; // 0x00000008;
 	/*0000*/ ULONG VadType : 03; // 0x00000070;
 	/*0000*/ ULONG Protection : 05; // 0x00000f80;
-	/*0000*/ ULONG PreferredNode : 06; // 0x0003f000;
-	/*0000*/ ULONG PageSize : 02; // 0x000c0000;
-	/*0000*/ ULONG PrivateMemoryAlwaysClear : 01; // 0x00100000;
-	/*0000*/ ULONG PrivateFixup : 01; // 0x00200000;
-	/*0000*/ ULONG HotPatchAllowed : 01; // 0x00400000;
+	/*0000*/ ULONG PreferredNode : 07; // 0x0007f000;
+	/*0000*/ ULONG PageSize : 02; // 0x00180000;
+	/*0000*/ ULONG PrivateMemoryAlwaysClear : 01; // 0x00200000;
+	/*0000*/ ULONG PrivateFixup : 01; // 0x00400000;
+	/*0000*/ ULONG HotPatchState : 02; // 0x01800000;
 	/*0004*/
 };
 
@@ -15403,10 +17310,10 @@ union _MM_STORE_KEY {
 };
 
 struct _MM_SYSTEM_PAGE_COUNTS {
-	/*0000*/ ULONG SystemCodePage;
-	/*0004*/ ULONG SystemDriverPage;
-	/*0008*/ LONG TotalSystemCodePages;
-	/*000c*/ LONG TotalSystemDriverPages;
+	/*0000*/ ULONG volatile SystemCodePage;
+	/*0004*/ ULONG volatile SystemDriverPage;
+	/*0008*/ LONG volatile TotalSystemCodePages;
+	/*000c*/ LONG volatile TotalSystemDriverPages;
 	/*0010*/
 };
 
@@ -15431,8 +17338,9 @@ struct _MSUBSECTION {
 	/*0060*/ ULONGLONG NumberOfMappedViews;
 	/*0068*/ ULONG NumberOfPfnReferences;
 	/*006c*/ ULONG LargeViews;
-	/*0070*/ _MI_PROTOTYPE_PTES_NODE ProtosNode;
-	/*0090*/
+	/*0070*/ void * SubsectionExtentList;
+	/*0078*/ _MI_PROTOTYPE_PTES_NODE ProtosNode;
+	/*0098*/
 };
 
 struct _NAMED_PIPE_CREATE_PARAMETERS {
@@ -15471,6 +17379,8 @@ struct _NLS_DATA_BLOCK {
 	/*0018*/
 };
 
+struct _NLS_STATE;
+
 struct _NONOPAQUE_OPLOCK {
 	/*0000*/ _IRP * IrpExclusiveOplock;
 	/*0008*/ _FILE_OBJECT * FileObject;
@@ -15505,6 +17415,188 @@ struct _NON_PAGED_DEBUG_INFO {
 struct _NPAGED_LOOKASIDE_LIST {
 	/*0000*/ _GENERAL_LOOKASIDE L;
 	/*0080*/
+};
+
+union _NT_IORING_BUFFERREF {
+	/*0000*/ void * Address;
+	/*0000*/ IORING_REGISTERED_BUFFER FixedBuffer;
+	/*0008*/
+};
+
+struct _NT_IORING_COMPLETION_QUEUE {
+	/*0000*/ UINT Head;
+	/*0004*/ UINT Tail;
+	/*0008*/ _NT_IORING_CQE Entries[0x1];
+	/*0020*/
+};
+
+struct _NT_IORING_CQE {
+	/*0000*/ ULONGLONG UserData;
+	/*0000*/ ULONGLONG PaddingUserDataForWow;
+	/*0008*/ _IO_STATUS_BLOCK IoStatus;
+	/*0018*/
+};
+
+enum _NT_IORING_CREATE_ADVISORY_FLAGS {
+	NT_IORING_CREATE_ADVISORY_FLAG_NONE = 0x0
+};
+
+struct _NT_IORING_CREATE_FLAGS {
+	/*0000*/ _NT_IORING_CREATE_REQUIRED_FLAGS Required;
+	/*0004*/ _NT_IORING_CREATE_ADVISORY_FLAGS Advisory;
+	/*0008*/
+};
+
+enum _NT_IORING_CREATE_REQUIRED_FLAGS {
+	NT_IORING_CREATE_REQUIRED_FLAG_NONE = 0x0
+};
+
+union _NT_IORING_HANDLEREF {
+	/*0000*/ void * Handle;
+	/*0000*/ UINT HandleIndex;
+	/*0008*/
+};
+
+struct _NT_IORING_INFO {
+	/*0000*/ IORING_VERSION IoRingVersion;
+	/*0004*/ _NT_IORING_CREATE_FLAGS Flags;
+	/*000c*/ UINT SubmissionQueueSize;
+	/*0010*/ UINT SubmissionQueueRingMask;
+	/*0014*/ UINT CompletionQueueSize;
+	/*0018*/ UINT CompletionQueueRingMask;
+	/*0020*/ _NT_IORING_SUBMISSION_QUEUE * SubmissionQueue;
+	/*0028*/ _NT_IORING_COMPLETION_QUEUE * CompletionQueue;
+	/*0030*/
+};
+
+struct _NT_IORING_OP_CANCEL {
+	/*0000*/ _NT_IORING_OP_FLAGS CommonOpFlags;
+	/*0008*/ _NT_IORING_HANDLEREF File;
+	/*0010*/ ULONGLONG CancelId;
+	/*0018*/
+};
+
+enum _NT_IORING_OP_FLAGS {
+	NT_IORING_OP_FLAG_NONE = 0x0,
+	NT_IORING_OP_FLAG_REGISTERED_FILE_0 = 0x1,
+	NT_IORING_OP_FLAG_REGISTERED_FILE = 0x1,
+	NT_IORING_OP_FLAG_REGISTERED_BUFFER_0 = 0x2,
+	NT_IORING_OP_FLAG_REGISTERED_BUFFER = 0x2
+};
+
+struct _NT_IORING_OP_FLUSH {
+	/*0000*/ _NT_IORING_OP_FLAGS CommonOpFlags;
+	/*0004*/ ULONG Flags;
+	/*0008*/ _NT_IORING_HANDLEREF File;
+	/*0010*/
+};
+
+struct _NT_IORING_OP_READ {
+	/*0000*/ _NT_IORING_OP_FLAGS CommonOpFlags;
+	/*0004*/ UINT Padding;
+	/*0008*/ _NT_IORING_HANDLEREF File;
+	/*0010*/ _NT_IORING_BUFFERREF Buffer;
+	/*0018*/ ULONGLONG Offset;
+	/*0020*/ UINT Length;
+	/*0024*/ UINT Key;
+	/*0028*/
+};
+
+struct _NT_IORING_OP_REGISTER_BUFFERS {
+	/*0000*/ _NT_IORING_OP_FLAGS CommonOpFlags;
+	/*0004*/ _NT_IORING_REG_BUFFERS_FLAGS Flags;
+	/*000c*/ UINT Count;
+	/*0010*/ IORING_BUFFER_INFO * Buffers;
+	/*0018*/
+};
+
+struct _NT_IORING_OP_REGISTER_FILES {
+	/*0000*/ _NT_IORING_OP_FLAGS CommonOpFlags;
+	/*0004*/ _NT_IORING_REG_FILES_FLAGS Flags;
+	/*000c*/ UINT Count;
+	/*0010*/ void * * Handles;
+	/*0018*/
+};
+
+struct _NT_IORING_OP_RESERVED {
+	/*0000*/ ULONGLONG Argument1;
+	/*0008*/ ULONGLONG Argument2;
+	/*0010*/ ULONGLONG Argument3;
+	/*0018*/ ULONGLONG Argument4;
+	/*0020*/ ULONGLONG Argument5;
+	/*0028*/ ULONGLONG Argument6;
+	/*0030*/
+};
+
+struct _NT_IORING_OP_WRITE {
+	/*0000*/ _NT_IORING_OP_FLAGS CommonOpFlags;
+	/*0004*/ _NT_WRITE_FLAGS Flags;
+	/*0008*/ _NT_IORING_HANDLEREF File;
+	/*0010*/ _NT_IORING_BUFFERREF Buffer;
+	/*0018*/ ULONGLONG Offset;
+	/*0020*/ UINT Length;
+	/*0024*/ UINT Key;
+	/*0028*/
+};
+
+enum _NT_IORING_REG_BUFFERS_ADV_FLAGS {
+	NT_IORING_REG_BUFFERS_ADV_FLAG_NONE = 0x0
+};
+
+struct _NT_IORING_REG_BUFFERS_FLAGS {
+	/*0000*/ _NT_IORING_REG_BUFFERS_REQ_FLAGS Required;
+	/*0004*/ _NT_IORING_REG_BUFFERS_ADV_FLAGS Advisory;
+	/*0008*/
+};
+
+enum _NT_IORING_REG_BUFFERS_REQ_FLAGS {
+	NT_IORING_REG_BUFFERS_REQ_FLAG_NONE = 0x0
+};
+
+enum _NT_IORING_REG_FILES_ADV_FLAGS {
+	NT_IORING_REG_FILES_ADV_FLAG_NONE = 0x0
+};
+
+struct _NT_IORING_REG_FILES_FLAGS {
+	/*0000*/ _NT_IORING_REG_FILES_REQ_FLAGS Required;
+	/*0004*/ _NT_IORING_REG_FILES_ADV_FLAGS Advisory;
+	/*0008*/
+};
+
+enum _NT_IORING_REG_FILES_REQ_FLAGS {
+	NT_IORING_REG_FILES_REQ_FLAG_NONE = 0x0
+};
+
+struct _NT_IORING_SQE {
+	/*0000*/ IORING_OP_CODE OpCode;
+	/*0004*/ _NT_IORING_SQE_FLAGS Flags;
+	/*0008*/ ULONGLONG UserData;
+	/*0008*/ ULONGLONG PaddingUserDataForWow;
+	/*0010*/ _NT_IORING_OP_READ Read;
+	/*0010*/ _NT_IORING_OP_REGISTER_FILES RegisterFiles;
+	/*0010*/ _NT_IORING_OP_REGISTER_BUFFERS RegisterBuffers;
+	/*0010*/ _NT_IORING_OP_CANCEL Cancel;
+	/*0010*/ _NT_IORING_OP_WRITE Write;
+	/*0010*/ _NT_IORING_OP_FLUSH Flush;
+	/*0010*/ _NT_IORING_OP_RESERVED ReservedMaxSizePadding;
+	/*0040*/
+};
+
+enum _NT_IORING_SQE_FLAGS {
+	NT_IORING_SQE_FLAG_NONE = 0x0,
+	NT_IORING_SQE_FLAG_DRAIN_PRECEDING_OPS = 0x1
+};
+
+enum _NT_IORING_SQ_FLAGS {
+	NT_IORING_SQ_FLAG_NONE = 0x0
+};
+
+struct _NT_IORING_SUBMISSION_QUEUE {
+	/*0000*/ UINT Head;
+	/*0004*/ UINT Tail;
+	/*0008*/ _NT_IORING_SQ_FLAGS Flags;
+	/*0010*/ _NT_IORING_SQE Entries[0x1];
+	/*0050*/
 };
 
 enum _NT_PRODUCT_TYPE {
@@ -15547,6 +17639,11 @@ struct _NT_TIB64 {
 	/*0028*/ ULONGLONG ArbitraryUserPointer;
 	/*0030*/ ULONGLONG Self;
 	/*0038*/
+};
+
+enum _NT_WRITE_FLAGS {
+	NT_WRITE_FLAG_NONE = 0x0,
+	NT_WRITE_FLAG_WRITE_THROUGH = 0x1
 };
 
 struct _NUMA_MEMORY_RANGE {
@@ -15766,6 +17863,7 @@ struct _OBJECT_SYMBOLIC_LINK {
 	/*0018*/ ULONG DosDeviceDriveIndex;
 	/*001c*/ ULONG Flags;
 	/*0020*/ ULONG AccessMask;
+	/*0024*/ ULONG IntegrityLevel;
 	/*0028*/
 };
 
@@ -15823,18 +17921,25 @@ struct _OBJECT_TYPE_INITIALIZER {
 
 struct _OBP_LOOKUP_CONTEXT {
 	/*0000*/ _OBJECT_DIRECTORY * Directory;
-	/*0008*/ void * Object;
-	/*0010*/ _OBJECT_DIRECTORY_ENTRY * * EntryLink;
-	/*0018*/ ULONG HashValue;
-	/*001c*/ USHORT HashIndex;
-	/*001e*/ UCHAR DirectoryLocked;
-	/*001f*/ UCHAR LockedExclusive;
-	/*0020*/ ULONG LockStateSignature;
-	/*0028*/
+	/*0008*/ _OBJECT_DIRECTORY_ENTRY * * EntryLink;
+	/*0010*/ ULONG HashValue;
+	/*0014*/ UCHAR HashIndex;
+	/*0015*/ UCHAR LockedExclusive;
+	/*0016*/ UCHAR DirectoryReferenced;
+	/*0017*/ UCHAR Unused;
+	/*0018*/
+};
+
+enum _OBP_LOOKUP_DIR_ENTRY_FLAGS {
+	OBP_LOOKUP_SEARCH_SHADOW = 0x1,
+	OBP_LOOKUP_IS_SANDBOXED = 0x2,
+	OBP_LOOKUP_IS_NOT_SANDBOXED = 0x4,
+	OBP_LOOKUP_SANDBOX_COMPUTED = 0x6,
+	OBP_LOOKUP_CASE_INSENSITIVE = 0x40
 };
 
 struct _OBP_SILODRIVERSTATE {
-	/*0000*/ _DEVICE_MAP * SystemDeviceMap;
+	/*0000*/ _EX_FAST_REF SystemDeviceMap;
 	/*0008*/ _OBP_SYSTEM_DOS_DEVICE_STATE SystemDosDeviceState;
 	/*0078*/ _EX_PUSH_LOCK DeviceMapLock;
 	/*0080*/ _OBJECT_NAMESPACE_LOOKUPTABLE PrivateNamespaceLookupTable;
@@ -15894,37 +17999,6 @@ struct _OFFLINE_CRASHDUMP_CONFIGURATION_TABLE_V2 {
 	/*0020*/
 };
 
-enum _OPENCOUNT_REASON {
-	OpenCount_SkipLogging = 0x0,
-	OpenCount_AsyncRead = 0x1,
-	OpenCount_FlushCache = 0x2,
-	OpenCount_GetDirtyPage = 0x3,
-	OpenCount_GetFlushedVDL = 0x4,
-	OpenCount_InitCachemap1 = 0x5,
-	OpenCount_InitCachemap2 = 0x6,
-	OpenCount_InitCachemap3 = 0x7,
-	OpenCount_InitCachemap4 = 0x8,
-	OpenCount_InitCachemap5 = 0x9,
-	OpenCount_MdlWrite = 0xa,
-	OpenCount_MdlWriteAbort = 0xb,
-	OpenCount_NotifyMappedWrite = 0xc,
-	OpenCount_NotifyMappedWriteCompCallback = 0xd,
-	OpenCount_PurgeCache = 0xe,
-	OpenCount_PurgeCacheActiveViews = 0xf,
-	OpenCount_ReadAhead = 0x10,
-	OpenCount_SetFileSize = 0x11,
-	OpenCount_SetFileSizeSection = 0x12,
-	OpenCount_UninitCachemapReadAhead = 0x13,
-	OpenCount_UninitCachemapReg = 0x14,
-	OpenCount_UnmapInactiveViews = 0x15,
-	OpenCount_UnmapInactiveViews1 = 0x16,
-	OpenCount_UnmapInactiveViews2 = 0x17,
-	OpenCount_UnmapInactiveViews3 = 0x18,
-	OpenCount_WriteBehind = 0x19,
-	OpenCount_WriteBehindComplete = 0x1a,
-	OpenCount_WriteBehindFailAcquire = 0x1b
-};
-
 struct _OPEN_PACKET {
 	/*0000*/ SHORT Type;
 	/*0002*/ SHORT Size;
@@ -15959,7 +18033,8 @@ struct _OPEN_PACKET {
 	/*00c8*/ _FILE_INFORMATION_CLASS FileInformationClass;
 	/*00cc*/ ULONG FileInformationLength;
 	/*00d0*/ UCHAR FilterQuery;
-	/*00d8*/
+	/*00d8*/ LONGLONG ExtendedCreateFlags;
+	/*00e0*/
 };
 
 struct _OWNER_ENTRY {
@@ -16020,6 +18095,20 @@ enum _PCI_BUSMASTER_RID_TYPE {
 	BusmasterRidFromDeviceRid = 0x1,
 	BusmasterRidFromBridgeRid = 0x2,
 	BusmasterRidFromMultipleBridges = 0x3
+};
+
+struct _PCI_SLOT_NUMBER {
+	union {
+		struct {
+			/*0000*/ ULONG DeviceNumber : 05; // 0x0000001f;
+			/*0000*/ ULONG FunctionNumber : 03; // 0x000000e0;
+			/*0000*/ ULONG Reserved : 24; // 0xffffff00;
+			/*0004*/
+		} bits;
+		/*0000*/ ULONG AsULONG;
+		/*0004*/
+	} u;
+	/*0004*/
 };
 
 struct _PCW_BUFFER;
@@ -16114,7 +18203,8 @@ struct _PCW_REGISTRATION_INFORMATION {
 	/*0018*/ _PCW_COUNTER_DESCRIPTOR * Counters;
 	/*0020*/ LONG (* Callback)( _PCW_CALLBACK_TYPE , _PCW_CALLBACK_INFORMATION * , void * );
 	/*0028*/ void * CallbackContext;
-	/*0030*/
+	/*0030*/ PCW_REGISTRATION_FLAGS Flags;
+	/*0038*/
 };
 
 struct _PEB {
@@ -16158,7 +18248,7 @@ struct _PEB {
 	/*0068*/ void * ApiSetMap;
 	/*0070*/ ULONG TlsExpansionCounter;
 	/*0074*/ UCHAR Padding2[0x4];
-	/*0078*/ void * TlsBitmap;
+	/*0078*/ _RTL_BITMAP * TlsBitmap;
 	/*0080*/ ULONG TlsBitmapBits[0x2];
 	/*0088*/ void * ReadOnlySharedMemoryBase;
 	/*0090*/ void * SharedData;
@@ -16193,7 +18283,7 @@ struct _PEB {
 	/*0138*/ ULONGLONG ActiveProcessAffinityMask;
 	/*0140*/ ULONG GdiHandleBuffer[0x3c];
 	/*0230*/ void (* PostProcessInitRoutine)();
-	/*0238*/ void * TlsExpansionBitmap;
+	/*0238*/ _RTL_BITMAP * TlsExpansionBitmap;
 	/*0240*/ ULONG TlsExpansionBitmapBits[0x20];
 	/*02c0*/ ULONG SessionId;
 	/*02c4*/ UCHAR Padding5[0x4];
@@ -16207,11 +18297,18 @@ struct _PEB {
 	/*0308*/ _ACTIVATION_CONTEXT_DATA const * SystemDefaultActivationContextData;
 	/*0310*/ _ASSEMBLY_STORAGE_MAP * SystemAssemblyStorageMap;
 	/*0318*/ ULONGLONG MinimumStackCommit;
-	/*0320*/ void * SparePointers[0x4];
-	/*0340*/ ULONG SpareUlongs[0x5];
+	/*0320*/ void * SparePointers[0x2];
+	/*0330*/ void * PatchLoaderData;
+	/*0338*/ _CHPEV2_PROCESS_INFO * ChpeV2ProcessInfo;
+	/*0340*/ ULONG AppModelFeatureState;
+	/*0344*/ ULONG SpareUlongs[0x2];
+	/*034c*/ USHORT ActiveCodePage;
+	/*034e*/ USHORT OemCodePage;
+	/*0350*/ USHORT UseCaseMapping;
+	/*0352*/ USHORT UnusedNlsField;
 	/*0358*/ void * WerRegistrationData;
 	/*0360*/ void * WerShipAssertPtr;
-	/*0368*/ void * pUnused;
+	/*0368*/ void * EcCodeBitMap;
 	/*0370*/ void * pImageHeaderHash;
 	/*0378*/ ULONG TracingFlags;
 	/*0378*/ ULONG HeapTracingEnabled : 01; // 0x00000001;
@@ -16233,7 +18330,8 @@ struct _PEB {
 	/*07c0*/ ULONG SixtySecondEnabled : 01; // 0x00000001;
 	/*07c0*/ ULONG Reserved : 31; // 0xfffffffe;
 	/*07c4*/ ULONG NtGlobalFlag2;
-	/*07c8*/
+	/*07c8*/ ULONGLONG ExtendedFeatureDisableMask;
+	/*07d0*/
 };
 
 struct _PEB32 {
@@ -16320,11 +18418,18 @@ struct _PEB32 {
 	/*0200*/ ULONG SystemDefaultActivationContextData;
 	/*0204*/ ULONG SystemAssemblyStorageMap;
 	/*0208*/ ULONG MinimumStackCommit;
-	/*020c*/ ULONG SparePointers[0x4];
-	/*021c*/ ULONG SpareUlongs[0x5];
+	/*020c*/ ULONG SparePointers[0x2];
+	/*0214*/ ULONG PatchLoaderData;
+	/*0218*/ ULONG ChpeV2ProcessInfo;
+	/*021c*/ ULONG AppModelFeatureState;
+	/*0220*/ ULONG SpareUlongs[0x2];
+	/*0228*/ USHORT ActiveCodePage;
+	/*022a*/ USHORT OemCodePage;
+	/*022c*/ USHORT UseCaseMapping;
+	/*022e*/ USHORT UnusedNlsField;
 	/*0230*/ ULONG WerRegistrationData;
 	/*0234*/ ULONG WerShipAssertPtr;
-	/*0238*/ ULONG pUnused;
+	/*0238*/ ULONG Spare;
 	/*023c*/ ULONG pImageHeaderHash;
 	/*0240*/ ULONG TracingFlags;
 	/*0240*/ ULONG HeapTracingEnabled : 01; // 0x00000001;
@@ -16345,7 +18450,8 @@ struct _PEB32 {
 	/*0474*/ ULONG SixtySecondEnabled : 01; // 0x00000001;
 	/*0474*/ ULONG Reserved : 31; // 0xfffffffe;
 	/*0478*/ ULONG NtGlobalFlag2;
-	/*0480*/
+	/*0480*/ ULONGLONG ExtendedFeatureDisableMask;
+	/*0488*/
 };
 
 struct _PEB64 {
@@ -16438,11 +18544,18 @@ struct _PEB64 {
 	/*0308*/ ULONGLONG SystemDefaultActivationContextData;
 	/*0310*/ ULONGLONG SystemAssemblyStorageMap;
 	/*0318*/ ULONGLONG MinimumStackCommit;
-	/*0320*/ ULONGLONG SparePointers[0x4];
-	/*0340*/ ULONG SpareUlongs[0x5];
+	/*0320*/ ULONGLONG SparePointers[0x2];
+	/*0330*/ ULONGLONG PatchLoaderData;
+	/*0338*/ ULONGLONG ChpeV2ProcessInfo;
+	/*0340*/ ULONG AppModelFeatureState;
+	/*0344*/ ULONG SpareUlongs[0x2];
+	/*034c*/ USHORT ActiveCodePage;
+	/*034e*/ USHORT OemCodePage;
+	/*0350*/ USHORT UseCaseMapping;
+	/*0352*/ USHORT UnusedNlsField;
 	/*0358*/ ULONGLONG WerRegistrationData;
 	/*0360*/ ULONGLONG WerShipAssertPtr;
-	/*0368*/ ULONGLONG pUnused;
+	/*0368*/ ULONGLONG EcCodeBitMap;
 	/*0370*/ ULONGLONG pImageHeaderHash;
 	/*0378*/ ULONG TracingFlags;
 	/*0378*/ ULONG HeapTracingEnabled : 01; // 0x00000001;
@@ -16464,7 +18577,8 @@ struct _PEB64 {
 	/*07c0*/ ULONG SixtySecondEnabled : 01; // 0x00000001;
 	/*07c0*/ ULONG Reserved : 31; // 0xfffffffe;
 	/*07c4*/ ULONG NtGlobalFlag2;
-	/*07c8*/
+	/*07c8*/ ULONGLONG ExtendedFeatureDisableMask;
+	/*07d0*/
 };
 
 struct _PEBS_DS_SAVE_AREA {
@@ -16559,7 +18673,7 @@ struct _PEP_ACPI_GPIO_RESOURCE {
 	/*0014*/ _GPIO_PIN_IORESTRICTION_TYPE IoRestrictionType;
 	/*0018*/ USHORT DriveStrength;
 	/*001a*/ USHORT DebounceTimeout;
-	/*0020*/ WCHAR * PinTable;
+	/*0020*/ USHORT * PinTable;
 	/*0028*/ USHORT PinCount;
 	/*002a*/ UCHAR ResourceSourceIndex;
 	/*0030*/ _UNICODE_STRING * ResourceSourceName;
@@ -16830,6 +18944,12 @@ struct _PHYSICAL_MEMORY_DESCRIPTOR {
 	/*0020*/
 };
 
+struct _PHYSICAL_MEMORY_RANGE {
+	/*0000*/ _LARGE_INTEGER BaseAddress;
+	/*0008*/ _LARGE_INTEGER NumberOfBytes;
+	/*0010*/
+};
+
 struct _PHYSICAL_MEMORY_RUN {
 	/*0000*/ ULONGLONG BasePage;
 	/*0008*/ ULONGLONG PageCount;
@@ -16878,7 +18998,7 @@ struct _PLATFORM_IDLE_ACCOUNTING {
 	/*000c*/ PPM_IDLE_BUCKET_TIME_TYPE TimeUnit;
 	/*0010*/ ULONGLONG StartTime;
 	/*0018*/ _PLATFORM_IDLE_STATE_ACCOUNTING State[0x1];
-	/*0408*/
+	/*0410*/
 };
 
 struct _PLATFORM_IDLE_STATE_ACCOUNTING {
@@ -16890,8 +19010,8 @@ struct _PLATFORM_IDLE_STATE_ACCOUNTING {
 	/*0020*/ ULONGLONG TotalTime;
 	/*0028*/ ULONG InvalidBucketIndex;
 	/*0030*/ _PPM_SELECTION_STATISTICS SelectionStatistics;
-	/*00b0*/ _PROC_IDLE_STATE_BUCKET IdleTimeBuckets[0x1a];
-	/*03f0*/
+	/*00b8*/ _PROC_IDLE_STATE_BUCKET IdleTimeBuckets[0x1a];
+	/*03f8*/
 };
 
 struct _PLATFORM_INTERRUPT {
@@ -16905,6 +19025,16 @@ struct _PLATFORM_INTERRUPT {
 	/*0008*/ ULONG GlobalVector;
 	/*000c*/ ULONG Reserved;
 	/*0010*/
+};
+
+struct _PLUGPLAY_CONTROL_STATUS_DATA {
+	/*0000*/ _UNICODE_STRING DeviceInstance;
+	/*0010*/ ULONG Operation;
+	/*0014*/ ULONG DeviceStatus;
+	/*0018*/ ULONG DeviceProblem;
+	/*001c*/ ULONG Flags;
+	/*0020*/ LONG ProblemStatus;
+	/*0028*/
 };
 
 struct _PLUGPLAY_EVENT_BLOCK {
@@ -17004,7 +19134,7 @@ struct _PNP_DEVICE_ACTION_ENTRY {
 	/*0010*/ _DEVICE_OBJECT * DeviceObject;
 	/*0018*/ _PNP_DEVICE_ACTION_REQUEST RequestType;
 	/*001c*/ UCHAR ReorderingBarrier;
-	/*0020*/ ULONGLONG RequestArgument;
+	/*0020*/ _PNP_DEVICE_ACTION_REQUEST_ARGUMENT RequestArgument;
 	/*0028*/ _KEVENT * CompletionEvent;
 	/*0030*/ LONG * CompletionStatus;
 	/*0038*/ _GUID ActivityId;
@@ -17020,7 +19150,7 @@ enum _PNP_DEVICE_ACTION_REQUEST {
 	ClearDeviceProblem = 0x1,
 	ClearProblem = 0x2,
 	ClearEjectProblem = 0x3,
-	HaltDevice = 0x4,
+	ReservedAction0 = 0x4,
 	QueryPowerRelations = 0x5,
 	Rebalance = 0x6,
 	ReenumerateBootDevices = 0x7,
@@ -17042,7 +19172,39 @@ enum _PNP_DEVICE_ACTION_REQUEST {
 	ConfigureDeviceExtensions = 0x17,
 	ConfigureDeviceReset = 0x18,
 	ClearDmaGuardProblem = 0x19,
-	PnpDeviceActionRequestMax = 0x1a
+	RequestDeviceReset = 0x1a,
+	UpdateConsoleLockState = 0x1b,
+	PnpDeviceActionRequestMax = 0x1c
+};
+
+union _PNP_DEVICE_ACTION_REQUEST_ARGUMENT {
+	struct {
+		/*0000*/ ULONG ProblemCodeToClear;
+		/*0004*/
+	} ClearProblem;
+	/*0000*/ _PNP_REBALANCE_FLAGS Rebalance;
+	struct {
+		/*0000*/ UCHAR ClearWaitingForFdo;
+		/*0001*/
+	} ReenumerateDeviceOnly;
+	struct {
+		/*0000*/ UCHAR StopRequired;
+		/*0001*/
+	} ResourceRequirementsChanged;
+	struct {
+		/*0000*/ ULONG Flags;
+		/*0004*/
+	} RequestDeviceReset;
+	struct {
+		/*0000*/ _PLUGPLAY_CONTROL_STATUS_DATA * ControlStatusData;
+		/*0008*/
+	} SetDeviceProblem;
+	struct {
+		/*0000*/ _PNP_DEVICE_IOMMU_DOMAIN_POLICY DomainPolicy;
+		/*0004*/
+	} UpdateConsoleLockState;
+	/*0000*/ ULONGLONG AsUlong64;
+	/*0008*/
 };
 
 struct _PNP_DEVICE_COMPLETION_QUEUE {
@@ -17105,6 +19267,12 @@ struct _PNP_DEVICE_EVENT_LIST {
 	/*0088*/
 };
 
+enum _PNP_DEVICE_IOMMU_DOMAIN_POLICY {
+	IommuDomainPolicyAllowAll = 0x0,
+	IommuDomainPolicyBlockPassthrough = 0x1,
+	IommuDomainPolicyMax = 0x2
+};
+
 enum _PNP_DEVNODE_QUERY_REBALANCE_VETO_REASON {
 	DeviceQueryRebalanceSucceeded = 0x0,
 	DeviceQueryStopFailed = 0x1,
@@ -17116,26 +19284,43 @@ enum _PNP_DEVNODE_QUERY_REBALANCE_VETO_REASON {
 enum _PNP_DEVNODE_STATE {
 	DeviceNodeUnspecified = 0x300,
 	DeviceNodeUninitialized = 0x301,
-	DeviceNodeInitialized = 0x302,
-	DeviceNodeDriversAdded = 0x303,
-	DeviceNodeResourcesAssigned = 0x304,
-	DeviceNodeStartPending = 0x305,
-	DeviceNodeStartCompletion = 0x306,
-	DeviceNodeStartPostWork = 0x307,
-	DeviceNodeStarted = 0x308,
-	DeviceNodeQueryStopped = 0x309,
-	DeviceNodeStopped = 0x30a,
-	DeviceNodeRestartCompletion = 0x30b,
-	DeviceNodeEnumeratePending = 0x30c,
-	DeviceNodeEnumerateCompletion = 0x30d,
-	DeviceNodeAwaitingQueuedDeletion = 0x30e,
-	DeviceNodeAwaitingQueuedRemoval = 0x30f,
-	DeviceNodeQueryRemoved = 0x310,
-	DeviceNodeRemovePendingCloses = 0x311,
-	DeviceNodeRemoved = 0x312,
-	DeviceNodeDeletePendingCloses = 0x313,
-	DeviceNodeDeleted = 0x314,
-	MaxDeviceNodeState = 0x315
+	DeviceNodeUninitializedPending = 0x302,
+	DeviceNodeInitializedPending = 0x303,
+	DeviceNodeInitialized = 0x304,
+	DeviceNodeDriversAdded = 0x305,
+	DeviceNodeResourcesAssigned = 0x306,
+	DeviceNodeStartPending = 0x307,
+	DeviceNodeStartCompletion = 0x308,
+	DeviceNodeStartPostWork = 0x309,
+	DeviceNodeStarted = 0x30a,
+	DeviceNodeQueryStopped = 0x30b,
+	DeviceNodeStopped = 0x30c,
+	DeviceNodeRestartCompletion = 0x30d,
+	DeviceNodeEnumeratePending = 0x30e,
+	DeviceNodeEnumerateCompletion = 0x30f,
+	DeviceNodeAwaitingQueuedDeletion = 0x310,
+	DeviceNodeAwaitingQueuedRemoval = 0x311,
+	DeviceNodeQueryRemoved = 0x312,
+	DeviceNodeRemovePendingCloses = 0x313,
+	DeviceNodeRemoved = 0x314,
+	DeviceNodeDeletePendingCloses = 0x315,
+	DeviceNodeDeleted = 0x316,
+	MaxDeviceNodeState = 0x317
+};
+
+struct _PNP_PROBLEM_CODE_LOG_ENTRY {
+	/*0000*/ _LARGE_INTEGER Timestamp;
+	/*0008*/ _PNP_PROBLEM_CODE_LOG_OPERATION Operation;
+	/*000c*/ ULONG ProblemCode;
+	/*0010*/ LONG ProblemStatus;
+	/*0018*/
+};
+
+enum _PNP_PROBLEM_CODE_LOG_OPERATION {
+	ProblemCodeOpInvalid = 0x0,
+	ProblemCodeOpSet = 0x1,
+	ProblemCodeOpClear = 0x2,
+	ProblemCodeOpMax = 0x3
 };
 
 enum _PNP_REBALANCE_FAILURE {
@@ -17148,6 +19333,17 @@ enum _PNP_REBALANCE_FAILURE {
 	RebalanceFailureNoConfiguration = 0x6
 };
 
+union _PNP_REBALANCE_FLAGS {
+	struct {
+		/*0000*/ ULONG RebalanceDueToDynamicPartitioning : 01; // 0x00000001;
+		/*0000*/ ULONG ResetDeviceWhileStopped : 01; // 0x00000002;
+		/*0000*/ ULONG Reserved : 30; // 0xfffffffc;
+		/*0004*/
+	} u;
+	/*0000*/ ULONG AsUlong;
+	/*0004*/
+};
+
 enum _PNP_REBALANCE_REASON {
 	RebalanceReasonUnknown = 0x0,
 	RebalanceReasonRequirementsChanged = 0x1,
@@ -17155,19 +19351,19 @@ enum _PNP_REBALANCE_REASON {
 };
 
 struct _PNP_REBALANCE_TRACE_CONTEXT {
-	/*0000*/ ULONG DeviceCount;
-	/*0004*/ ULONG RebalancePhase;
-	/*0008*/ _PNP_REBALANCE_REASON Reason[0x2];
+	/*0000*/ ULONG DeviceCount[0x2];
+	/*0008*/ ULONG RebalancePhase;
+	/*000c*/ _PNP_REBALANCE_REASON Reason;
 	/*0010*/ _PNP_REBALANCE_FAILURE Failure[0x2];
-	/*0018*/ _DEVICE_NODE * SubtreeRoot;
-	/*0020*/ UCHAR SubtreeIncludesRoot;
-	/*0028*/ _DEVICE_NODE * TriggerRoot;
-	/*0030*/ UCHAR RebalanceDueToDynamicPartitioning;
-	/*0038*/ ULONGLONG BeginTime;
-	/*0040*/ _DEVICE_NODE * VetoNode[0x2];
-	/*0050*/ _PNP_DEVNODE_QUERY_REBALANCE_VETO_REASON VetoQueryRebalanceReason[0x2];
-	/*0058*/ _PNP_RESOURCE_CONFLICT_TRACE_CONTEXT ConflictContext;
-	/*0070*/
+	/*0018*/ _DEVICE_NODE * SubtreeRoot[0x2];
+	/*0028*/ UCHAR SubtreeIncludesRoot[0x2];
+	/*0030*/ _DEVICE_NODE * TriggerRoot;
+	/*0038*/ _PNP_REBALANCE_FLAGS Flags;
+	/*0040*/ ULONGLONG BeginTime[0x2];
+	/*0050*/ _DEVICE_NODE * VetoNode[0x2];
+	/*0060*/ _PNP_DEVNODE_QUERY_REBALANCE_VETO_REASON VetoQueryRebalanceReason[0x2];
+	/*0068*/ _PNP_RESOURCE_CONFLICT_TRACE_CONTEXT ConflictContext;
+	/*0080*/
 };
 
 struct _PNP_REPLACE_PROCESSOR_LIST {
@@ -17223,11 +19419,15 @@ struct _PNP_WATCHDOG {
 	/*0008*/ _WDT_HANDLE * WatchdogTimer;
 	/*0010*/ _PNP_WATCHDOG_TYPE WatchdogContextType;
 	/*0018*/ void * WatchdogContext;
-	/*0020*/ UCHAR TriggerEventLogged;
-	/*0028*/
+	/*0020*/ UCHAR FirstChanceTriggered;
+	/*0021*/ UCHAR TelemetryGenerated;
+	/*0028*/ _UNICODE_STRING DriverToBlame;
+	/*0038*/ WCHAR DriverToBlameBuffer[0x1];
+	/*0040*/
 };
 
 enum _PNP_WATCHDOG_TYPE {
+	PNP_WATCHDOG_NONE = 0x0,
 	PNP_EVENT_WORKER_WATCHDOG = 0x1,
 	PNP_DEVICE_COMPLETION_QUEUE_WATCHDOG = 0x2,
 	PNP_DELAYED_REMOVE_WORKER_WATCHDOG = 0x3,
@@ -17260,6 +19460,24 @@ struct _POOL_HEADER {
 	/*0010*/
 };
 
+struct _POOL_LIMIT_INFO {
+	/*0000*/ ULONGLONG HardMemoryLimit;
+	/*0008*/ ULONGLONG NotificationLimit;
+	/*0010*/ ULONGLONG MemoryIssued;
+	/*0018*/
+};
+
+struct _POOL_LIMIT_TABLE_ENTRY {
+	/*0000*/ _RTL_HASH_ENTRY HashEntry;
+	/*0000*/ ULONGLONG Reserved;
+	/*0008*/ _SINGLE_LIST_ENTRY SListEntry;
+	/*0010*/ _POOL_LIMIT_INFO LimitInfo[0x2];
+	/*0040*/ _WNF_STATE_NAME NotificationObject;
+	/*0050*/ _SLIST_ENTRY NotificationEntry;
+	/*0060*/ ULONG Scheduled;
+	/*0070*/
+};
+
 struct _POOL_TRACKER_BIG_PAGES {
 	/*0000*/ ULONGLONG volatile Va;
 	/*0008*/ ULONG Key;
@@ -17267,7 +19485,8 @@ struct _POOL_TRACKER_BIG_PAGES {
 	/*000c*/ ULONG PoolType : 12; // 0x000fff00;
 	/*000c*/ ULONG SlushSize : 12; // 0xfff00000;
 	/*0010*/ ULONGLONG NumberOfBytes;
-	/*0018*/
+	/*0018*/ _EPROCESS * ProcessBilled;
+	/*0020*/
 };
 
 struct _POOL_TRACKER_TABLE {
@@ -17278,7 +19497,9 @@ struct _POOL_TRACKER_TABLE {
 	/*0020*/ ULONGLONG PagedBytes;
 	/*0028*/ ULONGLONG PagedAllocs;
 	/*0030*/ ULONGLONG PagedFrees;
-	/*0038*/
+	/*0038*/ LONGLONG AvailableLimit[0x2];
+	/*0048*/ _POOL_LIMIT_TABLE_ENTRY * LimitInfo;
+	/*0050*/
 };
 
 enum _POOL_TYPE {
@@ -17365,7 +19586,8 @@ enum _POP_DEEP_SLEEP_DISENGAGE_REASON {
 	PopDeepSleepDisengageReasonAcpi = 0x7,
 	PopDeepSleepDisengageReasonDirectedDripsTransition = 0x8,
 	PopDeepSleepDisengageReasonPepPreVeto = 0x9,
-	PopDeepSleepDisengageReasonMax = 0xa
+	PopDeepSleepDisengageReasonThermal = 0xa,
+	PopDeepSleepDisengageReasonMax = 0xb
 };
 
 enum _POP_DEVICE_IDLE_TYPE {
@@ -17414,18 +19636,26 @@ enum _POP_DIRECTED_DRIPS_PROBLEM_DEVICE_REASON {
 	DirectedDripsProblemDeviceReasonPagingDevice = 0x6,
 	DirectedDripsProblemDeviceReasonDebuggingDevice = 0x7,
 	DirectedDripsProblemDeviceReasonDfxNotAllowed = 0x8,
-	DirectedDripsProblemDeviceReasonMax = 0x9
+	DirectedDripsProblemDeviceReasonDfxOptOut = 0x9,
+	DirectedDripsProblemDeviceReasonMax = 0xa
 };
 
 struct _POP_FX_ACCOUNTING {
 	/*0000*/ ULONGLONG Lock;
 	/*0008*/ UCHAR Active;
 	/*000c*/ ULONG DripsRequiredState;
-	/*0010*/ LONG Level;
-	/*0018*/ LONGLONG ActiveStamp;
+	/*0010*/ _POP_FX_ACCOUNTING_MODE AccountingMode;
+	/*0018*/ ULONGLONG ActiveStamp;
 	/*0020*/ _POP_FX_ACTIVE_TIME_ACCOUNTING CsActiveTimeAccounting;
 	/*0080*/ _POP_FX_ACTIVE_TIME_ACCOUNTING CsCriticalActiveTimeAccounting;
 	/*00e0*/
+};
+
+enum _POP_FX_ACCOUNTING_MODE {
+	PopFxAccountingModeDisabled = 0x0,
+	PopFxAccountingModeBasic = 0x1,
+	PopFxAccountingModeEnhanced = 0x2,
+	PopFxAccountingModeMax = 0x3
 };
 
 struct _POP_FX_ACTIVE_TIME_ACCOUNTING {
@@ -17460,7 +19690,9 @@ struct _POP_FX_COMPONENT {
 	/*00c8*/ _POP_FX_ACCOUNTING Accounting;
 	/*01a8*/ _POP_FX_PERF_INFO * Performance;
 	/*01b0*/ _POP_COMPONENT_POWER_PROFILE * PowerProfile;
-	/*01b8*/
+	/*01b8*/ _LIST_ENTRY ExternalDependents;
+	/*01c8*/ _LIST_ENTRY ExternalDependencies;
+	/*01d8*/
 };
 
 union _POP_FX_COMPONENT_FLAGS {
@@ -17532,7 +19764,12 @@ struct _POP_FX_DEVICE {
 	/*0490*/ _POP_FX_DEVICE_DIRECTED_TRANSITION_STATE DirectedTransitionState;
 	/*04a0*/ _POP_DEVICE_POWER_PROFILE * PowerProfile;
 	/*04a8*/ _UNICODE_STRING FriendlyName;
-	/*04b8*/
+	/*04b8*/ _WORK_QUEUE_ITEM ReportDevicePoweredOnPassiveWorkItem;
+	/*04d8*/ ULONGLONG RelationsLock;
+	/*04e0*/ ULONG IdleProviderCount;
+	/*04e8*/ _IRP * PendingDevicePowerIrp;
+	/*04f0*/ _LIST_ENTRY ExternalDependencies;
+	/*0500*/
 };
 
 struct _POP_FX_DEVICE_DIRECTED_TRANSITION_STATE {
@@ -17684,8 +19921,7 @@ struct _POP_FX_WORK_POOL {
 	/*0020*/ _KSEMAPHORE WorkPoolQueues[0x2];
 	/*0060*/ LONG volatile WorkItemStatus;
 	/*0068*/ _POP_FX_WORK_POOL_ITEM WorkItems[0x4];
-	/*0108*/ _KTHREAD * EmergencyWorkerThread;
-	/*0110*/ _KTHREAD * DynamicWorkerThreads[0x4];
+	/*0108*/ _KTHREAD * PoolWorkerThreads[0x5];
 	/*0130*/
 };
 
@@ -17751,7 +19987,7 @@ struct _POP_HIBER_CONTEXT {
 	/*0130*/ void * ExtraMapVa;
 	/*0138*/ ULONGLONG BitlockerKeyPFN;
 	/*0140*/ _POP_IO_INFO IoInfo;
-	/*01b0*/ WCHAR * IoChecksums;
+	/*01b0*/ USHORT * IoChecksums;
 	/*01b8*/ ULONGLONG IoChecksumsSize;
 	/*01c0*/ ULONG HardwareConfigurationSignature;
 	/*01c4*/ UCHAR IumEnabled;
@@ -17795,7 +20031,6 @@ struct _POP_IRP_DATA {
 	/*00b8*/ UCHAR MinorFunction;
 	/*00bc*/ _POWER_STATE_TYPE PowerStateType;
 	/*00c0*/ _POWER_STATE PowerState;
-	/*00c4*/ UCHAR WatchdogEnabled;
 	/*00c8*/ _POP_FX_DEVICE * FxDevice;
 	/*00d0*/ UCHAR SystemTransition;
 	/*00d1*/ UCHAR NotifyPEP;
@@ -17805,15 +20040,26 @@ struct _POP_IRP_DATA {
 		/*00e0*/ void * CallerContext;
 		/*00e8*/ _DEVICE_OBJECT * CallerDevice;
 		/*00f0*/ UCHAR SystemWake;
-		/*00f8*/
+		/*00f8*/ _WORK_QUEUE_ITEM PassiveCompletionWorkItem;
+		/*0118*/
 	} Device;
 	struct {
 		/*00d8*/ _PO_DEVICE_NOTIFY * NotifyDevice;
 		/*00e0*/ UCHAR FxDeviceActivated;
 		/*00e8*/
 	} System;
-	/*00f8*/ _POP_PEP_NOTIFY_DEVICE_DSTATE_REASON DStateReason;
-	/*0100*/
+	/*0118*/ _POP_PEP_NOTIFY_DEVICE_DSTATE_REASON DStateReason;
+	/*0120*/ ULONGLONG WatchdogLock;
+	/*0128*/ _POP_IRP_WATCHDOG_STATE WatchdogState;
+	/*0130*/ ULONGLONG BlackboxWatchdogStartTime;
+	/*0138*/
+};
+
+enum _POP_IRP_WATCHDOG_STATE {
+	IrpWatchdogStateDisabled = 0x0,
+	IrpWatchdogStateEnabled = 0x1,
+	IrpWatchdogStateCompleted = 0x2,
+	IrpWatchdogStateBlackboxSelected = 0x3
 };
 
 struct _POP_IRP_WORKER_ENTRY {
@@ -17900,10 +20146,11 @@ struct _POP_POWER_ACTION {
 	/*01a0*/ UCHAR WatchdogInitialized;
 	/*01a4*/ _POP_POWER_ACTION_WATCHDOG_STATE WatchdogState;
 	/*01a8*/ ULONGLONG WatchdogStartTime;
-	/*01b0*/ _KTHREAD * ActionWorkerThread;
-	/*01b8*/ _KTHREAD * PromoteActionWorkerThread;
-	/*01c0*/ _KTHREAD * UnlockAfterSleepWorkerThread;
-	/*01c8*/
+	/*01b0*/ ULONG WatchdogTimeout;
+	/*01b8*/ _KTHREAD * ActionWorkerThread;
+	/*01c0*/ _KTHREAD * PromoteActionWorkerThread;
+	/*01c8*/ _KTHREAD * UnlockAfterSleepWorkerThread;
+	/*01d0*/
 };
 
 enum _POP_POWER_ACTION_WATCHDOG_STATE {
@@ -17932,7 +20179,7 @@ struct _POP_POWER_SETTING_VALUES {
 	/*00f0*/ UCHAR AwayModeEnabled;
 	/*00f1*/ UCHAR AwayModeEngaged;
 	/*00f2*/ UCHAR AwayModePolicyAllowed;
-	/*00f4*/ LONG volatile AwayModeIgnoreUserPresent;
+	/*00f4*/ LONG AwayModeIgnoreUserPresent;
 	/*00f8*/ LONG volatile AwayModeIgnoreAction;
 	/*00fc*/ UCHAR DisableFastS4;
 	/*00fd*/ UCHAR DisableStandbyStates;
@@ -17968,12 +20215,12 @@ struct _POP_PPM_PROFILE {
 	/*001c*/ ULONG Flags;
 	/*0020*/ UCHAR Priority;
 	/*0028*/ _PPM_ENGINE_SETTINGS Settings[0x2];
-	/*1588*/ ULONGLONG StartTime;
-	/*1590*/ ULONGLONG Count;
-	/*1598*/ ULONGLONG MaxDuration;
-	/*15a0*/ ULONGLONG MinDuration;
-	/*15a8*/ ULONGLONG TotalDuration;
-	/*15b0*/
+	/*0398*/ ULONGLONG StartTime;
+	/*03a0*/ ULONGLONG Count;
+	/*03a8*/ ULONGLONG MaxDuration;
+	/*03b0*/ ULONGLONG MinDuration;
+	/*03b8*/ ULONGLONG TotalDuration;
+	/*03c0*/
 };
 
 struct _POP_RW_LOCK {
@@ -18261,7 +20508,30 @@ enum _POWER_INFORMATION_LEVEL_INTERNAL {
 	PowerInternalClearConstraints = 0x41,
 	PowerInternalSoftParkVelocityEnabled = 0x42,
 	PowerInternalQueryIntelPepCapabilities = 0x43,
-	PowerInformationInternalMaximum = 0x44
+	PowerInternalGetSystemIdleLoopEnablement = 0x44,
+	PowerInternalGetVmPerfControlSupport = 0x45,
+	PowerInternalGetVmPerfControlConfig = 0x46,
+	PowerInternalSleepDetailedDiagUpdate = 0x47,
+	PowerInternalProcessorClassFrequencyBandsStats = 0x48,
+	PowerInternalHostGlobalUserPresenceStateUpdate = 0x49,
+	PowerInternalCpuNodeIdleIntervalStats = 0x4a,
+	PowerInternalClassIdleIntervalStats = 0x4b,
+	PowerInternalCpuNodeConcurrencyStats = 0x4c,
+	PowerInternalClassConcurrencyStats = 0x4d,
+	PowerInternalQueryProcMeasurementCapabilities = 0x4e,
+	PowerInternalQueryProcMeasurementValues = 0x4f,
+	PowerInternalPrepareForSystemInitiatedReboot = 0x50,
+	PowerInternalGetAdaptiveSessionState = 0x51,
+	PowerInternalSetConsoleLockedState = 0x52,
+	PowerInternalOverrideSystemInitiatedRebootState = 0x53,
+	PowerInternalFanImpactStats = 0x54,
+	PowerInternalFanRpmBuckets = 0x55,
+	PowerInternalPowerBootAppDiagInfo = 0x56,
+	PowerInternalUnregisterShutdownNotification = 0x57,
+	PowerInternalManageTransitionStateRecord = 0x58,
+	PowerInternalGetAcpiTimeAndAlarmCapabilities = 0x59,
+	PowerInternalSuspendResumeRequest = 0x5a,
+	PowerInformationInternalMaximum = 0x5b
 };
 
 enum _POWER_INFORMATION_LEVEL_INTERNAL_TTMTCAPI {
@@ -18447,8 +20717,7 @@ struct _PO_HIBER_PERF {
 	/*00e0*/ ULONGLONG WriteLogDataTimestamp;
 	/*00e8*/ ULONGLONG KernelReturnFromHandler;
 	/*00f0*/ ULONGLONG TimeStampCounterAtSwitchTime;
-	/*00f8*/ ULONGLONG HalTscOffset;
-	/*0100*/ ULONGLONG HvlTscOffset;
+	/*00f8*/ ULONGLONG Reserved[0x2];
 	/*0108*/ ULONGLONG SleeperThreadEnd;
 	/*0110*/ ULONGLONG PostCmosUpdateTimestamp;
 	/*0118*/ ULONGLONG KernelReturnSystemPowerStateTimestamp;
@@ -18481,7 +20750,20 @@ struct _PO_HIBER_PERF {
 	/*01e4*/ ULONG MaxHuffRatio;
 	/*01e8*/ ULONGLONG AdjustedTotalResumeTime;
 	/*01f0*/ ULONGLONG ResumeCompleteTimestamp;
-	/*01f8*/
+	/*01f8*/ ULONGLONG WinresumeExitTimestamp;
+	/*0200*/ ULONGLONG TcbLoaderStartTimestamp;
+	/*0208*/ ULONGLONG TcbLoaderEndTimestamp;
+	/*0210*/ ULONGLONG RemappedPageLookupCycles;
+	/*0218*/ ULONGLONG TcbLaunchPrepareCycles;
+	/*0220*/ ULONGLONG TcbLaunchPrepareDataCycles;
+	/*0228*/ ULONGLONG TcbRestoreStateCycles;
+	/*0230*/ ULONGLONG DecryptVsmPagesPhase0Cycles;
+	/*0238*/ ULONGLONG DecryptVsmPagesPhase1Cycles;
+	/*0240*/ ULONGLONG DecryptVsmPagesPhase2Cycles;
+	/*0248*/ ULONGLONG TcbLoaderAuthenticateCycles;
+	/*0250*/ ULONGLONG TcbLoaderDecryptCycles;
+	/*0258*/ ULONGLONG TcbLoaderValidateCycles;
+	/*0260*/
 };
 
 struct _PO_IRP_MANAGER {
@@ -18522,6 +20804,17 @@ struct _PO_POWER_PLANE_PROFILE {
 
 struct _PO_PROCESS_ENERGY_CONTEXT;
 
+enum _PO_S0_DISCONNECTED_REASON {
+	PoS0DisconnectedReasonNone = 0x0,
+	PoS0DisconnectedReasonNonCompliantNic = 0x1,
+	PoS0DisconnectedReasonSettingPolicy = 0x2,
+	PoS0DisconnectedReasonEnforceDsPolicy = 0x3,
+	PoS0DisconnectedReasonCsChecksFailed = 0x4,
+	PoS0DisconnectedReasonOpportunisticDs = 0x5,
+	PoS0DisconnectedReasonAdaptiveCs = 0x5,
+	PoS0DisconnectedReasonMaximum = 0x6
+};
+
 struct _PPC_DBGKD_CONTROL_SET {
 	/*0000*/ ULONG Continue;
 	/*0004*/ ULONG CurrentSymbolStart;
@@ -18535,8 +20828,9 @@ struct _PPM_CONCURRENCY_ACCOUNTING {
 	/*000c*/ ULONG ActiveProcessors;
 	/*0010*/ ULONGLONG LastUpdateTime;
 	/*0018*/ ULONGLONG TotalTime;
-	/*0020*/ ULONGLONG AccumulatedTime[0x1];
-	/*0028*/
+	/*0020*/ ULONGLONG volatile IdleIntervalStats[0x25];
+	/*0148*/ ULONGLONG AccumulatedTime[0x1];
+	/*0150*/
 };
 
 struct _PPM_COORDINATED_SELECTION {
@@ -18607,12 +20901,18 @@ struct _PPM_ENGINE_SETTINGS {
 	/*009e*/ UCHAR IdleStateMax;
 	/*009f*/ UCHAR HeteroDecreaseTime;
 	/*00a0*/ UCHAR HeteroIncreaseTime;
-	/*00a1*/ UCHAR HeteroDecreaseThreshold[0x500];
-	/*05a1*/ UCHAR HeteroIncreaseThreshold[0x500];
-	/*0aa1*/ UCHAR Class0FloorPerformance;
-	/*0aa2*/ UCHAR Class1InitialPerformance;
-	/*0aa4*/ _KHETERO_CPU_POLICY ThreadPolicies[0x2];
-	/*0ab0*/
+	/*00a1*/ UCHAR HeteroDecreaseThreshold[0x2][0x40];
+	/*0121*/ UCHAR HeteroIncreaseThreshold[0x2][0x40];
+	/*01a1*/ UCHAR Class0FloorPerformance;
+	/*01a2*/ UCHAR Class1InitialPerformance;
+	/*01a4*/ ULONG ShortThreadRuntimeThreshold;
+	/*01a8*/ _KHETERO_CPU_POLICY ThreadPolicies[0x2];
+	/*01b0*/ UCHAR ArchClassLowerThreshold[0x2];
+	/*01b2*/ UCHAR ArchClassUpperThreshold[0x2];
+	/*01b4*/ UCHAR ModuleUnparkPolicy;
+	/*01b5*/ UCHAR ComplexUnparkPolicy;
+	/*01b6*/ UCHAR SmtUnparkPolicy;
+	/*01b8*/
 };
 
 struct _PPM_FFH_THROTTLE_STATE_INFO {
@@ -18626,21 +20926,21 @@ struct _PPM_FFH_THROTTLE_STATE_INFO {
 
 struct _PPM_IDLE_STATE {
 	/*0000*/ _KAFFINITY_EX DomainMembers;
-	/*00a8*/ _UNICODE_STRING Name;
-	/*00b8*/ ULONG Latency;
-	/*00bc*/ ULONG BreakEvenDuration;
-	/*00c0*/ ULONG Power;
-	/*00c4*/ ULONG StateFlags;
-	/*00c8*/ _PPM_VETO_ACCOUNTING VetoAccounting;
-	/*00f0*/ UCHAR StateType;
-	/*00f1*/ UCHAR InterruptsEnabled;
-	/*00f2*/ UCHAR Interruptible;
-	/*00f3*/ UCHAR ContextRetained;
-	/*00f4*/ UCHAR CacheCoherent;
-	/*00f5*/ UCHAR WakesSpuriously;
-	/*00f6*/ UCHAR PlatformOnly;
-	/*00f7*/ UCHAR NoCState;
-	/*00f8*/
+	/*0108*/ _UNICODE_STRING Name;
+	/*0118*/ ULONG Latency;
+	/*011c*/ ULONG BreakEvenDuration;
+	/*0120*/ ULONG Power;
+	/*0124*/ ULONG StateFlags;
+	/*0128*/ _PPM_VETO_ACCOUNTING VetoAccounting;
+	/*0150*/ UCHAR StateType;
+	/*0151*/ UCHAR InterruptsEnabled;
+	/*0152*/ UCHAR Interruptible;
+	/*0153*/ UCHAR ContextRetained;
+	/*0154*/ UCHAR CacheCoherent;
+	/*0155*/ UCHAR WakesSpuriously;
+	/*0156*/ UCHAR PlatformOnly;
+	/*0157*/ UCHAR NoCState;
+	/*0158*/
 };
 
 struct _PPM_IDLE_STATES {
@@ -18652,40 +20952,41 @@ struct _PPM_IDLE_STATES {
 	/*0005*/ UCHAR UnaccountedTransition;
 	/*0006*/ UCHAR IdleDurationLimited;
 	/*0007*/ UCHAR IdleCheckLimited;
-	/*0008*/ UCHAR StrictVetoBias;
-	/*000c*/ ULONG ExitLatencyCountdown;
-	/*0010*/ ULONG TargetState;
-	/*0014*/ ULONG ActualState;
-	/*0018*/ ULONG OldState;
-	/*001c*/ ULONG OverrideIndex;
-	/*0020*/ ULONG ProcessorIdleCount;
-	/*0024*/ ULONG Type;
-	/*0028*/ ULONGLONG LevelId;
-	/*0030*/ USHORT ReasonFlags;
-	/*0038*/ ULONGLONG volatile InitiateWakeStamp;
-	/*0040*/ LONG PreviousStatus;
-	/*0044*/ ULONG PreviousCancelReason;
-	/*0048*/ _KAFFINITY_EX PrimaryProcessorMask;
-	/*00f0*/ _KAFFINITY_EX SecondaryProcessorMask;
-	/*0198*/ void (* IdlePrepare)( _PROCESSOR_IDLE_PREPARE_INFO * );
-	/*01a0*/ LONG (* IdlePreExecute)( void * , ULONG , ULONG , ULONG , ULONG * );
-	/*01a8*/ LONG (* IdleExecute)( void * , ULONGLONG , ULONG , ULONG , ULONG , ULONG , ULONG * );
-	/*01b0*/ ULONG (* IdlePreselect)( void * , _PROCESSOR_IDLE_CONSTRAINTS * );
-	/*01b8*/ ULONG (* IdleTest)( void * , ULONG , ULONG );
-	/*01c0*/ ULONG (* IdleAvailabilityCheck)( void * , ULONG );
-	/*01c8*/ void (* IdleComplete)( void * , ULONG , ULONG , ULONG , ULONG * );
-	/*01d0*/ void (* IdleCancel)( void * , ULONG );
-	/*01d8*/ UCHAR (* IdleIsHalted)( void * );
-	/*01e0*/ UCHAR (* IdleInitiateWake)( void * );
-	/*01e8*/ _PROCESSOR_IDLE_PREPARE_INFO PrepareInfo;
-	/*0240*/ _KAFFINITY_EX DeepIdleSnapshot;
-	/*02e8*/ _PERFINFO_PPM_STATE_SELECTION * Tracing;
-	/*02f0*/ _PERFINFO_PPM_STATE_SELECTION * CoordinatedTracing;
-	/*02f8*/ _PPM_SELECTION_MENU ProcessorMenu;
-	/*0308*/ _PPM_SELECTION_MENU CoordinatedMenu;
-	/*0318*/ _PPM_COORDINATED_SELECTION CoordinatedSelection;
-	/*0330*/ _PPM_IDLE_STATE State[0x1];
-	/*0428*/
+	/*0008*/ ULONGLONG IdleReevaluationDuration;
+	/*0010*/ UCHAR StrictVetoBias;
+	/*0014*/ ULONG ExitLatencyCountdown;
+	/*0018*/ ULONG TargetState;
+	/*001c*/ ULONG ActualState;
+	/*0020*/ ULONG OldState;
+	/*0024*/ ULONG OverrideIndex;
+	/*0028*/ ULONG ProcessorIdleCount;
+	/*002c*/ ULONG Type;
+	/*0030*/ ULONGLONG LevelId;
+	/*0038*/ USHORT ReasonFlags;
+	/*0040*/ ULONGLONG volatile InitiateWakeStamp;
+	/*0048*/ LONG PreviousStatus;
+	/*004c*/ ULONG PreviousCancelReason;
+	/*0050*/ _KAFFINITY_EX PrimaryProcessorMask;
+	/*0158*/ _KAFFINITY_EX SecondaryProcessorMask;
+	/*0260*/ void (* IdlePrepare)( _PROCESSOR_IDLE_PREPARE_INFO * );
+	/*0268*/ LONG (* IdlePreExecute)( void * , ULONG , ULONG , ULONG , ULONG * );
+	/*0270*/ LONG (* IdleExecute)( void * , ULONGLONG , ULONG , ULONG , ULONG , ULONG , ULONG * );
+	/*0278*/ ULONG (* IdlePreselect)( void * , _PROCESSOR_IDLE_CONSTRAINTS * );
+	/*0280*/ ULONG (* IdleTest)( void * , ULONG , ULONG );
+	/*0288*/ ULONG (* IdleAvailabilityCheck)( void * , ULONG );
+	/*0290*/ void (* IdleComplete)( void * , ULONG , ULONG , ULONG , ULONG * );
+	/*0298*/ void (* IdleCancel)( void * , ULONG );
+	/*02a0*/ UCHAR (* IdleIsHalted)( void * );
+	/*02a8*/ UCHAR (* IdleInitiateWake)( void * );
+	/*02b0*/ _PROCESSOR_IDLE_PREPARE_INFO PrepareInfo;
+	/*0308*/ _KAFFINITY_EX DeepIdleSnapshot;
+	/*0410*/ _PERFINFO_PPM_STATE_SELECTION * Tracing;
+	/*0418*/ _PERFINFO_PPM_STATE_SELECTION * CoordinatedTracing;
+	/*0420*/ _PPM_SELECTION_MENU ProcessorMenu;
+	/*0430*/ _PPM_SELECTION_MENU CoordinatedMenu;
+	/*0440*/ _PPM_COORDINATED_SELECTION CoordinatedSelection;
+	/*0458*/ _PPM_IDLE_STATE State[0x1];
+	/*05b0*/
 };
 
 union _PPM_IDLE_SYNCHRONIZATION_STATE {
@@ -18717,13 +21018,13 @@ struct _PPM_PLATFORM_STATE {
 	/*0039*/ UCHAR Platform;
 	/*003c*/ ULONG DependencyListCount;
 	/*0040*/ _KAFFINITY_EX Processors;
-	/*00e8*/ _UNICODE_STRING Name;
-	/*00f8*/ _PPM_SELECTION_DEPENDENCY * DependencyLists;
-	/*0100*/ _PPM_COORDINATED_SYNCHRONIZATION volatile Synchronization;
-	/*0108*/ ULONGLONG volatile EnterTime;
-	/*0140*/ LONG volatile RefCount;
-	/*0140*/ UCHAR CacheAlign0[0x40];
-	/*0180*/
+	/*0148*/ _UNICODE_STRING Name;
+	/*0158*/ _PPM_SELECTION_DEPENDENCY * DependencyLists;
+	/*0160*/ _PPM_COORDINATED_SYNCHRONIZATION volatile Synchronization;
+	/*0168*/ ULONGLONG volatile EnterTime;
+	/*0180*/ LONG volatile RefCount;
+	/*0180*/ UCHAR CacheAlign0[0x40];
+	/*01c0*/
 };
 
 struct _PPM_PLATFORM_STATES {
@@ -18738,7 +21039,7 @@ struct _PPM_PLATFORM_STATES {
 	/*0030*/ _PLATFORM_IDLE_ACCOUNTING * Accounting;
 	/*0038*/ UCHAR DeepSleepEnabled;
 	/*0040*/ _PPM_PLATFORM_STATE State[0x1];
-	/*01c0*/
+	/*0200*/
 };
 
 union _PPM_POLICY_SETTINGS_MASK {
@@ -18796,7 +21097,15 @@ union _PPM_POLICY_SETTINGS_MASK {
 	/*0004*/ ULONG ResponsivenessEppCeiling : 01; // 0x00040000;
 	/*0004*/ ULONG ResponsivenessPerfFloor : 01; // 0x00080000;
 	/*0004*/ ULONG SoftParkLatency : 01; // 0x00100000;
-	/*0004*/ ULONG Spare : 11; // 0xffe00000;
+	/*0004*/ ULONG ShortThreadRuntimeThreshold : 01; // 0x00200000;
+	/*0004*/ ULONG ShortThreadArchClassUpperThreshold : 01; // 0x00400000;
+	/*0004*/ ULONG ShortThreadArchClassLowerThreshold : 01; // 0x00800000;
+	/*0004*/ ULONG LongThreadArchClassUpperThreshold : 01; // 0x01000000;
+	/*0004*/ ULONG LongThreadArchClassLowerThreshold : 01; // 0x02000000;
+	/*0004*/ ULONG ModuleUnparkPolicy : 01; // 0x04000000;
+	/*0004*/ ULONG ComplexUnparkPolicy : 01; // 0x08000000;
+	/*0004*/ ULONG SmtUnparkPolicy : 01; // 0x10000000;
+	/*0004*/ ULONG Spare : 03; // 0xe0000000;
 	/*0008*/
 };
 
@@ -18838,8 +21147,9 @@ struct _PPM_SELECTION_STATISTICS {
 	/*0060*/ ULONGLONG NoCStateCount;
 	/*0068*/ ULONGLONG CoordinatedDependencyCount;
 	/*0070*/ ULONGLONG NotClockOwnerCount;
-	/*0078*/ _PPM_VETO_ACCOUNTING * PreVetoAccounting;
-	/*0080*/
+	/*0078*/ ULONGLONG DependencyIdleDurationCount;
+	/*0080*/ _PPM_VETO_ACCOUNTING * PreVetoAccounting;
+	/*0088*/
 };
 
 struct _PPM_VETO_ACCOUNTING {
@@ -18915,6 +21225,70 @@ struct _PRIVATE_CACHE_MAP_FLAGS {
 	/*0004*/
 };
 
+struct _PRIVATE_VOLUME_CACHEMAP {
+	/*0000*/ SHORT NodeTypeCode;
+	/*0002*/ SHORT NodeByteSize;
+	/*0004*/ ULONG UseCount;
+	/*0008*/ LONGLONG RefCount;
+	/*0010*/ _DEVICE_OBJECT * DeviceObject;
+	/*0018*/ ULONG VolumeId;
+	/*0020*/ _CC_PARTITION * Partition;
+	/*0028*/ _VOLUME_CACHE_MAP * VolumeCacheMap;
+	/*0030*/ _LIST_ENTRY NumaNodeList;
+	/*0040*/ _CC_NUMA_NODE * NumaNodeBlock[0x40];
+	/*0240*/ _LIST_ENTRY PartitionVolumeLinks;
+	/*0250*/ _LIST_ENTRY VolumeCacheMapLinks;
+	/*0260*/ _LIST_ENTRY CleanSharedCacheMapList;
+	/*0270*/ _LIST_ENTRY CleanSharedCacheMapWithLogHandleList;
+	/*0280*/ _SHARED_CACHE_MAP_LIST_CURSOR DirtySharedCacheMapList;
+	/*0298*/ _SHARED_CACHE_MAP_LIST_CURSOR LazyWriteCursor;
+	/*02b0*/ _LIST_ENTRY DirtySharedCacheMapWithLogHandleList;
+	/*02c0*/ ULONG ConsecutiveWorklessLazyScanCount;
+	/*02c4*/ UCHAR ForcedDisableLazywriteScan;
+	/*0300*/ ULONGLONG WorkQueueLock;
+	/*0308*/ ULONG NumberWorkerThreads;
+	/*0310*/ _LIST_ENTRY PostTickWorkQueue;
+	/*0320*/ ULONG MaxExtraWriteBehindThreads;
+	/*0324*/ ULONG MaxCacheMapUninitThreads;
+	/*0328*/ UCHAR QueueThrottle;
+	/*032c*/ ULONG PostTickWorkItemCount;
+	/*0330*/ _KEVENT LowMemoryEvent;
+	/*0348*/ _KEVENT PowerEvent;
+	/*0360*/ _KEVENT WaitingForTeardownEvent;
+	/*0378*/ _KEVENT CoalescingFlushEvent;
+	/*0390*/ ULONG PagesYetToWrite;
+	/*0398*/ _LAZY_WRITER LazyWriter;
+	/*03e0*/ _DIRTY_PAGE_STATISTICS DirtyPageStatistics;
+	/*03f8*/ _DIRTY_PAGE_THRESHOLDS DirtyPageThresholds;
+	/*0430*/ _WRITE_BEHIND_THROUGHPUT * ThroughputStats;
+	/*0438*/ ULONGLONG AverageAvailablePages;
+	/*0440*/ ULONGLONG AverageDirtyPages;
+	/*0448*/ ULONGLONG PagesSkippedDueToHotSpot;
+	/*0450*/ _LIST_ENTRY DeferredWrites;
+	/*0480*/ ULONGLONG DeferredWriteSpinLock;
+	/*0488*/ _EX_PUSH_LOCK AsyncReadWorkQueueLock;
+	/*0490*/ ULONG MaxNumberOfWriteBehindThreads;
+	/*0494*/ UCHAR CoalescingState;
+	/*0495*/ UCHAR InitComplete;
+	/*0498*/ _KEVENT ExitEvent;
+	/*04b0*/ _KEVENT FinalDereferenceEvent;
+	/*04c8*/ void * LazyWriteScanThreadHandle;
+	/*04d0*/ _CC_LWS_PACKET LWSPacket;
+	/*04e0*/ _LIST_ENTRY ExternalCacheList;
+	/*04f0*/ ULONG ThroughputIdx;
+	/*04f8*/ ULONGLONG AvgPagesPerSecond;
+	/*0500*/ ULONGLONG ThroughputHistory[0x20];
+	/*0600*/ ULONG DirtyThresholdInSeconds;
+	/*0604*/ ULONG DirtyPageTargetInSeconds;
+	/*0608*/ _LIST_ENTRY QuickLWSThreadList;
+	/*0618*/ _KEVENT QuickLazyScanEvent;
+	/*0630*/ _LARGE_INTEGER PrevLazyWriteScanTime;
+	/*0638*/ ULONG AsyncLazywriteQueueDepth;
+	/*063c*/ ULONG MaxAsyncLazywriteCompletionWorkers;
+	/*0640*/ ULONG Flags;
+	/*0680*/
+};
+
 struct _PRIVILEGE_SET {
 	/*0000*/ ULONG PrivilegeCount;
 	/*0004*/ ULONG Control;
@@ -18927,6 +21301,12 @@ enum _PROCESSOR_CACHE_TYPE {
 	CacheInstruction = 0x1,
 	CacheData = 0x2,
 	CacheTrace = 0x3
+};
+
+struct _PROCESSOR_CYCLES_WORKLOAD_CLASS {
+	/*0000*/ ULONG Count;
+	/*0008*/ ULONGLONG ProcessorCyclesClass[0x1];
+	/*0010*/
 };
 
 struct _PROCESSOR_IDLE_CONSTRAINTS {
@@ -18990,49 +21370,54 @@ struct _PROCESSOR_POWER_STATE {
 	/*0008*/ _PROC_IDLE_ACCOUNTING * IdleAccounting;
 	/*0010*/ ULONGLONG IdleTimeLast;
 	/*0018*/ ULONGLONG IdleTimeTotal;
-	/*0020*/ ULONGLONG volatile IdleTimeEntry;
-	/*0028*/ ULONGLONG IdleTimeExpiration;
-	/*0030*/ UCHAR NonInterruptibleTransition;
-	/*0031*/ UCHAR PepWokenTransition;
-	/*0032*/ UCHAR HvTargetState;
-	/*0033*/ UCHAR SoftParked;
-	/*0034*/ ULONG TargetIdleState;
-	/*0038*/ _PROC_IDLE_POLICY IdlePolicy;
-	/*0040*/ _PPM_IDLE_SYNCHRONIZATION_STATE volatile Synchronization;
-	/*0048*/ _PROC_FEEDBACK PerfFeedback;
-	/*00d8*/ _PROC_HYPERVISOR_STATE Hypervisor;
-	/*00dc*/ ULONG LastSysTime;
-	/*00e0*/ ULONGLONG WmiDispatchPtr;
-	/*00e8*/ LONG WmiInterfaceEnabled;
-	/*00f0*/ _PPM_FFH_THROTTLE_STATE_INFO FFHThrottleStateInfo;
-	/*0110*/ _KDPC PerfActionDpc;
-	/*0150*/ LONG volatile PerfActionMask;
-	/*0158*/ _PROC_IDLE_SNAP HvIdleCheck;
-	/*0168*/ _PROC_PERF_CHECK_CONTEXT CheckContext;
-	/*01a8*/ _PPM_CONCURRENCY_ACCOUNTING * Concurrency;
-	/*01b0*/ _PPM_CONCURRENCY_ACCOUNTING * ClassConcurrency;
-	/*01b8*/ UCHAR ArchitecturalEfficiencyClass;
-	/*01b9*/ UCHAR PerformanceSchedulingClass;
-	/*01ba*/ UCHAR EfficiencySchedulingClass;
-	/*01bb*/ UCHAR Unused;
-	/*01bc*/ UCHAR Parked;
-	/*01bd*/ UCHAR LongPriorQosPeriod;
-	/*01c0*/ ULONGLONG SnapTimeLast;
-	/*01c0*/ ULONGLONG EnergyConsumed;
-	/*01c8*/ ULONGLONG ActiveTime;
-	/*01d0*/ ULONGLONG TotalTime;
-	/*01d8*/ _POP_FX_DEVICE * FxDevice;
-	/*01e0*/ ULONGLONG LastQosTranstionTsc;
-	/*01e8*/ ULONGLONG QosTransitionHysteresis;
-	/*01f0*/ _KHETERO_CPU_QOS RequestedQosClass;
-	/*01f4*/ _KHETERO_CPU_QOS ResolvedQosClass;
-	/*01f8*/ USHORT QosEquivalencyMask;
-	/*01fa*/ USHORT HwFeedbackTableIndex;
-	/*01fc*/ UCHAR HwFeedbackParkHint;
-	/*01fd*/ UCHAR HwFeedbackPerformanceClass;
-	/*01fe*/ UCHAR HwFeedbackEfficiencyClass;
-	/*01ff*/ UCHAR HeteroCoreType;
-	/*0200*/
+	/*0020*/ ULONGLONG volatile IdleSequenceNumber;
+	/*0028*/ ULONGLONG IdleTimeEntry;
+	/*0030*/ ULONGLONG IdleTimeExpiration;
+	/*0030*/ LONGLONG volatile IdleWakeTime;
+	/*0038*/ UCHAR NonInterruptibleTransition;
+	/*0039*/ UCHAR PepWokenTransition;
+	/*003a*/ UCHAR HvTargetState;
+	/*003b*/ UCHAR SoftParked;
+	/*003c*/ ULONG TargetIdleState;
+	/*0040*/ _PROC_IDLE_POLICY IdlePolicy;
+	/*0048*/ _PPM_IDLE_SYNCHRONIZATION_STATE volatile Synchronization;
+	/*0050*/ _PROC_FEEDBACK PerfFeedback;
+	/*00e0*/ _PROC_HYPERVISOR_STATE Hypervisor;
+	/*00e4*/ ULONG LastSysTime;
+	/*00e8*/ ULONGLONG WmiDispatchPtr;
+	/*00f0*/ LONG WmiInterfaceEnabled;
+	/*00f8*/ _PPM_FFH_THROTTLE_STATE_INFO FFHThrottleStateInfo;
+	/*0118*/ _KDPC PerfActionDpc;
+	/*0158*/ LONG volatile PerfActionMask;
+	/*0160*/ _PROC_IDLE_SNAP HvIdleCheck;
+	/*0170*/ _PROC_PERF_CHECK_CONTEXT CheckContext;
+	/*01b8*/ _PPM_CONCURRENCY_ACCOUNTING * Concurrency;
+	/*01c0*/ _PPM_CONCURRENCY_ACCOUNTING * ClassConcurrency;
+	/*01c8*/ UCHAR ArchitecturalEfficiencyClass;
+	/*01c9*/ UCHAR PerformanceSchedulingClass;
+	/*01ca*/ UCHAR EfficiencySchedulingClass;
+	/*01cb*/ UCHAR EarlyBootArchitecturalEfficiencyClass;
+	/*01cc*/ UCHAR Parked;
+	/*01cd*/ UCHAR LongPriorQosPeriod;
+	/*01d0*/ ULONGLONG SnapTimeLast;
+	/*01d0*/ ULONGLONG EnergyConsumed;
+	/*01d8*/ ULONGLONG ActiveTime;
+	/*01e0*/ ULONGLONG TotalTime;
+	/*01e8*/ _POP_FX_DEVICE * FxDevice;
+	/*01f0*/ ULONGLONG LastQosTranstionTsc;
+	/*01f8*/ ULONGLONG QosTransitionHysteresis;
+	/*0200*/ _KHETERO_CPU_QOS RequestedQosClass;
+	/*0204*/ _KHETERO_CPU_QOS ResolvedQosClass;
+	/*0208*/ USHORT QosEquivalencyMask;
+	/*020a*/ USHORT HwFeedbackTableOffset;
+	/*020c*/ UCHAR HwFeedbackParkHint;
+	/*020d*/ UCHAR HeteroCoreType;
+	/*020e*/ USHORT HwFeedbackTableIndex;
+	/*0210*/ _KHETRO_HWFEEDBACK_TYPE * HwFeedbackClassList;
+	/*0218*/ _PROCESSOR_CYCLES_WORKLOAD_CLASS * EeCyclesWorkloadClassList;
+	/*0220*/ _PROCESSOR_CYCLES_WORKLOAD_CLASS * PerfCyclesWorkloadClassList;
+	/*0228*/ UCHAR NotUsed;
+	/*0230*/
 };
 
 enum _PROCESSOR_PRESENCE {
@@ -19140,6 +21525,27 @@ struct _PROCLOCALAPIC {
 	/*0008*/
 };
 
+struct _PROCLOCALGIC {
+	/*0000*/ UCHAR Type;
+	/*0001*/ UCHAR Length;
+	/*0002*/ USHORT Reserved;
+	/*0004*/ ULONG Identifier;
+	/*0008*/ ULONG AcpiProcessorId;
+	/*000c*/ ULONG Flags;
+	/*0010*/ ULONG ParkingProtocolVersion;
+	/*0014*/ ULONG PerformanceInterruptGsi;
+	/*0018*/ ULONGLONG ParkedPhysicalAddress;
+	/*0020*/ ULONGLONG ControllerPhysicalAddress;
+	/*0028*/ ULONGLONG Gicv;
+	/*0030*/ ULONGLONG Gich;
+	/*0038*/ ULONG VgicMaintenanceInterrupt;
+	/*003c*/ ULONGLONG GicrBaseAddress;
+	/*0044*/ ULONGLONG Mpidr;
+	/*004c*/ UCHAR ProcessorPowerEfficiencyClass;
+	/*004d*/ UCHAR Reserved2[0x3];
+	/*0050*/
+};
+
 struct _PROCLOCALSAPIC {
 	/*0000*/ UCHAR Type;
 	/*0001*/ UCHAR Length;
@@ -19151,6 +21557,16 @@ struct _PROCLOCALSAPIC {
 	/*000c*/ ULONG ACPIProcessorUIDInteger;
 	/*0010*/ CHAR ACPIProcessorUIDString[0x1];
 	/*0011*/
+};
+
+struct _PROCLOCALX2APIC {
+	/*0000*/ UCHAR Type;
+	/*0001*/ UCHAR Length;
+	/*0002*/ USHORT Reserved;
+	/*0004*/ ULONG APICID;
+	/*0008*/ ULONG Flags;
+	/*000c*/ ULONG ACPIProcessorID;
+	/*0010*/
 };
 
 struct _PROC_FEEDBACK {
@@ -19172,6 +21588,7 @@ struct _PROC_FEEDBACK {
 	/*0080*/ ULONGLONG StallTime;
 	/*0088*/ UCHAR KernelTimesIndex;
 	/*0089*/ UCHAR CounterDiscardsIdleTime;
+	/*008a*/ UCHAR CounterReadOptimize;
 	/*0090*/
 };
 
@@ -19205,7 +21622,7 @@ struct _PROC_IDLE_ACCOUNTING {
 	/*0018*/ ULONGLONG PriorIdleTime;
 	/*0020*/ PPM_IDLE_BUCKET_TIME_TYPE TimeUnit;
 	/*0028*/ _PROC_IDLE_STATE_ACCOUNTING State[0x1];
-	/*0410*/
+	/*0418*/
 };
 
 struct _PROC_IDLE_POLICY {
@@ -19233,8 +21650,8 @@ struct _PROC_IDLE_STATE_ACCOUNTING {
 	/*0018*/ ULONGLONG MinTime;
 	/*0020*/ ULONGLONG MaxTime;
 	/*0028*/ _PPM_SELECTION_STATISTICS SelectionStatistics;
-	/*00a8*/ _PROC_IDLE_STATE_BUCKET IdleTimeBuckets[0x1a];
-	/*03e8*/
+	/*00b0*/ _PROC_IDLE_STATE_BUCKET IdleTimeBuckets[0x1a];
+	/*03f0*/
 };
 
 struct _PROC_IDLE_STATE_BUCKET {
@@ -19251,15 +21668,21 @@ struct _PROC_PERF_CHECK {
 	/*0010*/ ULONGLONG LastStall;
 	/*0018*/ ULONG LastResponsivenessEvents;
 	/*0020*/ _PROC_PERF_CHECK_SNAP LastPerfCheckSnap;
-	/*0080*/ _PROC_PERF_CHECK_SNAP CurrentSnap;
-	/*00e0*/ _PROC_PERF_CHECK_SNAP LastDeliveredSnap;
-	/*0140*/ ULONG LastDeliveredPerformance;
-	/*0144*/ ULONG LastDeliveredFrequency;
-	/*0148*/ UCHAR TaggedThreadPercent[0x3];
-	/*014b*/ UCHAR Class0FloorPerfSelection;
-	/*014c*/ UCHAR Class1MinimumPerfSelection;
-	/*0150*/ ULONG CurrentResponsivenessEvents;
-	/*0158*/
+	/*0058*/ _PROC_PERF_CHECK_CYCLE_SNAP * LastPerfCheckCycleSnap;
+	/*0060*/ _PROC_PERF_CHECK_SNAP CurrentSnap;
+	/*0098*/ _PROC_PERF_CHECK_CYCLE_SNAP * CurrentCycleSnap;
+	/*00a0*/ _PROC_PERF_CHECK_SNAP LastDeliveredSnap;
+	/*00d8*/ _PROC_PERF_CHECK_CYCLE_SNAP * LastDeliveredCycleSnap;
+	/*00e0*/ ULONG LastDeliveredPerformance;
+	/*00e4*/ ULONG LastDeliveredFrequency;
+	/*00e8*/ UCHAR TaggedThreadPercent[0x4];
+	/*00ec*/ UCHAR ImportantPercent;
+	/*00ed*/ UCHAR IdealPercent;
+	/*00ee*/ UCHAR Class0FloorPerfSelection;
+	/*00ef*/ UCHAR Class1MinimumPerfSelection;
+	/*00f0*/ ULONG CurrentResponsivenessEvents;
+	/*00f8*/ ULONGLONG CyclesByFreqBand[0x3][0x30];
+	/*0578*/
 };
 
 struct _PROC_PERF_CHECK_CONTEXT {
@@ -19271,10 +21694,21 @@ struct _PROC_PERF_CHECK_CONTEXT {
 	/*0028*/ ULONG Utility;
 	/*002c*/ ULONG AffinitizedUtility;
 	/*0030*/ ULONG MediaUtility;
-	/*0034*/ USHORT LatestAffinitizedPercent;
-	/*0036*/ USHORT AveragePerformancePercent;
-	/*0038*/ ULONG RelativePerformance;
-	/*003c*/ UCHAR NtProcessor;
+	/*0034*/ ULONG ImportantUtility;
+	/*0038*/ ULONG IdealUtility;
+	/*003c*/ USHORT LatestAffinitizedPercent;
+	/*003e*/ USHORT AveragePerformancePercent;
+	/*0040*/ ULONG RelativePerformance;
+	/*0044*/ UCHAR NtProcessor;
+	/*0048*/
+};
+
+struct _PROC_PERF_CHECK_CYCLE_SNAP {
+	/*0000*/ ULONGLONG CyclesActive;
+	/*0008*/ ULONGLONG CyclesAffinitized;
+	/*0010*/ ULONGLONG TaggedThreadCycles[0x4];
+	/*0030*/ ULONG WorkloadClasses;
+	/*0038*/ ULONGLONG ThreadTypeCycles[0x1];
 	/*0040*/
 };
 
@@ -19285,11 +21719,8 @@ struct _PROC_PERF_CHECK_SNAP {
 	/*0018*/ ULONGLONG FrequencyScaledActive;
 	/*0020*/ ULONGLONG PerformanceScaledActive;
 	/*0028*/ ULONGLONG PerformanceScaledKernelActive;
-	/*0030*/ ULONGLONG CyclesActive;
-	/*0038*/ ULONGLONG CyclesAffinitized;
-	/*0040*/ ULONGLONG TaggedThreadCycles[0x3];
-	/*0058*/ ULONG ResponsivenessEvents;
-	/*0060*/
+	/*0030*/ ULONG ResponsivenessEvents;
+	/*0038*/
 };
 
 struct _PROC_PERF_CONSTRAINT {
@@ -19315,63 +21746,75 @@ struct _PROC_PERF_CONSTRAINT {
 	/*007c*/ UCHAR Force;
 	/*007d*/ UCHAR UseQosUpdateLock;
 	/*0080*/ ULONGLONG QosUpdateLock;
-	/*0088*/
+	/*0088*/ ULONG IncreasePerfCheckCount;
+	/*008c*/ ULONG DecreasePerfCheckCount;
+	/*0090*/
 };
 
 struct _PROC_PERF_DOMAIN {
 	/*0000*/ _LIST_ENTRY Link;
 	/*0010*/ _PROC_PERF_CHECK_CONTEXT * Master;
 	/*0018*/ _KAFFINITY_EX Members;
-	/*00c0*/ ULONGLONG DomainContext;
-	/*00c8*/ ULONG ProcessorCount;
-	/*00cc*/ UCHAR EfficiencyClass;
-	/*00cd*/ UCHAR NominalPerformanceClass;
-	/*00ce*/ UCHAR HighestPerformanceClass;
-	/*00d0*/ _PROCESSOR_PRESENCE Presence;
-	/*00d8*/ _PROC_PERF_CONSTRAINT * Processors;
-	/*00e0*/ void (* GetFFHThrottleState)( ULONGLONG * );
-	/*00e8*/ void (* TimeWindowHandler)( ULONGLONG , ULONG );
-	/*00f0*/ void (* BoostPolicyHandler)( ULONGLONG , ULONG );
-	/*00f8*/ void (* BoostModeHandler)( ULONGLONG , ULONG );
-	/*0100*/ void (* AutonomousActivityWindowHandler)( ULONGLONG , ULONG );
-	/*0108*/ void (* AutonomousModeHandler)( ULONGLONG , ULONG );
-	/*0110*/ void (* ReinitializeHandler)( ULONGLONG );
-	/*0118*/ ULONG (* PerfSelectionHandler)( ULONGLONG , ULONG , ULONG , ULONG , ULONG , ULONG , ULONG , ULONG * , ULONGLONG * );
-	/*0120*/ void (* PerfControlHandler)( ULONGLONG , _PERF_CONTROL_STATE_SELECTION * , UCHAR , UCHAR );
-	/*0128*/ void (* PerfControlHandlerHidden)( ULONGLONG , _PERF_CONTROL_STATE_SELECTION * , UCHAR , UCHAR );
-	/*0130*/ void (* DomainPerfControlHandler)( ULONGLONG , _PERF_CONTROL_STATE_SELECTION * , UCHAR , UCHAR );
-	/*0138*/ ULONG MaxFrequency;
-	/*013c*/ ULONG NominalFrequency;
-	/*0140*/ ULONG MaxPercent;
-	/*0144*/ ULONG MinPerfPercent;
-	/*0148*/ ULONG MinThrottlePercent;
-	/*014c*/ ULONG AdvertizedMaximumFrequency;
-	/*0150*/ ULONGLONG MinimumRelativePerformance;
-	/*0158*/ ULONGLONG NominalRelativePerformance;
-	/*0160*/ UCHAR NominalRelativePerformancePercent;
-	/*0161*/ UCHAR Coordination;
-	/*0162*/ UCHAR HardPlatformCap;
-	/*0163*/ UCHAR AffinitizeControl;
-	/*0164*/ UCHAR EfficientThrottle;
-	/*0165*/ UCHAR AllowSchedulerDirectedPerfStates;
-	/*0166*/ UCHAR InitiateAllProcessors;
-	/*0167*/ UCHAR AutonomousMode;
-	/*0168*/ UCHAR ProvideGuidance;
-	/*016c*/ ULONG DesiredPercent;
-	/*0170*/ ULONG GuaranteedPercent;
-	/*0174*/ UCHAR EngageResponsivenessOverrides;
-	/*0178*/ _PROC_PERF_QOS_CLASS_POLICY QosPolicies[0x5];
-	/*0204*/ ULONG QosDisableReasons[0x5];
-	/*0218*/ USHORT QosEquivalencyMasks[0x5];
-	/*0222*/ UCHAR QosSupported;
-	/*0224*/ ULONG volatile SelectionGeneration;
-	/*0228*/ _PERF_CONTROL_STATE_SELECTION QosSelection[0x5];
-	/*02f0*/ ULONGLONG PerfChangeTime;
-	/*02f8*/ ULONG PerfChangeIntervalCount;
-	/*02fc*/ UCHAR Force;
-	/*02fd*/ UCHAR Update;
-	/*02fe*/ UCHAR Apply;
-	/*0300*/
+	/*0120*/ ULONGLONG DomainContext;
+	/*0128*/ ULONG ProcessorCount;
+	/*012c*/ UCHAR EfficiencyClass;
+	/*012d*/ UCHAR NominalPerformanceClass;
+	/*012e*/ UCHAR HighestPerformanceClass;
+	/*0130*/ _PROCESSOR_PRESENCE Presence;
+	/*0138*/ _PROC_PERF_CONSTRAINT * Processors;
+	/*0140*/ void (* GetFFHThrottleState)( ULONGLONG * );
+	/*0148*/ void (* TimeWindowHandler)( ULONGLONG , ULONG );
+	/*0150*/ void (* BoostPolicyHandler)( ULONGLONG , ULONG );
+	/*0158*/ void (* BoostModeHandler)( ULONGLONG , ULONG );
+	/*0160*/ void (* AutonomousActivityWindowHandler)( ULONGLONG , ULONG );
+	/*0168*/ void (* AutonomousModeHandler)( ULONGLONG , ULONG );
+	/*0170*/ void (* ReinitializeHandler)( ULONGLONG );
+	/*0178*/ ULONG (* PerfSelectionHandler)( ULONGLONG , ULONG , ULONG , ULONG , ULONG , ULONG , ULONG , ULONG * , ULONGLONG * );
+	/*0180*/ void (* PerfControlHandler)( ULONGLONG , _PERF_CONTROL_STATE_SELECTION * , UCHAR , UCHAR );
+	/*0188*/ void (* PerfControlHandlerHidden)( ULONGLONG , _PERF_CONTROL_STATE_SELECTION * , UCHAR , UCHAR );
+	/*0190*/ void (* DomainPerfControlHandler)( ULONGLONG , _PERF_CONTROL_STATE_SELECTION * , UCHAR , UCHAR );
+	/*0198*/ void (* PerfUpdateHwDebugData)( ULONGLONG , ULONGLONG , UCHAR );
+	/*01a0*/ ULONG (* PerfQueryProcMeasurementCapabilities)();
+	/*01a8*/ LONG (* PerfQueryProcMeasurementValues)( ULONG , ULONG * , void * , ULONG );
+	/*01b0*/ ULONG Id;
+	/*01b4*/ ULONG MaxFrequency;
+	/*01b8*/ ULONG NominalFrequency;
+	/*01bc*/ ULONG MaxPercent;
+	/*01c0*/ ULONG MinPerfPercent;
+	/*01c4*/ ULONG MinThrottlePercent;
+	/*01c8*/ ULONG AdvertizedMaximumFrequency;
+	/*01d0*/ ULONGLONG MinimumRelativePerformance;
+	/*01d8*/ ULONGLONG NominalRelativePerformance;
+	/*01e0*/ UCHAR NominalRelativePerformancePercent;
+	/*01e1*/ UCHAR Coordination;
+	/*01e2*/ UCHAR HardPlatformCap;
+	/*01e3*/ UCHAR AffinitizeControl;
+	/*01e4*/ UCHAR EfficientThrottle;
+	/*01e5*/ UCHAR AllowSchedulerDirectedPerfStates;
+	/*01e6*/ UCHAR InitiateAllProcessors;
+	/*01e7*/ UCHAR AllowVmPerfSelection;
+	/*01e8*/ ULONG VmFrequencyStepMhz;
+	/*01ec*/ ULONG VmHighestFrequencyMhz;
+	/*01f0*/ ULONG VmNominalFrequencyMhz;
+	/*01f4*/ ULONG VmLowestFrequencyMhz;
+	/*01f8*/ UCHAR AutonomousMode;
+	/*01f9*/ UCHAR AutonomousCapability;
+	/*01fa*/ UCHAR ProvideGuidance;
+	/*01fc*/ ULONG DesiredPercent;
+	/*0200*/ ULONG GuaranteedPercent;
+	/*0204*/ UCHAR EngageResponsivenessOverrides;
+	/*0208*/ _PROC_PERF_QOS_CLASS_POLICY QosPolicies[0x7];
+	/*02cc*/ ULONG QosDisableReasons[0x7];
+	/*02e8*/ USHORT QosEquivalencyMasks[0x7];
+	/*02f6*/ UCHAR QosSupported;
+	/*02f8*/ ULONG volatile SelectionGeneration;
+	/*0300*/ _PERF_CONTROL_STATE_SELECTION QosSelection[0x7];
+	/*0418*/ ULONGLONG PerfChangeTime;
+	/*0420*/ ULONG PerfChangeIntervalCount;
+	/*0424*/ UCHAR Force;
+	/*0425*/ UCHAR Update;
+	/*0426*/ UCHAR Apply;
+	/*0428*/
 };
 
 struct _PROC_PERF_HISTORY {
@@ -19380,17 +21823,21 @@ struct _PROC_PERF_HISTORY {
 	/*0008*/ ULONG UtilityTotal;
 	/*000c*/ ULONG AffinitizedUtilityTotal;
 	/*0010*/ ULONG FrequencyTotal;
-	/*0014*/ ULONG TaggedPercentTotal[0x3];
-	/*0020*/ _PROC_PERF_HISTORY_ENTRY HistoryList[0x1];
-	/*002c*/
+	/*0014*/ ULONG ImportantPercentTotal;
+	/*0018*/ ULONG IdealPercentTotal;
+	/*001c*/ ULONG TaggedPercentTotal[0x4];
+	/*002c*/ _PROC_PERF_HISTORY_ENTRY HistoryList[0x1];
+	/*0038*/
 };
 
 struct _PROC_PERF_HISTORY_ENTRY {
 	/*0000*/ USHORT Utility;
 	/*0002*/ USHORT AffinitizedUtility;
 	/*0004*/ USHORT Frequency;
-	/*0006*/ UCHAR TaggedPercent[0x3];
-	/*000a*/
+	/*0006*/ UCHAR ImportantPercent;
+	/*0007*/ UCHAR IdealPercent;
+	/*0008*/ UCHAR TaggedPercent[0x4];
+	/*000c*/
 };
 
 struct _PROC_PERF_LOAD {
@@ -19425,6 +21872,12 @@ struct _PROFILE_PARAMETER_BLOCK {
 
 struct _PSP_STORAGE;
 
+struct _PSP_SYSCALL_PROVIDER_DISPATCH_CONTEXT {
+	/*0000*/ ULONG Level;
+	/*0004*/ ULONG Slot;
+	/*0008*/
+};
+
 enum _PS_ATTRIBUTE_NUM {
 	PsAttributeParentProcess = 0x0,
 	PsAttributeDebugObject = 0x1,
@@ -19454,7 +21907,10 @@ enum _PS_ATTRIBUTE_NUM {
 	PsAttributeDesktopAppPolicy = 0x19,
 	PsAttributeChpe = 0x1a,
 	PsAttributeMitigationAuditOptions = 0x1b,
-	PsAttributeMax = 0x1c
+	PsAttributeMachineType = 0x1c,
+	PsAttributeComponentFilter = 0x1d,
+	PsAttributeEnableOptionalXStateFeatures = 0x1e,
+	PsAttributeMax = 0x1f
 };
 
 union _PS_CLIENT_SECURITY_CONTEXT {
@@ -19540,12 +21996,41 @@ enum _PS_MITIGATION_OPTION {
 	PS_MITIGATION_OPTION_CET_USER_SHADOW_STACKS = 0x1f,
 	PS_MITIGATION_OPTION_USER_CET_SET_CONTEXT_IP_VALIDATION = 0x20,
 	PS_MITIGATION_OPTION_BLOCK_NON_CET_BINARIES = 0x21,
-	PS_MITIGATION_OPTION_CET_DYNAMIC_APIS_OUT_OF_PROC_ONLY = 0x24
+	PS_MITIGATION_OPTION_XTENDED_CONTROL_FLOW_GUARD = 0x22,
+	PS_MITIGATION_OPTION_POINTER_AUTH_USER_IP = 0x23,
+	PS_MITIGATION_OPTION_CET_DYNAMIC_APIS_OUT_OF_PROC_ONLY = 0x24,
+	PS_MITIGATION_OPTION_REDIRECTION_TRUST = 0x25,
+	PS_MITIGATION_OPTION_RESTRICT_CORE_SHARING = 0x26
 };
 
 struct _PS_MITIGATION_OPTIONS_MAP {
 	/*0000*/ ULONGLONG Map[0x3];
 	/*0018*/
+};
+
+struct _PS_NTDLL_EXPORTS {
+	/*0000*/ void * LdrSystemDllInitBlock;
+	/*0008*/ void * LdrInitializeThunk;
+	/*0010*/ void * RtlUserThreadStart;
+	/*0018*/ void * RtlUserFiberStart;
+	/*0020*/ void * KiUserExceptionDispatcher;
+	/*0028*/ void * KiUserApcDispatcher;
+	/*0030*/ void * KiUserCallbackDispatcher;
+	/*0038*/ void * KiUserCallbackDispatcherReturn;
+	/*0040*/ void * KiRaiseUserExceptionDispatcher;
+	/*0048*/ void * ExpInterlockedPopEntrySListEnd;
+	/*0050*/ void * ExpInterlockedPopEntrySListFault;
+	/*0058*/ void * ExpInterlockedPopEntrySListResume;
+	/*0060*/ void * RtlpFreezeTimeBias;
+	/*0068*/ void * KiUserInvertedFunctionTable;
+	/*0070*/ void * WerReportExceptionWorker;
+	/*0078*/ void * RtlCallEnclaveReturn;
+	/*0080*/ void * RtlEnclaveCallDispatch;
+	/*0088*/ void * RtlEnclaveCallDispatchReturn;
+	/*0090*/ void * RtlRaiseExceptionForReturnAddressHijack;
+	/*0098*/ void * KiUserEmulationDispatcher;
+	/*00a0*/ void * LdrHotPatchNotify;
+	/*00a8*/
 };
 
 struct _PS_PROCESS_WAKE_INFORMATION {
@@ -19604,6 +22089,8 @@ enum _PS_STD_HANDLE_STATE {
 	PsAlwaysDuplicate = 0x2,
 	PsMaxStdHandleStates = 0x3
 };
+
+struct _PS_SYSCALL_PROVIDER;
 
 union _PS_TRUSTLET_ATTRIBUTE_ACCESSRIGHTS {
 	/*0000*/ UCHAR Trustlet : 01; // 0x01;
@@ -19683,32 +22170,79 @@ struct _QUAD {
 	/*0008*/
 };
 
+enum _REFS_SET_VOLUME_COMPRESSION_INFO_FLAGS {
+	REFS_SET_VOLUME_COMPRESSION_INFO_FLAG_COMPRESS_SYNC = 0x1,
+	REFS_SET_VOLUME_COMPRESSION_INFO_FLAG_MAX = 0x1
+};
+
+enum _REFS_STREAM_SNAPSHOT_OPERATION {
+	REFS_STREAM_SNAPSHOT_OPERATION_INVALID = 0x0,
+	REFS_STREAM_SNAPSHOT_OPERATION_CREATE = 0x1,
+	REFS_STREAM_SNAPSHOT_OPERATION_LIST = 0x2,
+	REFS_STREAM_SNAPSHOT_OPERATION_QUERY_DELTAS = 0x3,
+	REFS_STREAM_SNAPSHOT_OPERATION_REVERT = 0x4,
+	REFS_STREAM_SNAPSHOT_OPERATION_SET_SHADOW_BTREE = 0x5,
+	REFS_STREAM_SNAPSHOT_OPERATION_CLEAR_SHADOW_BTREE = 0x6,
+	REFS_STREAM_SNAPSHOT_OPERATION_MAX = 0x6
+};
+
 struct _REGISTERED_INTERRUPT_CONTROLLER {
 	/*0000*/ _LIST_ENTRY ListEntry;
 	/*0010*/ void * InternalData;
 	/*0018*/ ULONG InternalDataSize;
 	/*0020*/ _INTERRUPT_FUNCTION_TABLE FunctionTable;
-	/*00d8*/ _KNOWN_CONTROLLER_TYPE KnownType;
-	/*00dc*/ ULONG Capabilities;
-	/*00e0*/ ULONG Flags;
-	/*00e4*/ ULONG MaxPriority;
-	/*00e8*/ ULONG UnitId;
-	/*00f0*/ _LIST_ENTRY LinesHead;
-	/*0100*/ _LIST_ENTRY OutputLinesHead;
-	/*0110*/ LONG MinLine;
-	/*0114*/ LONG MaxLine;
-	/*0118*/ ULONG MaxClusterSize;
-	/*011c*/ ULONG MaxClusters;
-	/*0120*/ ULONG InterruptReplayDataSize;
-	/*0124*/ _INTERRUPT_PROBLEM Problem;
-	/*0128*/ LONG ProblemStatus;
-	/*0130*/ CHAR const * ProblemSourceFile;
-	/*0138*/ ULONG ProblemSourceLine;
-	/*013c*/ ULONG CustomProblem;
-	/*0140*/ LONG CustomProblemStatus;
-	/*0148*/ _UNICODE_STRING ResourceId;
-	/*0158*/ POHANDLE__ * PowerHandle;
-	/*0160*/
+	/*00f0*/ _KNOWN_CONTROLLER_TYPE KnownType;
+	/*00f4*/ ULONG Capabilities;
+	/*00f8*/ ULONG Flags;
+	/*00fc*/ ULONG MaxPriority;
+	/*0100*/ ULONG UnitId;
+	/*0108*/ _LIST_ENTRY LinesHead;
+	/*0118*/ _LIST_ENTRY OutputLinesHead;
+	/*0128*/ LONG MinLine;
+	/*012c*/ LONG MaxLine;
+	/*0130*/ ULONG MaxClusterSize;
+	/*0134*/ ULONG MaxClusters;
+	/*0138*/ ULONG InterruptReplayDataSize;
+	/*013c*/ _INTERRUPT_PROBLEM Problem;
+	/*0140*/ LONG ProblemStatus;
+	/*0148*/ CHAR const * ProblemSourceFile;
+	/*0150*/ ULONG ProblemSourceLine;
+	/*0154*/ ULONG CustomProblem;
+	/*0158*/ LONG CustomProblemStatus;
+	/*0160*/ _UNICODE_STRING ResourceId;
+	/*0170*/ POHANDLE__ * PowerHandle;
+	/*0178*/
+};
+
+struct _REGISTERED_IOMMU {
+	/*0000*/ _LIST_ENTRY ListEntry;
+	/*0010*/ void * InternalData;
+	/*0018*/ ULONG InternalDataSize;
+	/*0020*/ void * InterruptContext;
+	/*0028*/ UCHAR Irql;
+	/*002c*/ LONG Gsi;
+	/*0030*/ _KINTERRUPT_POLARITY InterruptPolarity;
+	/*0034*/ _KINTERRUPT_MODE InterruptMode;
+	/*0038*/ _EXT_IOMMU_FUNCTION_TABLE FunctionTable;
+	/*00d0*/ _EXT_IOMMU_FUNCTION_TABLE_EXTENDED FunctionTableExtended;
+	/*0188*/ ULONG Flags;
+	/*0190*/ _LIST_ENTRY PasidTableListHead;
+	/*01a0*/ _IOMMU_PAGE_HANDLING_DATA PageHandling;
+	/*01c8*/ ULONG MaximumDomainIds;
+	/*01d0*/ ULONGLONG DomainIdBitmapLock;
+	/*01d8*/ _RTL_BITMAP DomainIdBitmap;
+	/*01e8*/ ULONG Capabilities;
+	/*01ec*/ _EXT_IOMMU_KNOWN_IOMMU_TYPE KnownType;
+	/*01f0*/ ULONG PciSegment;
+	/*01f4*/ ULONG PciBus;
+	/*01f8*/ _PCI_SLOT_NUMBER PciSlot;
+	/*0200*/ _LARGE_INTEGER MsiAddress;
+	/*0208*/ ULONGLONG MsiData;
+	/*0210*/ ULONG MaximumAsids;
+	/*0214*/ ULONG Identifier;
+	/*0218*/ _UNICODE_STRING ResourceId;
+	/*0228*/ _IOMMU_RESERVED_DEVICE_LIST * ReservedDevices;
+	/*0230*/
 };
 
 enum _REG_NOTIFY_CLASS {
@@ -19772,7 +22306,9 @@ enum _REG_NOTIFY_CLASS {
 	RegNtPostReplaceKey = 0x2e,
 	RegNtPreQueryKeyName = 0x2f,
 	RegNtPostQueryKeyName = 0x30,
-	MaxRegNtNotifyClass = 0x31
+	RegNtPreSaveMergedKey = 0x31,
+	RegNtPostSaveMergedKey = 0x32,
+	MaxRegNtNotifyClass = 0x33
 };
 
 struct _RELATION_LIST {
@@ -19808,8 +22344,8 @@ struct _REQUEST_MAILBOX {
 	/*0000*/ _REQUEST_MAILBOX * Next;
 	/*0008*/ ULONGLONG RequestSummary;
 	/*0010*/ _KREQUEST_PACKET RequestPacket;
-	/*0030*/ LONG volatile * NodeTargetCountAddr;
-	/*0038*/ LONG volatile NodeTargetCount;
+	/*0030*/ LONG volatile * SubNodeTargetCountAddr;
+	/*0038*/ LONG volatile SubNodeTargetCount;
 	/*0040*/
 };
 
@@ -19855,7 +22391,7 @@ enum _RTLP_HP_ADDRESS_SPACE_TYPE {
 	HeapAddressUser = 0x0,
 	HeapAddressKernel = 0x1,
 	HeapAddressSession = 0x2,
-	HeapAddressSecureKernel = 0x3,
+	HeapAddressSecure = 0x3,
 	HeapAddressTypeMax = 0x4
 };
 
@@ -19879,16 +22415,22 @@ struct _RTLP_HP_HEAP_GLOBALS {
 	/*0008*/ ULONGLONG LfhKey;
 	/*0010*/ _HEAP_FAILURE_INFORMATION * FailureInfo;
 	/*0018*/ _RTL_HEAP_MEMORY_LIMIT_DATA CommitLimitData;
-	/*0038*/
+	/*0038*/ ULONG Flags;
+	struct {
+		/*0038*/ ULONG ErmsSupported : 01; // 0x00000001;
+		/*0038*/ ULONG ErmsChecked : 01; // 0x00000002;
+		/*003c*/
+	} FlagsBits;
+	/*0040*/
 };
 
 struct _RTLP_HP_HEAP_MANAGER {
 	/*0000*/ _RTLP_HP_HEAP_GLOBALS * Globals;
 	/*0008*/ _RTLP_HP_ALLOC_TRACKER AllocTracker;
 	/*0058*/ _HEAP_VAMGR_CTX VaMgr;
-	/*3898*/ _RTLP_HP_METADATA_HEAP_CTX MetadataHeaps[0x3];
-	/*38c8*/ _RTL_HP_SUB_ALLOCATOR_CONFIGS SubAllocConfigs;
-	/*38d0*/
+	/*3898*/ _RTLP_HP_METADATA_HEAP_CTX MetadataHeaps[0x4];
+	/*38d8*/ _RTL_HP_SUB_ALLOCATOR_CONFIGS SubAllocConfigs;
+	/*38e0*/
 };
 
 enum _RTLP_HP_LOCK_TYPE {
@@ -19900,9 +22442,11 @@ enum _RTLP_HP_LOCK_TYPE {
 enum _RTLP_HP_MEMORY_TYPE {
 	HeapMemoryPaged = 0x0,
 	HeapMemoryNonPaged = 0x1,
-	HeapMemoryLargePage = 0x2,
-	HeapMemoryHugePage = 0x3,
-	HeapMemoryTypeMax = 0x4
+	HeapMemory64KPage = 0x2,
+	HeapMemoryLargePage = 0x3,
+	HeapMemoryHugePage = 0x4,
+	HeapMemoryTypeCustom = 0x5,
+	HeapMemoryTypeMax = 0x6
 };
 
 struct _RTLP_HP_METADATA_HEAP_CTX {
@@ -20062,7 +22606,7 @@ struct _RTL_CRITICAL_SECTION_DEBUG {
 	/*0024*/ ULONG ContentionCount;
 	/*0028*/ ULONG Flags;
 	/*002c*/ USHORT CreatorBackTraceIndexHigh;
-	/*002e*/ USHORT SpareUSHORT;
+	/*002e*/ USHORT Identifier;
 	/*0030*/
 };
 
@@ -20153,6 +22697,7 @@ struct _RTL_FEATURE_CONFIGURATION {
 
 enum _RTL_FEATURE_CONFIGURATION_PRIORITY {
 	FeatureConfigurationPriorityImageDefault = 0x0,
+	FeatureConfigurationPriorityEnrollment = 0x2,
 	FeatureConfigurationPriorityService = 0x4,
 	FeatureConfigurationPriorityUser = 0x8,
 	FeatureConfigurationPriorityUserPolicy = 0xa,
@@ -20177,6 +22722,12 @@ struct _RTL_FEATURE_USAGE_REPORT {
 	/*0004*/ USHORT ReportingKind;
 	/*0006*/ USHORT ReportingOptions;
 	/*0008*/
+};
+
+struct _RTL_FUNCTION_OVERRIDE_CAPABILITIES {
+	/*0000*/ UCHAR AMD64Capabilities[0x28];
+	/*0028*/ UCHAR AMD64KernelCapabilities[0x28];
+	/*0050*/
 };
 
 enum _RTL_GENERIC_COMPARE_RESULTS {
@@ -20211,6 +22762,14 @@ struct _RTL_HEAP_MEMORY_LIMIT_DATA {
 	/*0008*/ ULONGLONG CommitLimitFailureCode;
 	/*0010*/ ULONGLONG MaxAllocationSizeBytes;
 	/*0018*/ ULONGLONG AllocationLimitFailureCode;
+	/*0020*/
+};
+
+struct _RTL_HP_HEAP_VA_CALLBACKS_ENCODED {
+	/*0000*/ ULONGLONG CallbackContext;
+	/*0008*/ ULONGLONG AllocateVirtualMemoryEncoded;
+	/*0010*/ ULONGLONG FreeVirtualMemoryEncoded;
+	/*0018*/ ULONGLONG QueryVirtualMemoryEncoded;
 	/*0020*/
 };
 
@@ -20261,9 +22820,24 @@ struct _RTL_LOOKASIDE {
 enum _RTL_MEMORY_TYPE {
 	MemoryTypePaged = 0x0,
 	MemoryTypeNonPaged = 0x1,
-	MemoryTypeLargePage = 0x2,
-	MemoryTypeHugePage = 0x3,
-	MemoryTypeMax = 0x4
+	MemoryType64KPage = 0x2,
+	MemoryTypeLargePage = 0x3,
+	MemoryTypeHugePage = 0x4,
+	MemoryTypeCustom = 0x5,
+	MemoryTypeMax = 0x6
+};
+
+struct _RTL_NLS_STATE {
+	/*0000*/ _CPTABLEINFO DefaultAcpTableInfo;
+	/*0040*/ _CPTABLEINFO DefaultOemTableInfo;
+	/*0080*/ USHORT * ActiveCodePageData;
+	/*0088*/ USHORT * OemCodePageData;
+	/*0090*/ USHORT * LeadByteInfo;
+	/*0098*/ USHORT * OemLeadByteInfo;
+	/*00a0*/ USHORT * CaseMappingData;
+	/*00a8*/ USHORT * UnicodeUpcaseTable844;
+	/*00b0*/ USHORT * UnicodeLowercaseTable844;
+	/*00b8*/
 };
 
 struct _RTL_QUERY_REGISTRY_TABLE {
@@ -20308,7 +22882,8 @@ struct _RTL_RETPOLINE_ROUTINES {
 	/*0044*/ ULONG CfgIndirectRax;
 	/*0048*/ ULONG NonCfgIndirectRax;
 	/*004c*/ ULONG ImportR10;
-	/*0050*/
+	/*0050*/ ULONG JumpHpat;
+	/*0054*/
 };
 
 union _RTL_RUN_ONCE {
@@ -20365,30 +22940,6 @@ struct _RTL_TIME_ZONE_INFORMATION {
 	/*00ac*/
 };
 
-struct _RTL_UMS_CONTEXT {
-	/*0000*/ _SINGLE_LIST_ENTRY Link;
-	/*0010*/ _CONTEXT Context;
-	/*04e0*/ void * Teb;
-	/*04e8*/ void * UserContext;
-	/*04f0*/ ULONG volatile ScheduledThread : 01; // 0x00000001;
-	/*04f0*/ ULONG volatile Suspended : 01; // 0x00000002;
-	/*04f0*/ ULONG volatile VolatileContext : 01; // 0x00000004;
-	/*04f0*/ ULONG volatile Terminated : 01; // 0x00000008;
-	/*04f0*/ ULONG volatile DebugActive : 01; // 0x00000010;
-	/*04f0*/ ULONG volatile RunningOnSelfThread : 01; // 0x00000020;
-	/*04f0*/ ULONG volatile DenyRunningOnSelfThread : 01; // 0x00000040;
-	/*04f0*/ LONG volatile Flags;
-	/*04f8*/ ULONGLONG volatile KernelUpdateLock : 02; // 0x0000000000000003;
-	/*04f8*/ ULONGLONG volatile PrimaryClientID : 62; // 0xfffffffffffffffc;
-	/*04f8*/ ULONGLONG volatile ContextLock;
-	/*0500*/ _RTL_UMS_CONTEXT * PrimaryUmsContext;
-	/*0508*/ ULONG SwitchCount;
-	/*050c*/ ULONG KernelYieldCount;
-	/*0510*/ ULONG MixedYieldCount;
-	/*0514*/ ULONG YieldCount;
-	/*0520*/
-};
-
 struct _RTL_USER_PROCESS_PARAMETERS {
 	/*0000*/ ULONG MaximumLength;
 	/*0004*/ ULONG Length;
@@ -20428,7 +22979,8 @@ struct _RTL_USER_PROCESS_PARAMETERS {
 	/*0430*/ ULONGLONG * DefaultThreadpoolCpuSetMasks;
 	/*0438*/ ULONG DefaultThreadpoolCpuSetMaskCount;
 	/*043c*/ ULONG DefaultThreadpoolThreadMaximum;
-	/*0440*/
+	/*0440*/ ULONG HeapMemoryTypeMask;
+	/*0448*/
 };
 
 struct _SCATTER_GATHER_ELEMENT {
@@ -20667,7 +23219,8 @@ struct _SEGMENT_HEAP {
 	/*0048*/ _RTL_RB_TREE LargeAllocMetadata;
 	/*0058*/ ULONGLONG volatile LargeReservedPages;
 	/*0060*/ ULONGLONG volatile LargeCommittedPages;
-	/*0068*/ _RTL_RUN_ONCE StackTraceInitVar;
+	/*0068*/ ULONGLONG Tag;
+	/*0070*/ _RTL_RUN_ONCE StackTraceInitVar;
 	/*0080*/ _HEAP_RUNTIME_MEMORY_STATS MemStats;
 	/*00d8*/ USHORT GlobalLockCount;
 	/*00dc*/ ULONG GlobalLockOwner;
@@ -20675,10 +23228,12 @@ struct _SEGMENT_HEAP {
 	/*00e8*/ UCHAR * AllocatedBase;
 	/*00f0*/ UCHAR * UncommittedBase;
 	/*00f8*/ UCHAR * ReservedLimit;
-	/*0100*/ _HEAP_SEG_CONTEXT SegContexts[0x2];
-	/*0280*/ _HEAP_VS_CONTEXT VsContext;
-	/*0340*/ _HEAP_LFH_CONTEXT LfhContext;
-	/*0800*/
+	/*0100*/ UCHAR * ReservedRegionEnd;
+	/*0108*/ _RTL_HP_HEAP_VA_CALLBACKS_ENCODED CallbacksEncoded;
+	/*0140*/ _HEAP_SEG_CONTEXT SegContexts[0x2];
+	/*02c0*/ _HEAP_VS_CONTEXT VsContext;
+	/*0380*/ _HEAP_LFH_CONTEXT LfhContext;
+	/*0840*/
 };
 
 struct _SEGMENT_HEAP_EXTRA {
@@ -20858,37 +23413,44 @@ struct _SHARED_CACHE_MAP {
 	/*0078*/ _LIST_ENTRY LoggedStreamLinks;
 	/*0088*/ _LIST_ENTRY SharedCacheMapLinks;
 	/*0098*/ ULONG Flags;
-	/*009c*/ LONG Status;
-	/*00a0*/ _MBCB * Mbcb;
-	/*00a8*/ void * Section;
-	/*00b0*/ _KEVENT * CreateEvent;
-	/*00b8*/ _KEVENT * WaitOnActiveCount;
-	/*00c0*/ ULONG PagesToWrite;
-	/*00c8*/ LONGLONG BeyondLastFlush;
-	/*00d0*/ _CACHE_MANAGER_CALLBACKS * Callbacks;
-	/*00d8*/ void * LazyWriteContext;
-	/*00e0*/ _LIST_ENTRY PrivateList;
-	/*00f0*/ _LOGGED_STREAM_CALLBACK_V1 V1;
-	/*00f0*/ _LOGGED_STREAM_CALLBACK_V2 V2;
-	/*0100*/ _LARGE_INTEGER LargestLSN;
-	/*0108*/ ULONG DirtyPageThreshold;
-	/*010c*/ ULONG LazyWritePassCount;
-	/*0110*/ _CACHE_UNINITIALIZE_EVENT * UninitializeEvent;
-	/*0118*/ _FAST_MUTEX BcbLock;
-	/*0150*/ _LARGE_INTEGER LastUnmapBehindOffset;
-	/*0158*/ _KEVENT Event;
-	/*0170*/ _LARGE_INTEGER HighWaterMappingOffset;
-	/*0178*/ _PRIVATE_CACHE_MAP PrivateCacheMap;
-	/*01f0*/ void * WriteBehindWorkQueueEntry;
-	/*01f8*/ _VOLUME_CACHE_MAP * VolumeCacheMap;
-	/*0200*/ ULONG ProcImagePathHash;
-	/*0204*/ ULONG WritesInProgress;
-	/*0208*/ ULONG AsyncReadRequestCount;
-	/*0210*/ _CC_PARTITION * Partition;
-	/*0218*/ ULONG InternalRefCount;
-	/*021c*/ ULONG NumMappedVacb;
-	/*0220*/ ULONG NumActiveVacb;
-	/*0228*/
+	/*009c*/ ULONG Flags2;
+	/*00a0*/ LONG Status;
+	/*00a8*/ _MBCB * Mbcb;
+	/*00b0*/ void * Section;
+	/*00b8*/ _KEVENT * CreateEvent;
+	/*00c0*/ _KEVENT * WaitOnActiveCount;
+	/*00c8*/ ULONG PagesToWrite;
+	/*00d0*/ LONGLONG BeyondLastFlush;
+	/*00d8*/ _CACHE_MANAGER_CALLBACKS * Callbacks;
+	/*00d8*/ _CACHE_MANAGER_CALLBACKS_EX * CallbacksEx;
+	/*00e0*/ void * LazyWriteContext;
+	/*00e8*/ _LIST_ENTRY PrivateList;
+	/*00f8*/ _LOGGED_STREAM_CALLBACK_V1 V1;
+	/*00f8*/ _LOGGED_STREAM_CALLBACK_V2 V2;
+	/*0108*/ _LARGE_INTEGER LargestLSN;
+	/*0110*/ ULONG DirtyPageThreshold;
+	/*0114*/ ULONG LazyWritePassCount;
+	/*0118*/ _CACHE_UNINITIALIZE_EVENT * UninitializeEvent;
+	/*0120*/ _FAST_MUTEX BcbLock;
+	/*0158*/ _LARGE_INTEGER LastUnmapBehindOffset;
+	/*0160*/ _KEVENT Event;
+	/*0178*/ _LARGE_INTEGER HighWaterMappingOffset;
+	/*0180*/ _PRIVATE_CACHE_MAP PrivateCacheMap;
+	/*01f8*/ void * WriteBehindWorkQueueEntry;
+	/*0200*/ _VOLUME_CACHE_MAP * VolumeCacheMap;
+	/*0208*/ ULONG ProcImagePathHash;
+	/*020c*/ ULONG WritesInProgress;
+	/*0210*/ ULONG AsyncReadRequestCount;
+	/*0218*/ _CC_PARTITION * Partition;
+	/*0220*/ ULONG InternalRefCount;
+	/*0224*/ ULONG NumMappedVacb;
+	/*0228*/ ULONG NumActiveVacb;
+	/*022c*/ ULONG IdealNodeForWriteBehind;
+	/*0230*/ ULONG IdealNodeNumber;
+	/*0238*/ _LIST_ENTRY VolSharedCacheMapLinks;
+	/*0248*/ _LIST_ENTRY VolLoggedStreamLinks;
+	/*0258*/ _PRIVATE_VOLUME_CACHEMAP * PrivateVolumeCacheMap;
+	/*0260*/
 };
 
 struct _SHARED_CACHE_MAP_LIST_CURSOR {
@@ -20931,6 +23493,7 @@ struct _SILO_USER_SHARED_DATA {
 	/*0014*/ ULONG SuiteMask;
 	/*0018*/ ULONG SharedUserSessionId;
 	/*001c*/ UCHAR IsMultiSessionSku;
+	/*001d*/ UCHAR IsStateSeparationEnabled;
 	/*001e*/ WCHAR NtSystemRoot[0x104];
 	/*0226*/ USHORT UserModeGlobalLogger[0x10];
 	/*0248*/ ULONG TimeZoneId;
@@ -20987,49 +23550,59 @@ enum _SKSERVICE {
 	SECURESERVICE_TRANSFER_IMAGE_VERSION_RESOURCE = 0x20,
 	SECURESERVICE_SET_CODE_INTEGRITY_POLICY = 0x21,
 	SECURESERVICE_EXCHANGE_ENTROPY = 0x22,
-	SECURESERVICE_ALLOCATE_HIBERNATE_RESOURCES = 0x23,
-	SECURESERVICE_FREE_HIBERNATE_RESOURCES = 0x24,
-	SECURESERVICE_CONFIGURE_DYNAMIC_MEMORY = 0x25,
-	SECURESERVICE_DEBUG_PROTECT_MEMORY = 0x26,
-	SECURESERVICE_DEBUG_READ_WRITE_MEMORY = 0x27,
-	SECURESERVICE_QUERY_VIRTUAL_MEMORY = 0x28,
-	SECURESERVICE_CAPTURE_IMAGE_IAT = 0x29,
-	SECURESERVICE_FREE_IMAGE_IAT = 0x2a,
-	SECURESERVICE_APPLY_FIXUPS = 0x2b,
-	SECURESERVICE_MARK_IMAGE_PROTECTED = 0x2c,
-	SECURESERVICE_CREATE_ENCLAVE = 0x2d,
-	SECURESERVICE_LOAD_ENCLAVE_DATA = 0x2e,
-	SECURESERVICE_LOAD_ENCLAVE_MODULE = 0x2f,
-	SECURESERVICE_INITIALIZE_ENCLAVE = 0x30,
-	SECURESERVICE_TERMINATE_ENCLAVE = 0x31,
-	SECURESERVICE_DELETE_ENCLAVE = 0x32,
-	SECURESERVICE_CONNECT_SW_INTERRUPT = 0x33,
-	SECURESERVICE_RELAX_HYPERGUARD_QUOTA = 0x34,
-	SECURESERVICE_LIVEDUMP_QUERY_SECONDARYDATA_SIZE = 0x35,
-	SECURESERVICE_LIVEDUMP_START = 0x36,
-	SECURESERVICE_LIVEDUMP_ADD_BUFFER = 0x37,
-	SECURESERVICE_LIVEDUMP_SETUP_BUFFER = 0x38,
-	SECURESERVICE_LIVEDUMP_FINALIZE = 0x39,
-	SECURESERVICE_LIVEDUMP_ABORT = 0x3a,
-	SECURESERVICE_LIVEDUMP_CAPTURE_PROCESS = 0x3b,
-	SECURESERVICE_NOTIFY_POWER_STATE = 0x3c,
-	SECURESERVICE_QUERY_PROFILE_INFORMATION = 0x3d,
-	SECURESERVICE_UPDATE_FREEZE_BIAS = 0x3e,
-	SECURESERVICE_CREATE_SECURE_SECTION = 0x3f,
-	SECURESERVICE_DELETE_SECURE_SECTION = 0x40,
-	SECURESERVICE_QUERY_SECURE_DEVICE = 0x41,
-	SECURESERVICE_UNPROTECT_SECURE_DEVICE = 0x42,
-	SECURESERVICE_DETERMINE_HOT_PATCH_TYPE = 0x43,
-	SECURESERVICE_OBTAIN_PATCH_UNDO_TABLE_SIZE = 0x44,
-	SECURESERVICE_OBTAIN_PATCH_UNDO_TABLE = 0x45,
-	SECURESERVICE_APPLY_HOT_PATCH = 0x46,
-	SECURESERVICE_REVERT_HOT_PATCH = 0x47,
-	SECURESERVICE_PREPARE_DRIVER_FOR_PATCH = 0x48,
-	SECURESERVICE_PROVISION_DUMP_KEYS = 0x49,
-	SECURESERVICE_CAPTURE_PGO_DATA = 0x4a,
-	SECURESERVICE_START_PROFILE = 0x4b,
-	SECURESERVICE_STOP_PROFILE = 0x4c,
-	SECURESERVICE_SET_TRACEPOINT = 0x4d,
+	SECURESERVICE_IS_ENCRYPTION_KEY_AVAILABLE = 0x23,
+	SECURESERVICE_ALLOCATE_HIBERNATE_RESOURCES = 0x24,
+	SECURESERVICE_FREE_HIBERNATE_RESOURCES = 0x25,
+	SECURESERVICE_CONFIGURE_DYNAMIC_MEMORY = 0x26,
+	SECURESERVICE_DEBUG_PROTECT_MEMORY = 0x27,
+	SECURESERVICE_DEBUG_READ_WRITE_MEMORY = 0x28,
+	SECURESERVICE_QUERY_VIRTUAL_MEMORY = 0x29,
+	SECURESERVICE_CAPTURE_IMAGE_IAT = 0x2a,
+	SECURESERVICE_FREE_IMAGE_IAT = 0x2b,
+	SECURESERVICE_APPLY_FIXUPS = 0x2c,
+	SECURESERVICE_MARK_IMAGE_PROTECTED = 0x2d,
+	SECURESERVICE_CREATE_ENCLAVE = 0x2e,
+	SECURESERVICE_LOAD_ENCLAVE_DATA = 0x2f,
+	SECURESERVICE_LOAD_ENCLAVE_MODULE = 0x30,
+	SECURESERVICE_INITIALIZE_ENCLAVE = 0x31,
+	SECURESERVICE_TERMINATE_ENCLAVE = 0x32,
+	SECURESERVICE_DELETE_ENCLAVE = 0x33,
+	SECURESERVICE_CONNECT_SW_INTERRUPT = 0x34,
+	SECURESERVICE_RELAX_HYPERGUARD_QUOTA = 0x35,
+	SECURESERVICE_REGISTER_BOOT_DRIVERS = 0x36,
+	SECURESERVICE_LIVEDUMP_QUERY_SECONDARYDATA_SIZE = 0x37,
+	SECURESERVICE_LIVEDUMP_START = 0x38,
+	SECURESERVICE_LIVEDUMP_ADD_BUFFER = 0x39,
+	SECURESERVICE_LIVEDUMP_SETUP_BUFFER = 0x3a,
+	SECURESERVICE_LIVEDUMP_FINALIZE = 0x3b,
+	SECURESERVICE_LIVEDUMP_ABORT = 0x3c,
+	SECURESERVICE_LIVEDUMP_CAPTURE_PROCESS = 0x3d,
+	SECURESERVICE_NOTIFY_POWER_STATE = 0x3e,
+	SECURESERVICE_QUERY_PROFILE_INFORMATION = 0x3f,
+	SECURESERVICE_UPDATE_FREEZE_BIAS = 0x40,
+	SECURESERVICE_CREATE_SECURE_SECTION = 0x41,
+	SECURESERVICE_DELETE_SECURE_SECTION = 0x42,
+	SECURESERVICE_QUERY_SECURE_DEVICE = 0x43,
+	SECURESERVICE_UNPROTECT_SECURE_DEVICE = 0x44,
+	SECURESERVICE_DETERMINE_HOT_PATCH_TYPE = 0x45,
+	SECURESERVICE_OBTAIN_PATCH_UNDO_TABLE_SIZE = 0x46,
+	SECURESERVICE_OBTAIN_PATCH_UNDO_TABLE = 0x47,
+	SECURESERVICE_APPLY_HOT_PATCH = 0x48,
+	SECURESERVICE_REVERT_HOT_PATCH = 0x49,
+	SECURESERVICE_PREPARE_DRIVER_FOR_PATCH = 0x4a,
+	SECURESERVICE_PROVISION_DUMP_KEYS = 0x4b,
+	SECURESERVICE_CAPTURE_PGO_DATA = 0x4c,
+	SECURESERVICE_START_PROFILE = 0x4d,
+	SECURESERVICE_STOP_PROFILE = 0x4e,
+	SECURESERVICE_SECURE_POOL_CREATE = 0x4f,
+	SECURESERVICE_SECURE_POOL_DESTROY = 0x50,
+	SECURESERVICE_SECURE_POOL_ALLOCATE = 0x51,
+	SECURESERVICE_SECURE_POOL_FREE = 0x52,
+	SECURESERVICE_SECURE_POOL_UPDATE = 0x53,
+	SECURESERVICE_SET_TRACEPOINT = 0x54,
+	SECURESERVICE_TRANSFORM_DUMP_KEY = 0x55,
+	SECURESERVICE_PUBLISH_SYSCALL_PROVIDER_SERVICE_TABLES = 0x56,
+	SECURESERVICE_REVOKE_SYSCALL_PROVIDER_SERVICE_TABLES = 0x57,
 	SECURESERVICE_NO_TRACING_FIRST = 0xbf,
 	SECURESERVICE_GET_PEB_ADDRESS = 0xc0,
 	SECURESERVICE_VALIDATE_SECURE_IMAGE_PAGES = 0xc1,
@@ -21046,9 +23619,18 @@ enum _SKSERVICE {
 	SECURESERVICE_UNLOAD_DRIVER = 0xd9,
 	SECURESERVICE_ENABLE_CFG_TARGET = 0xda,
 	SECURESERVICE_COMPLETE_SLAB_CONFIGURATION = 0xdb,
-	SECURESERVICE_INITIALIZE_RETPOLINE = 0xdc,
-	SECURESERVICE_PERFORM_RETPOLINE_RELOCATIONS = 0xdd,
-	SECURESERVICE_UPDATE_IMPORT_RELOCATIONS = 0xde,
+	SECURESERVICE_REAPPLY_BOOT_DRIVER_PATCH = 0xdc,
+	SECURESERVICE_INITIALIZE_RETPOLINE = 0xdd,
+	SECURESERVICE_PERFORM_RETPOLINE_RELOCATIONS = 0xde,
+	SECURESERVICE_UPDATE_IMPORT_RELOCATIONS = 0xdf,
+	SECURESERVICE_REAPPLY_IMPORT_RELOCATIONS = 0xe0,
+	SECURESERVICE_INIT_FUNCTION_OVERRIDES = 0xe1,
+	SECURESERVICE_PERFORM_DRIVER_FUNCTION_OVERRIDES = 0xe2,
+	SECURESERVICE_ALLOCATE_SHADOW_STACK = 0xe3,
+	SECURESERVICE_FREE_SHADOW_STACK = 0xe4,
+	SECURESERVICE_RESET_SHADOW_STACK = 0xe5,
+	SECURESERVICE_REGISTER_SYSCALL_PROVIDER_SERVICE_TABLE_MD = 0xe6,
+	SECURESERVICE_INITIALIZE_SYSCALL_PROVIDERS = 0xe7,
 	SECURESERVICE_DISPATCH_LEVEL_FIRST = 0xef,
 	SECURESERVICE_FLUSH_ADDRESS_SPACE = 0xf0,
 	SECURESERVICE_FAST_FLUSH_RANGE_LIST = 0xf1,
@@ -21075,9 +23657,11 @@ enum _SKSERVICE {
 	SECURESERVICE_SHUTDOWN = 0x106,
 	SECURESERVICE_QUERY_SECURE_PCI_INFO = 0x107,
 	SECURESERVICE_ACCESS_PCI_DEVICE = 0x108,
-	SECURESERVICE_REINITIALIZE_DEBUGGER_TRANSPORT = 0x109,
-	SECURESERVICE_KSR_CALL = 0x10a,
-	SECURESERVICE_SVC_CALL = 0x10b,
+	SECURESERVICE_QUERY_SECURE_PCI_BOOT_CONFIG = 0x109,
+	SECURESERVICE_REINITIALIZE_DEBUGGER_TRANSPORT = 0x10a,
+	SECURESERVICE_KSR_CALL = 0x10b,
+	SECURESERVICE_SVC_CALL = 0x10c,
+	SECURESERVICE_SHADOW_STACK_ASSIST = 0x10d,
 	SECURESERVICE_BUGCHECK = 0x700,
 	SECURESERVICE_LIMITED_MODE_SERVICE_START = 0x800
 };
@@ -21279,10 +23863,11 @@ enum _SYSTEM_DLL_TYPE {
 	PsNativeSystemDll = 0x0,
 	PsWowX86SystemDll = 0x1,
 	PsWowArm32SystemDll = 0x2,
-	PsWowAmd64SystemDll = 0x3,
-	PsWowChpeX86SystemDll = 0x4,
+	PsWowChpeX86SystemDll = 0x3,
+	PsChpeV2SystemDll = 0x4,
 	PsVsmEnclaveRuntimeDll = 0x5,
-	PsSystemDllTotalTypes = 0x6
+	PsTrustedAppsRuntimeDll = 0x6,
+	PsSystemDllTotalTypes = 0x7
 };
 
 enum _SYSTEM_FEATURE_CONFIGURATION_SECTION_TYPE {
@@ -21519,8 +24104,26 @@ enum _SYSTEM_INFORMATION_CLASS {
 	SystemPoolLimitInformation = 0xdf,
 	SystemCodeIntegrityAddDynamicStore = 0xe0,
 	SystemCodeIntegrityClearDynamicStores = 0xe1,
+	SystemDifPoolTrackingInformation = 0xe2,
 	SystemPoolZeroingInformation = 0xe3,
-	MaxSystemInfoClass = 0xe4
+	SystemDpcWatchdogInformation = 0xe4,
+	SystemDpcWatchdogInformation2 = 0xe5,
+	SystemSupportedProcessorArchitectures2 = 0xe6,
+	SystemSingleProcessorRelationshipInformation = 0xe7,
+	SystemXfgCheckFailureInformation = 0xe8,
+	SystemIommuStateInformation = 0xe9,
+	SystemHypervisorMinrootInformation = 0xea,
+	SystemHypervisorBootPagesInformation = 0xeb,
+	SystemPointerAuthInformation = 0xec,
+	SystemSecureKernelDebuggerInformation = 0xed,
+	SystemOriginalImageFeatureInformation = 0xee,
+	MaxSystemInfoClass = 0xef
+};
+
+enum _SYSTEM_POOL_LIMIT_MEM_TYPE {
+	SysPlMemPaged = 0x0,
+	SysPlMemNonPaged = 0x1,
+	SysPlMemTypeMax = 0x2
 };
 
 struct _SYSTEM_POWER_POLICY {
@@ -21674,8 +24277,8 @@ struct _TEB {
 	/*1770*/ ULONGLONG ReservedForCodeCoverage;
 	/*1778*/ void * ThreadPoolData;
 	/*1780*/ void * * TlsExpansionSlots;
-	/*1788*/ void * DeallocationBStore;
-	/*1790*/ void * BStoreLimit;
+	/*1788*/ _CHPEV2_CPUAREA_INFO * ChpeV2CpuAreaInfo;
+	/*1790*/ void * Unused;
 	/*1798*/ ULONG MuiGeneration;
 	/*179c*/ ULONG IsImpersonating;
 	/*17a0*/ void * NlsCache;
@@ -21707,7 +24310,7 @@ struct _TEB {
 	/*17ee*/ USHORT LoadOwner : 01; // 0x1000;
 	/*17ee*/ USHORT LoaderWorker : 01; // 0x2000;
 	/*17ee*/ USHORT SkipLoaderInit : 01; // 0x4000;
-	/*17ee*/ USHORT SpareSameTebBits : 01; // 0x8000;
+	/*17ee*/ USHORT SkipFileAPIBrokering : 01; // 0x8000;
 	/*17f0*/ void * TxnScopeEnterCallback;
 	/*17f8*/ void * TxnScopeExitCallback;
 	/*1800*/ void * TxnScopeContext;
@@ -21717,7 +24320,11 @@ struct _TEB {
 	/*1818*/ void * ReservedForWdf;
 	/*1820*/ ULONGLONG ReservedForCrt;
 	/*1828*/ _GUID EffectiveContainerId;
-	/*1838*/
+	/*1838*/ ULONGLONG LastSleepCounter;
+	/*1840*/ ULONG SpinCallCount;
+	/*1844*/ UCHAR Padding8[0x4];
+	/*1848*/ ULONGLONG ExtendedFeatureDisableMask;
+	/*1850*/
 };
 
 struct _TEB32 {
@@ -21828,7 +24435,7 @@ struct _TEB32 {
 	/*0fca*/ USHORT LoadOwner : 01; // 0x1000;
 	/*0fca*/ USHORT LoaderWorker : 01; // 0x2000;
 	/*0fca*/ USHORT SkipLoaderInit : 01; // 0x4000;
-	/*0fca*/ USHORT SpareSameTebBits : 01; // 0x8000;
+	/*0fca*/ USHORT SkipFileAPIBrokering : 01; // 0x8000;
 	/*0fcc*/ ULONG TxnScopeEnterCallback;
 	/*0fd0*/ ULONG TxnScopeExitCallback;
 	/*0fd4*/ ULONG TxnScopeContext;
@@ -21838,7 +24445,10 @@ struct _TEB32 {
 	/*0fe4*/ ULONG ReservedForWdf;
 	/*0fe8*/ ULONGLONG ReservedForCrt;
 	/*0ff0*/ _GUID EffectiveContainerId;
-	/*1000*/
+	/*1000*/ ULONGLONG LastSleepCounter;
+	/*1008*/ ULONG SpinCallCount;
+	/*1010*/ ULONGLONG ExtendedFeatureDisableMask;
+	/*1018*/
 };
 
 struct _TEB64 {
@@ -21926,8 +24536,8 @@ struct _TEB64 {
 	/*1770*/ ULONGLONG ReservedForCodeCoverage;
 	/*1778*/ ULONGLONG ThreadPoolData;
 	/*1780*/ ULONGLONG TlsExpansionSlots;
-	/*1788*/ ULONGLONG DeallocationBStore;
-	/*1790*/ ULONGLONG BStoreLimit;
+	/*1788*/ ULONGLONG ChpeV2CpuAreaInfo;
+	/*1790*/ ULONGLONG Unused;
 	/*1798*/ ULONG MuiGeneration;
 	/*179c*/ ULONG IsImpersonating;
 	/*17a0*/ ULONGLONG NlsCache;
@@ -21959,7 +24569,7 @@ struct _TEB64 {
 	/*17ee*/ USHORT LoadOwner : 01; // 0x1000;
 	/*17ee*/ USHORT LoaderWorker : 01; // 0x2000;
 	/*17ee*/ USHORT SkipLoaderInit : 01; // 0x4000;
-	/*17ee*/ USHORT SpareSameTebBits : 01; // 0x8000;
+	/*17ee*/ USHORT SkipFileAPIBrokering : 01; // 0x8000;
 	/*17f0*/ ULONGLONG TxnScopeEnterCallback;
 	/*17f8*/ ULONGLONG TxnScopeExitCallback;
 	/*1800*/ ULONGLONG TxnScopeContext;
@@ -21969,7 +24579,11 @@ struct _TEB64 {
 	/*1818*/ ULONGLONG ReservedForWdf;
 	/*1820*/ ULONGLONG ReservedForCrt;
 	/*1828*/ _GUID EffectiveContainerId;
-	/*1838*/
+	/*1838*/ ULONGLONG LastSleepCounter;
+	/*1840*/ ULONG SpinCallCount;
+	/*1844*/ UCHAR Padding8[0x4];
+	/*1848*/ ULONGLONG ExtendedFeatureDisableMask;
+	/*1850*/
 };
 
 struct _TEB_ACTIVE_FRAME {
@@ -22449,7 +25063,10 @@ enum _TYPE_OF_MEMORY {
 	LoaderIoSpaceMemoryZeroed = 0x26,
 	LoaderIoSpaceMemoryFree = 0x27,
 	LoaderIoSpaceMemoryKsr = 0x28,
-	LoaderMaximum = 0x29
+	LoaderKernelShadowStack = 0x29,
+	LoaderIsolatedHostVisible = 0x2a,
+	LoaderIsolatedKsr = 0x2b,
+	LoaderMaximum = 0x2c
 };
 
 enum _TlgBlob_t {
@@ -22482,27 +25099,6 @@ union _ULARGE_INTEGER {
 	} u;
 	/*0000*/ ULONGLONG QuadPart;
 	/*0008*/
-};
-
-struct _UMS_CONTROL_BLOCK {
-	/*0000*/ _RTL_UMS_CONTEXT * UmsContext;
-	/*0008*/ _SINGLE_LIST_ENTRY * CompletionListEntry;
-	/*0010*/ _KEVENT * CompletionListEvent;
-	/*0018*/ ULONG ServiceSequenceNumber;
-	/*0020*/ _KQUEUE UmsQueue;
-	/*0060*/ _LIST_ENTRY QueueEntry;
-	/*0070*/ _RTL_UMS_CONTEXT * YieldingUmsContext;
-	/*0078*/ void * YieldingParam;
-	/*0080*/ void * UmsTeb;
-	/*0020*/ _KQUEUE * UmsAssociatedQueue;
-	/*0028*/ _LIST_ENTRY * UmsQueueListEntry;
-	/*0030*/ _KEVENT UmsWaitEvent;
-	/*0048*/ void * StagingArea;
-	/*0050*/ ULONG UmsPrimaryDeliveredContext : 01; // 0x00000001;
-	/*0050*/ ULONG UmsAssociatedQueueUsed : 01; // 0x00000002;
-	/*0050*/ ULONG UmsThreadParked : 01; // 0x00000004;
-	/*0050*/ ULONG UmsFlags;
-	/*0088*/
 };
 
 struct _UNEXPECTED_INTERRUPT {
@@ -22617,8 +25213,8 @@ struct _VF_POOL_TRACE {
 	/*0000*/ void * Address;
 	/*0008*/ ULONGLONG Size;
 	/*0010*/ _ETHREAD * Thread;
-	/*0018*/ void * StackTrace[0xd];
-	/*0080*/
+	/*0018*/ void * StackTrace[0x32];
+	/*01a8*/
 };
 
 struct _VF_SUSPECT_DRIVER_ENTRY {
@@ -22632,9 +25228,8 @@ struct _VF_SUSPECT_DRIVER_ENTRY {
 struct _VF_TARGET_ALL_SHARED_EXPORT_THUNKS {
 	/*0000*/ _VERIFIER_SHARED_EXPORT_THUNK * SharedExportThunks;
 	/*0008*/ _VERIFIER_SHARED_EXPORT_THUNK * PoolSharedExportThunks;
-	/*0010*/ _VERIFIER_SHARED_EXPORT_THUNK * OrderDependentSharedExportThunks;
-	/*0018*/ _VERIFIER_SHARED_EXPORT_THUNK * XdvSharedExportThunks;
-	/*0020*/
+	/*0010*/ _VERIFIER_SHARED_EXPORT_THUNK * XdvSharedExportThunks;
+	/*0018*/
 };
 
 struct _VF_TARGET_DRIVER {
@@ -22646,8 +25241,9 @@ struct _VF_TARGET_DRIVER {
 			/*0018*/ ULONG Spare : 31; // 0xfffffffe;
 			/*001c*/
 		} Flags;
-		/*0038*/
+		/*0030*/
 	} u1;
+	/*0030*/ _DRIVER_OBJECT * DriverObject;
 	/*0038*/ _VF_TARGET_VERIFIED_DRIVER_DATA * VerifiedData;
 	/*0040*/
 };
@@ -22670,38 +25266,38 @@ struct _VF_TARGET_VERIFIED_DRIVER_DATA {
 	/*0030*/ UCHAR SeSigningLevel;
 	/*0040*/ _SLIST_HEADER PoolPageHeaders;
 	/*0050*/ _SLIST_HEADER PoolTrackers;
-	/*0060*/ void * * DifPluginData;
-	/*0068*/ ULONG volatile CurrentPagedPoolAllocations;
-	/*006c*/ ULONG volatile CurrentNonPagedPoolAllocations;
-	/*0070*/ ULONG PeakPagedPoolAllocations;
-	/*0074*/ ULONG PeakNonPagedPoolAllocations;
-	/*0078*/ ULONGLONG volatile PagedBytes;
-	/*0080*/ ULONGLONG volatile NonPagedBytes;
-	/*0088*/ ULONGLONG PeakPagedBytes;
-	/*0090*/ ULONGLONG PeakNonPagedBytes;
-	/*0098*/ ULONG RaiseIrqls;
-	/*009c*/ ULONG AcquireSpinLocks;
-	/*00a0*/ ULONG SynchronizeExecutions;
-	/*00a4*/ ULONG AllocationsWithNoTag;
-	/*00a8*/ ULONG AllocationsFailed;
-	/*00ac*/ ULONG AllocationsFailedDeliberately;
-	/*00b0*/ ULONGLONG LockedBytes;
-	/*00b8*/ ULONGLONG PeakLockedBytes;
-	/*00c0*/ ULONGLONG MappedLockedBytes;
-	/*00c8*/ ULONGLONG PeakMappedLockedBytes;
-	/*00d0*/ ULONGLONG MappedIoSpaceBytes;
-	/*00d8*/ ULONGLONG PeakMappedIoSpaceBytes;
-	/*00e0*/ ULONGLONG PagesForMdlBytes;
-	/*00e8*/ ULONGLONG PeakPagesForMdlBytes;
-	/*00f0*/ ULONGLONG ContiguousMemoryBytes;
-	/*00f8*/ ULONGLONG PeakContiguousMemoryBytes;
-	/*0100*/ _LIST_ENTRY ContiguousMemoryListHead;
-	/*0110*/ ULONG volatile ExecutePoolTypes;
-	/*0114*/ ULONG volatile ExecutePageProtections;
-	/*0118*/ ULONG volatile ExecutePageMappings;
-	/*011c*/ ULONG volatile ExecuteWriteSections;
-	/*0120*/ ULONG volatile SectionAlignmentFailures;
-	/*0124*/ ULONG volatile IATInExecutableSection;
+	/*0060*/ _LIST_ENTRY DifPluginPerDriverDataContextHead;
+	/*0070*/ ULONG volatile CurrentPagedPoolAllocations;
+	/*0074*/ ULONG volatile CurrentNonPagedPoolAllocations;
+	/*0078*/ ULONG PeakPagedPoolAllocations;
+	/*007c*/ ULONG PeakNonPagedPoolAllocations;
+	/*0080*/ ULONGLONG volatile PagedBytes;
+	/*0088*/ ULONGLONG volatile NonPagedBytes;
+	/*0090*/ ULONGLONG PeakPagedBytes;
+	/*0098*/ ULONGLONG PeakNonPagedBytes;
+	/*00a0*/ ULONG RaiseIrqls;
+	/*00a4*/ ULONG AcquireSpinLocks;
+	/*00a8*/ ULONG SynchronizeExecutions;
+	/*00ac*/ ULONG AllocationsWithNoTag;
+	/*00b0*/ ULONG AllocationsFailed;
+	/*00b4*/ ULONG AllocationsFailedDeliberately;
+	/*00b8*/ ULONGLONG LockedBytes;
+	/*00c0*/ ULONGLONG PeakLockedBytes;
+	/*00c8*/ ULONGLONG MappedLockedBytes;
+	/*00d0*/ ULONGLONG PeakMappedLockedBytes;
+	/*00d8*/ ULONGLONG MappedIoSpaceBytes;
+	/*00e0*/ ULONGLONG PeakMappedIoSpaceBytes;
+	/*00e8*/ ULONGLONG PagesForMdlBytes;
+	/*00f0*/ ULONGLONG PeakPagesForMdlBytes;
+	/*00f8*/ ULONGLONG ContiguousMemoryBytes;
+	/*0100*/ ULONGLONG PeakContiguousMemoryBytes;
+	/*0108*/ _LIST_ENTRY ContiguousMemoryListHead;
+	/*0118*/ ULONG volatile ExecutePoolTypes;
+	/*011c*/ ULONG volatile ExecutePageProtections;
+	/*0120*/ ULONG volatile ExecutePageMappings;
+	/*0124*/ ULONG volatile ExecuteWriteSections;
+	/*0128*/ ULONG volatile SectionAlignmentFailures;
+	/*012c*/ ULONG volatile IATInExecutableSection;
 	/*0130*/
 };
 
@@ -22909,7 +25505,10 @@ struct _VOLUME_CACHE_MAP {
 	/*00c0*/ ULONG Flags;
 	/*00c4*/ ULONG PagesQueuedToDisk;
 	/*00c8*/ ULONG LoggedPagesQueuedToDisk;
-	/*00d0*/
+	/*00cc*/ ULONG VolumeId;
+	/*00d0*/ _LIST_ENTRY PrivateVolumeList;
+	/*00e0*/ _CC_VOLUME_TELEMETRY VolumeTelemetry;
+	/*0a90*/
 };
 
 struct _VPB {
@@ -22926,30 +25525,30 @@ struct _VPB {
 };
 
 enum _VRF_RULE_CLASS_ID {
-	VrfSpecialPoolRuleClass = 0x0,
-	VrfForceIrqlRuleClass = 0x1,
+	DifPluginSpecialPool = 0x0,
+	DifPluginIrqlRuleClass = 0x1,
 	VrfAllocationFailuresRuleClass = 0x2,
-	VrfTrackingPoolAllocationsRuleClass = 0x3,
-	VrfIORuleClass = 0x4,
-	VrfDeadlockPreventionRuleClass = 0x5,
+	DifPluginPoolTracking = 0x3,
+	DifPluginIoRuleClass = 0x4,
+	DifPluginDeadlock = 0x5,
 	VrfEnhancedIORuleClass = 0x6,
-	VrfDMARuleClass = 0x7,
-	VrfSecurityRuleClass = 0x8,
+	DifPluginDmaRuleClass = 0x7,
+	DifPluginSecurity = 0x8,
 	VrfForcePendingIORequestRuleClass = 0x9,
 	VrfIRPTrackingRuleClass = 0xa,
-	VrfMiscellaneousRuleClass = 0xb,
+	DifPluginMiscellaneous = 0xb,
 	VrfMoreDebuggingRuleClass = 0xc,
 	VrfMDLInvariantStackRuleClass = 0xd,
 	VrfMDLInvariantDriverRuleClass = 0xe,
-	VrfPowerDelayFuzzingRuleClass = 0xf,
+	DifPluginPowerDelayFuzzing = 0xf,
 	VrfPortMiniportRuleClass = 0x10,
-	VrfStandardDDIRuleClass = 0x11,
-	VrfAutoFailRuleClass = 0x12,
-	VrfAdditionalDDIRuleClass = 0x13,
+	DifPluginDdiStandard = 0x11,
+	DifPluginAutoFail = 0x12,
+	DifPluginDdiStateful = 0x13,
 	VrfRuleClassBase = 0x14,
 	VrfNdisWifiRuleClass = 0x15,
-	VrfDriverLoggingRuleClass = 0x16,
-	VrfSyncDelayFuzzingRuleClass = 0x17,
+	DifPluginDriverLogging = 0x16,
+	DifPluginSyncDelayFuzzing = 0x17,
 	VrfVMSwitchingRuleClass = 0x18,
 	VrfCodeIntegrityRuleClass = 0x19,
 	VrfBelow4GBAllocationRuleClass = 0x1a,
@@ -22958,16 +25557,16 @@ enum _VRF_RULE_CLASS_ID {
 	VrfExtendingXDVTimeLimit = 0x1d,
 	VrfSystemBIOSRuleClass = 0x1e,
 	VrfHardwareRuleClass = 0x1f,
-	VrfStateSepRuleClass = 0x20,
-	VrfWDFRuleClass = 0x21,
-	VrfMoreIrqlRuleClass = 0x22,
-	VrfXDVPlatformMode = 0x23,
-	VrfStandalonePlatformMode = 0x24,
-	VrfPlatformModeTest = 0x25,
-	VrfInfoDisclosureIRPRule = 0x26,
-	VrfLwSpecialPool = 0x27,
-	VrfAVXCorruption = 0x28,
-	VrfAccessModeMismatch = 0x29,
+	DifPluginDriverIsolation = 0x20,
+	DifPluginWdfRuleClass = 0x21,
+	DifPluginDdiMoreirql = 0x22,
+	DifPluginMode = 0x23,
+	ReservedForDVRF36 = 0x24,
+	DifPluginTest = 0x25,
+	DifPluginInfoDisclosureIRPRule = 0x26,
+	DifPluginLwSP = 0x27,
+	DifPluginAvxCorruption = 0x28,
+	DifPluginAccessModeMismatch = 0x29,
 	ReservedForDVRF42 = 0x2a,
 	ReservedForDVRF43 = 0x2b,
 	ReservedForDVRF44 = 0x2c,
@@ -22998,10 +25597,11 @@ enum _VRF_TRIAGE_CONTEXT {
 	VRF_TRIAGE_CONTEXT_DEFAULT = 0x1,
 	VRF_TRIAGE_CONTEXT_DEVELOPMENT = 0x1,
 	VRF_TRIAGE_CONTEXT_CERTIFICATION = 0x2,
-	VRF_TRIAGE_CONTEXT_FLIGHT_TARGETED = 0x3,
-	VRF_TRIAGE_CONTEXT_FLIGHT_DIAGNOSTICS = 0x4,
-	VRF_TRIAGE_CONTEXT_FLIGHT_MONITORING = 0x5,
-	NUM_VRF_TRIAGE_CONTEXTS = 0x6
+	VRF_TRIAGE_CONTEXT_CERTIFICATION_STRICT = 0x3,
+	VRF_TRIAGE_CONTEXT_FLIGHT_TARGETED = 0x4,
+	VRF_TRIAGE_CONTEXT_FLIGHT_DIAGNOSTICS = 0x5,
+	VRF_TRIAGE_CONTEXT_FLIGHT_MONITORING = 0x6,
+	NUM_VRF_TRIAGE_CONTEXTS = 0x7
 };
 
 struct _VSM_PERFORMANCE_DATA {
@@ -23225,7 +25825,8 @@ union _WHEA_ERROR_PACKET_FLAGS {
 	/*0000*/ ULONG PlatformDirectedOffline : 01; // 0x00000020;
 	/*0000*/ ULONG AddressTranslationRequired : 01; // 0x00000040;
 	/*0000*/ ULONG AddressTranslationCompleted : 01; // 0x00000080;
-	/*0000*/ ULONG Reserved2 : 24; // 0xffffff00;
+	/*0000*/ ULONG RecoveryOptional : 01; // 0x00000100;
+	/*0000*/ ULONG Reserved2 : 23; // 0xfffffe00;
 	/*0000*/ ULONG AsULONG;
 	/*0004*/
 };
@@ -23272,6 +25873,8 @@ struct _WHEA_ERROR_RECORD_HEADER {
 	/*0060*/ ULONGLONG RecordId;
 	/*0068*/ _WHEA_ERROR_RECORD_HEADER_FLAGS Flags;
 	/*006c*/ _WHEA_PERSISTENCE_INFO PersistenceInfo;
+	/*0074*/ ULONG OsBuildNumber;
+	/*0078*/ UCHAR Reserved2[0x8];
 	/*0074*/ UCHAR Reserved[0xc];
 	/*0080*/
 };
@@ -23283,7 +25886,10 @@ union _WHEA_ERROR_RECORD_HEADER_FLAGS {
 	/*0000*/ ULONG DeviceDriver : 01; // 0x00000008;
 	/*0000*/ ULONG CriticalEvent : 01; // 0x00000010;
 	/*0000*/ ULONG PersistPfn : 01; // 0x00000020;
-	/*0000*/ ULONG Reserved : 26; // 0xffffffc0;
+	/*0000*/ ULONG SectionsTruncated : 01; // 0x00000040;
+	/*0000*/ ULONG RecoveryInProgress : 01; // 0x00000080;
+	/*0000*/ ULONG Throttle : 01; // 0x00000100;
+	/*0000*/ ULONG Reserved : 23; // 0xfffffe00;
 	/*0000*/ ULONG AsULONG;
 	/*0004*/
 };
@@ -23319,7 +25925,8 @@ union _WHEA_ERROR_RECORD_SECTION_DESCRIPTOR_FLAGS {
 	/*0000*/ ULONG ResourceNotAvailable : 01; // 0x00000010;
 	/*0000*/ ULONG LatentError : 01; // 0x00000020;
 	/*0000*/ ULONG Propagated : 01; // 0x00000040;
-	/*0000*/ ULONG Reserved : 25; // 0xffffff80;
+	/*0000*/ ULONG FruTextByPlugin : 01; // 0x00000080;
+	/*0000*/ ULONG Reserved : 24; // 0xffffff00;
 	/*0000*/ ULONG AsULONG;
 	/*0004*/
 };
@@ -23400,7 +26007,9 @@ enum _WHEA_ERROR_SOURCE_TYPE {
 	WheaErrSrcTypeBMC = 0xe,
 	WheaErrSrcTypePMEM = 0xf,
 	WheaErrSrcTypeDeviceDriver = 0x10,
-	WheaErrSrcTypeMax = 0x11
+	WheaErrSrcTypeSea = 0x11,
+	WheaErrSrcTypeSei = 0x12,
+	WheaErrSrcTypeMax = 0x13
 };
 
 union _WHEA_ERROR_STATUS {
@@ -23483,6 +26092,7 @@ enum _WHEA_EVENT_LOG_ENTRY_ID {
 	WheaEventLogEntryIdCreateGenericRecord = 0x80000015,
 	WheaEventLogEntryIdErrorRecord = 0x80000016,
 	WheaEventLogEntryIdErrorRecordLimit = 0x80000017,
+	WheaEventLogEntryIdAerNotGrantedToOs = 0x80000018,
 	WheaEventLogEntryIdErrSrcArrayInvalid = 0x80000019,
 	WheaEventLogEntryIdAcpiTimeOut = 0x8000001a,
 	WheaEventLogCmciRestart = 0x8000001b,
@@ -23507,7 +26117,42 @@ enum _WHEA_EVENT_LOG_ENTRY_ID {
 	WheaEventLogAzccRootBusPoisonSet = 0x8000002e,
 	WheaEventLogEntryIdSELBugCheckInfo = 0x8000002f,
 	WheaEventLogEntryIdErrDimmInfoMismatch = 0x80000030,
-	WheaEventLogEntryIdeDpcEnabled = 0x80000031
+	WheaEventLogEntryIdeDpcEnabled = 0x80000031,
+	WheaEventLogEntryPageOfflineDone = 0x80000032,
+	WheaEventLogEntryPageOfflinePendMax = 0x80000033,
+	WheaEventLogEntryIdBadPageLimitReached = 0x80000034,
+	WheaEventLogEntrySrarDetail = 0x80000035,
+	WheaEventLogEntryEarlyError = 0x80000036,
+	WheaEventLogEntryIdPcieOverrideInfo = 0x80000037,
+	WheaEventLogEntryIdReadPcieOverridesErr = 0x80000038,
+	WheaEventLogEntryIdPcieConfigInfo = 0x80000039,
+	WheaEventLogEntryIdPcieSummaryFailed = 0x80000040,
+	WheaEventLogEntryIdThrottleRegCorrupt = 0x80000041,
+	WheaEventLogEntryIdThrottleAddErrSrcFailed = 0x80000042,
+	WheaEventLogEntryIdThrottleRegDataIgnored = 0x80000043,
+	WheaEventLogEntryIdEnableKeyNotifFailed = 0x80000044,
+	WheaEventLogEntryIdKeyNotificationFailed = 0x80000045,
+	WheaEventLogEntryIdPcieRemoveDevice = 0x80000046,
+	WheaEventLogEntryIdPcieAddDevice = 0x80000047,
+	WheaEventLogEntryIdPcieSpuriousErrSource = 0x80000048,
+	WheaEventLogEntryIdMemoryAddDevice = 0x80000049,
+	WheaEventLogEntryIdMemoryRemoveDevice = 0x8000004a,
+	WheaEventLogEntryIdMemorySummaryFailed = 0x8000004b,
+	WheaEventLogEntryIdPcieDpcError = 0x8000004c,
+	WheaEventLogEntryIdCpuBusesInitFailed = 0x8000004d,
+	WheaEventLogEntryIdPshedPluginInitFailed = 0x8000004e,
+	WheaEventLogEntryIdFailedAddToDefectList = 0x8000004f,
+	WheaEventLogEntryIdDefectListFull = 0x80000050,
+	WheaEventLogEntryIdDefectListUEFIVarFailed = 0x80000051,
+	WheaEventLogEntryIdDefectListCorrupt = 0x80000052,
+	WheaEventLogEntryIdBadHestNotifyData = 0x80000053,
+	WheaEventLogEntryIdSrasTableNotFound = 0x80000054,
+	WheaEventLogEntryIdSrasTableError = 0x80000055,
+	WheaEventLogEntryIdSrasTableEntries = 0x80000056,
+	WheaEventLogEntryIdRowFailure = 0x80000057,
+	WheaEventLogEntryIdCpusFrozen = 0x80000060,
+	WheaEventLogEntryIdCpusFrozenNoCrashDump = 0x80000061,
+	WheaEventLogEntryIdPshedPiTraceLog = 0x80040010
 };
 
 enum _WHEA_EVENT_LOG_ENTRY_TYPE {
@@ -23772,7 +26417,8 @@ union _WHEA_PROCESSOR_GENERIC_ERROR_SECTION_VALIDBITS {
 	/*0000*/ ULONGLONG RequesterId : 01; // 0x0000000000000400;
 	/*0000*/ ULONGLONG ResponderId : 01; // 0x0000000000000800;
 	/*0000*/ ULONGLONG InstructionPointer : 01; // 0x0000000000001000;
-	/*0000*/ ULONGLONG Reserved : 51; // 0xffffffffffffe000;
+	/*0000*/ ULONGLONG NativeModelId : 01; // 0x0000000000002000;
+	/*0000*/ ULONGLONG Reserved : 50; // 0xffffffffffffc000;
 	/*0000*/ ULONGLONG ValidBits;
 	/*0008*/
 };
@@ -23850,7 +26496,8 @@ struct _WHEA_XPF_MCA_SECTION {
 	/*0048*/ ULONGLONG ExtendedRegisters[0x18];
 	/*0048*/ _WHEA_AMD_EXTENDED_REGISTERS AMDExtendedRegisters;
 	/*0108*/ _MCG_CAP GlobalCapability;
-	/*0110*/
+	/*0110*/ _XPF_RECOVERY_INFO RecoveryInfo;
+	/*0124*/
 };
 
 struct _WHEA_XPF_MCE_DESCRIPTOR {
@@ -23931,153 +26578,149 @@ struct _WMI_LOGGER_CONTEXT {
 	/*0008*/ ULONG MaximumEventSize;
 	/*000c*/ ULONG LoggerMode;
 	/*0010*/ LONG AcceptNewEvents;
-	/*0014*/ ULONG EventMarker[0x2];
-	/*001c*/ ULONG ErrorMarker;
-	/*0020*/ ULONG SizeMask;
-	/*0028*/ ULONGLONG GetCpuClock;
-	/*0030*/ _ETHREAD * LoggerThread;
-	/*0038*/ LONG LoggerStatus;
-	/*003c*/ ULONG FailureReason;
-	/*0040*/ _ETW_BUFFER_QUEUE BufferQueue;
-	/*0050*/ _ETW_BUFFER_QUEUE OverflowQueue;
-	/*0060*/ _LIST_ENTRY GlobalList;
-	/*0070*/ _LIST_ENTRY DebugIdTrackingList;
-	/*0080*/ _ETW_DECODE_CONTROL_ENTRY * DecodeControlList;
-	/*0088*/ ULONG DecodeControlCount;
-	/*0090*/ _WMI_BUFFER_HEADER * BatchedBufferList;
-	/*0090*/ _EX_FAST_REF CurrentBuffer;
-	/*0098*/ _UNICODE_STRING LoggerName;
-	/*00a8*/ _UNICODE_STRING LogFileName;
-	/*00b8*/ _UNICODE_STRING LogFilePattern;
-	/*00c8*/ _UNICODE_STRING NewLogFileName;
-	/*00d8*/ ULONG ClockType;
-	/*00dc*/ ULONG LastFlushedBuffer;
-	/*00e0*/ ULONG FlushTimer;
-	/*00e4*/ ULONG FlushThreshold;
-	/*00e8*/ _LARGE_INTEGER ByteOffset;
-	/*00f0*/ ULONG MinimumBuffers;
-	/*00f4*/ LONG volatile BuffersAvailable;
-	/*00f8*/ LONG volatile NumberOfBuffers;
-	/*00fc*/ ULONG MaximumBuffers;
-	/*0100*/ ULONG volatile EventsLost;
-	/*0104*/ LONG volatile PeakBuffersCount;
-	/*0108*/ ULONG BuffersWritten;
-	/*010c*/ ULONG LogBuffersLost;
-	/*0110*/ ULONG RealTimeBuffersDelivered;
-	/*0114*/ ULONG RealTimeBuffersLost;
-	/*0118*/ LONG * SequencePtr;
-	/*0120*/ ULONG LocalSequence;
-	/*0124*/ _GUID InstanceGuid;
-	/*0134*/ ULONG MaximumFileSize;
-	/*0138*/ LONG FileCounter;
-	/*013c*/ _POOL_TYPE PoolType;
-	/*0140*/ _ETW_REF_CLOCK ReferenceTime;
-	/*0150*/ LONG CollectionOn;
-	/*0154*/ ULONG ProviderInfoSize;
-	/*0158*/ _LIST_ENTRY Consumers;
-	/*0168*/ ULONG NumConsumers;
-	/*0170*/ _ETW_REALTIME_CONSUMER * TransitionConsumer;
-	/*0178*/ void * RealtimeLogfileHandle;
-	/*0180*/ _UNICODE_STRING RealtimeLogfileName;
-	/*0190*/ _LARGE_INTEGER RealtimeWriteOffset;
-	/*0198*/ _LARGE_INTEGER RealtimeReadOffset;
-	/*01a0*/ _LARGE_INTEGER RealtimeLogfileSize;
-	/*01a8*/ ULONGLONG RealtimeLogfileUsage;
-	/*01b0*/ ULONGLONG RealtimeMaximumFileSize;
-	/*01b8*/ ULONG RealtimeBuffersSaved;
-	/*01c0*/ _ETW_REF_CLOCK RealtimeReferenceTime;
-	/*01d0*/ _ETW_RT_EVENT_LOSS NewRTEventsLost;
-	/*01d8*/ _KEVENT LoggerEvent;
-	/*01f0*/ _KEVENT FlushEvent;
-	/*0208*/ _KTIMER FlushTimeOutTimer;
-	/*0248*/ _KDPC LoggerDpc;
-	/*0288*/ _KMUTANT LoggerMutex;
-	/*02c0*/ _EX_PUSH_LOCK LoggerLock;
-	/*02c8*/ ULONGLONG BufferListSpinLock;
-	/*02c8*/ _EX_PUSH_LOCK BufferListPushLock;
-	/*02d0*/ _SECURITY_CLIENT_CONTEXT ClientSecurityContext;
-	/*0318*/ _TOKEN_ACCESS_INFORMATION * TokenAccessInformation;
-	/*0320*/ _EX_FAST_REF SecurityDescriptor;
-	/*0328*/ _LARGE_INTEGER StartTime;
-	/*0330*/ void * LogFileHandle;
-	/*0338*/ LONGLONG BufferSequenceNumber;
-	/*0340*/ ULONG Flags;
-	/*0340*/ ULONG Persistent : 01; // 0x00000001;
-	/*0340*/ ULONG AutoLogger : 01; // 0x00000002;
-	/*0340*/ ULONG FsReady : 01; // 0x00000004;
-	/*0340*/ ULONG RealTime : 01; // 0x00000008;
-	/*0340*/ ULONG Wow : 01; // 0x00000010;
-	/*0340*/ ULONG KernelTrace : 01; // 0x00000020;
-	/*0340*/ ULONG NoMoreEnable : 01; // 0x00000040;
-	/*0340*/ ULONG StackTracing : 01; // 0x00000080;
-	/*0340*/ ULONG ErrorLogged : 01; // 0x00000100;
-	/*0340*/ ULONG RealtimeLoggerContextFreed : 01; // 0x00000200;
-	/*0340*/ ULONG PebsTracing : 01; // 0x00000400;
-	/*0340*/ ULONG PmcCounters : 01; // 0x00000800;
-	/*0340*/ ULONG PageAlignBuffers : 01; // 0x00001000;
-	/*0340*/ ULONG StackLookasideListAllocated : 01; // 0x00002000;
-	/*0340*/ ULONG SecurityTrace : 01; // 0x00004000;
-	/*0340*/ ULONG LastBranchTracing : 01; // 0x00008000;
-	/*0340*/ ULONG SystemLoggerIndex : 08; // 0x00ff0000;
-	/*0340*/ ULONG StackCaching : 01; // 0x01000000;
-	/*0340*/ ULONG ProviderTracking : 01; // 0x02000000;
-	/*0340*/ ULONG ProcessorTrace : 01; // 0x04000000;
-	/*0340*/ ULONG QpcDeltaTracking : 01; // 0x08000000;
-	/*0340*/ ULONG MarkerBufferSaved : 01; // 0x10000000;
-	/*0340*/ ULONG LargeMdlPages : 01; // 0x20000000;
-	/*0340*/ ULONG ExcludeKernelStack : 01; // 0x40000000;
-	/*0340*/ ULONG SpareFlags2 : 01; // 0x80000000;
-	/*0344*/ ULONG volatile RequestFlag;
-	/*0344*/ ULONG DbgRequestNewFile : 01; // 0x00000001;
-	/*0344*/ ULONG DbgRequestUpdateFile : 01; // 0x00000002;
-	/*0344*/ ULONG DbgRequestFlush : 01; // 0x00000004;
-	/*0344*/ ULONG DbgRequestDisableRealtime : 01; // 0x00000008;
-	/*0344*/ ULONG DbgRequestDisconnectConsumer : 01; // 0x00000010;
-	/*0344*/ ULONG DbgRequestConnectConsumer : 01; // 0x00000020;
-	/*0344*/ ULONG DbgRequestNotifyConsumer : 01; // 0x00000040;
-	/*0344*/ ULONG DbgRequestUpdateHeader : 01; // 0x00000080;
-	/*0344*/ ULONG DbgRequestDeferredFlush : 01; // 0x00000100;
-	/*0344*/ ULONG DbgRequestDeferredFlushTimer : 01; // 0x00000200;
-	/*0344*/ ULONG DbgRequestFlushTimer : 01; // 0x00000400;
-	/*0344*/ ULONG DbgRequestUpdateDebugger : 01; // 0x00000800;
-	/*0344*/ ULONG DbgSpareRequestFlags : 20; // 0xfffff000;
-	/*0350*/ _ETW_STACK_TRACE_BLOCK StackTraceBlock;
-	/*03d0*/ _RTL_BITMAP HookIdMap;
-	/*03e0*/ _ETW_STACK_CACHE * StackCache;
-	/*03e8*/ _ETW_PMC_SUPPORT * PmcData;
-	/*03f0*/ _ETW_LBR_SUPPORT * LbrData;
-	/*03f8*/ _ETW_IPT_SUPPORT * IptData;
-	/*0400*/ _LIST_ENTRY BinaryTrackingList;
-	/*0410*/ _WMI_BUFFER_HEADER * * ScratchArray;
-	/*0418*/ _DISALLOWED_GUIDS DisallowedGuids;
-	/*0428*/ LONGLONG RelativeTimerDueTime;
-	/*0430*/ _PERIODIC_CAPTURE_STATE_GUIDS PeriodicCaptureStateGuids;
-	/*0440*/ _EX_TIMER * PeriodicCaptureStateTimer;
-	/*0448*/ _ETW_PERIODIC_TIMER_STATE PeriodicCaptureStateTimerState;
-	/*0450*/ _ETW_SOFT_RESTART_CONTEXT * SoftRestartContext;
-	/*0458*/ _ETW_SILODRIVERSTATE * SiloState;
-	/*0460*/ _WORK_QUEUE_ITEM CompressionWorkItem;
-	/*0480*/ LONG CompressionWorkItemState;
-	/*0488*/ _EX_PUSH_LOCK CompressionLock;
-	/*0490*/ _WMI_BUFFER_HEADER * CompressionTarget;
-	/*0498*/ void * CompressionWorkspace;
-	/*04a0*/ LONG CompressionOn;
-	/*04a4*/ ULONG CompressionRatioGuess;
-	/*04a8*/ ULONG PartialBufferCompressionLevel;
-	/*04ac*/ ETW_COMPRESSION_RESUMPTION_MODE CompressionResumptionMode;
-	/*04b0*/ _SINGLE_LIST_ENTRY PlaceholderList;
-	/*04b8*/ _KDPC CompressionDpc;
-	/*04f8*/ _LARGE_INTEGER LastBufferSwitchTime;
-	/*0500*/ _LARGE_INTEGER BufferWriteDuration;
-	/*0508*/ _LARGE_INTEGER BufferCompressDuration;
-	/*0510*/ LONGLONG ReferenceQpcDelta;
-	/*0518*/ _ETW_EVENT_CALLBACK_CONTEXT * CallbackContext;
-	/*0520*/ _LARGE_INTEGER * LastDroppedTime;
-	/*0528*/ _LARGE_INTEGER * FlushingLastDroppedTime;
-	/*0530*/ LONGLONG FlushingSequenceNumber;
-	/*0538*/ _ETW_PARTITION_CONTEXT PartitionContext;
-	/*0540*/ _MDL * BufferMdl;
-	/*0550*/
+	/*0018*/ ULONGLONG GetCpuClock;
+	/*0020*/ _ETHREAD * LoggerThread;
+	/*0028*/ LONG LoggerStatus;
+	/*002c*/ ULONG FailureReason;
+	/*0030*/ _ETW_BUFFER_QUEUE BufferQueue;
+	/*0040*/ _ETW_BUFFER_QUEUE OverflowQueue;
+	/*0050*/ _LIST_ENTRY GlobalList;
+	/*0060*/ _LIST_ENTRY DebugIdTrackingList;
+	/*0070*/ _ETW_DECODE_CONTROL_ENTRY * DecodeControlList;
+	/*0078*/ ULONG DecodeControlCount;
+	/*0080*/ _WMI_BUFFER_HEADER * BatchedBufferList;
+	/*0080*/ _EX_FAST_REF CurrentBuffer;
+	/*0088*/ _UNICODE_STRING LoggerName;
+	/*0098*/ _UNICODE_STRING LogFileName;
+	/*00a8*/ _UNICODE_STRING LogFilePattern;
+	/*00b8*/ _UNICODE_STRING NewLogFileName;
+	/*00c8*/ ULONG ClockType;
+	/*00cc*/ ULONG LastFlushedBuffer;
+	/*00d0*/ ULONG FlushTimer;
+	/*00d4*/ ULONG FlushThreshold;
+	/*00d8*/ _LARGE_INTEGER ByteOffset;
+	/*00e0*/ ULONG MinimumBuffers;
+	/*00e4*/ LONG volatile BuffersAvailable;
+	/*00e8*/ LONG volatile NumberOfBuffers;
+	/*00ec*/ ULONG MaximumBuffers;
+	/*00f0*/ ULONG volatile EventsLost;
+	/*00f4*/ LONG volatile PeakBuffersCount;
+	/*00f8*/ ULONG BuffersWritten;
+	/*00fc*/ ULONG LogBuffersLost;
+	/*0100*/ ULONG RealTimeBuffersDelivered;
+	/*0104*/ ULONG RealTimeBuffersLost;
+	/*0108*/ LONG * SequencePtr;
+	/*0110*/ ULONG LocalSequence;
+	/*0114*/ _GUID InstanceGuid;
+	/*0124*/ ULONG MaximumFileSize;
+	/*0128*/ LONG FileCounter;
+	/*012c*/ _POOL_TYPE PoolType;
+	/*0130*/ _ETW_REF_CLOCK ReferenceTime;
+	/*0140*/ LONG CollectionOn;
+	/*0144*/ ULONG ProviderInfoSize;
+	/*0148*/ _LIST_ENTRY Consumers;
+	/*0158*/ ULONG NumConsumers;
+	/*0160*/ _ETW_REALTIME_CONSUMER * TransitionConsumer;
+	/*0168*/ void * RealtimeLogfileHandle;
+	/*0170*/ _UNICODE_STRING RealtimeLogfileName;
+	/*0180*/ _LARGE_INTEGER RealtimeWriteOffset;
+	/*0188*/ _LARGE_INTEGER RealtimeReadOffset;
+	/*0190*/ _LARGE_INTEGER RealtimeLogfileSize;
+	/*0198*/ ULONGLONG RealtimeLogfileUsage;
+	/*01a0*/ ULONGLONG RealtimeMaximumFileSize;
+	/*01a8*/ ULONG RealtimeBuffersSaved;
+	/*01b0*/ _ETW_REF_CLOCK RealtimeReferenceTime;
+	/*01c0*/ _ETW_RT_EVENT_LOSS NewRTEventsLost;
+	/*01c8*/ _KEVENT LoggerEvent;
+	/*01e0*/ _KEVENT FlushEvent;
+	/*01f8*/ _KTIMER FlushTimeOutTimer;
+	/*0238*/ _KDPC LoggerDpc;
+	/*0278*/ _KMUTANT LoggerMutex;
+	/*02b0*/ _EX_PUSH_LOCK LoggerLock;
+	/*02b8*/ ULONGLONG BufferListSpinLock;
+	/*02b8*/ _EX_PUSH_LOCK BufferListPushLock;
+	/*02c0*/ _SECURITY_CLIENT_CONTEXT ClientSecurityContext;
+	/*0308*/ _TOKEN_ACCESS_INFORMATION * TokenAccessInformation;
+	/*0310*/ _EX_FAST_REF SecurityDescriptor;
+	/*0318*/ _LARGE_INTEGER StartTime;
+	/*0320*/ void * LogFileHandle;
+	/*0328*/ LONGLONG BufferSequenceNumber;
+	/*0330*/ ULONG Flags;
+	/*0330*/ ULONG Persistent : 01; // 0x00000001;
+	/*0330*/ ULONG AutoLogger : 01; // 0x00000002;
+	/*0330*/ ULONG FsReady : 01; // 0x00000004;
+	/*0330*/ ULONG RealTime : 01; // 0x00000008;
+	/*0330*/ ULONG Wow : 01; // 0x00000010;
+	/*0330*/ ULONG KernelTrace : 01; // 0x00000020;
+	/*0330*/ ULONG NoMoreEnable : 01; // 0x00000040;
+	/*0330*/ ULONG StackTracing : 01; // 0x00000080;
+	/*0330*/ ULONG ErrorLogged : 01; // 0x00000100;
+	/*0330*/ ULONG RealtimeLoggerContextFreed : 01; // 0x00000200;
+	/*0330*/ ULONG PebsTracing : 01; // 0x00000400;
+	/*0330*/ ULONG PmcCounters : 01; // 0x00000800;
+	/*0330*/ ULONG PageAlignBuffers : 01; // 0x00001000;
+	/*0330*/ ULONG StackLookasideListAllocated : 01; // 0x00002000;
+	/*0330*/ ULONG SecurityTrace : 01; // 0x00004000;
+	/*0330*/ ULONG LastBranchTracing : 01; // 0x00008000;
+	/*0330*/ ULONG SystemLoggerIndex : 08; // 0x00ff0000;
+	/*0330*/ ULONG StackCaching : 01; // 0x01000000;
+	/*0330*/ ULONG ProviderTracking : 01; // 0x02000000;
+	/*0330*/ ULONG ProcessorTrace : 01; // 0x04000000;
+	/*0330*/ ULONG QpcDeltaTracking : 01; // 0x08000000;
+	/*0330*/ ULONG MarkerBufferSaved : 01; // 0x10000000;
+	/*0330*/ ULONG LargeMdlPages : 01; // 0x20000000;
+	/*0330*/ ULONG ExcludeKernelStack : 01; // 0x40000000;
+	/*0330*/ ULONG BootLogger : 01; // 0x80000000;
+	/*0334*/ ULONG Flags2;
+	/*0334*/ ULONG UnifiedStackCaching : 01; // 0x00000001;
+	/*0338*/ ULONG volatile RequestFlag;
+	/*0338*/ ULONG DbgRequestNewFile : 01; // 0x00000001;
+	/*0338*/ ULONG DbgRequestUpdateFile : 01; // 0x00000002;
+	/*0338*/ ULONG DbgRequestFlush : 01; // 0x00000004;
+	/*0338*/ ULONG DbgRequestDisableRealtime : 01; // 0x00000008;
+	/*0338*/ ULONG DbgRequestDisconnectConsumer : 01; // 0x00000010;
+	/*0338*/ ULONG DbgRequestConnectConsumer : 01; // 0x00000020;
+	/*0338*/ ULONG DbgRequestNotifyConsumer : 01; // 0x00000040;
+	/*0338*/ ULONG DbgRequestUpdateHeader : 01; // 0x00000080;
+	/*0338*/ ULONG DbgRequestDeferredFlush : 01; // 0x00000100;
+	/*0338*/ ULONG DbgRequestDeferredFlushTimer : 01; // 0x00000200;
+	/*0338*/ ULONG DbgRequestFlushTimer : 01; // 0x00000400;
+	/*0338*/ ULONG DbgRequestUpdateDebugger : 01; // 0x00000800;
+	/*0338*/ ULONG DbgSpareRequestFlags : 20; // 0xfffff000;
+	/*0340*/ _ETW_STACK_TRACE_BLOCK StackTraceBlock;
+	/*03e0*/ _RTL_BITMAP HookIdMap;
+	/*03f0*/ _ETW_STACK_CACHE * StackCache;
+	/*03f8*/ _ETW_PMC_SUPPORT * PmcData;
+	/*0400*/ _ETW_LBR_SUPPORT * LbrData;
+	/*0408*/ _ETW_IPT_SUPPORT * IptData;
+	/*0410*/ _LIST_ENTRY BinaryTrackingList;
+	/*0420*/ _WMI_BUFFER_HEADER * * ScratchArray;
+	/*0428*/ _DISALLOWED_GUIDS DisallowedGuids;
+	/*0438*/ PERIODIC_CAPTURE_STATE_CONTEXT * PeriodicCaptureStateContext;
+	/*0440*/ _ETW_SOFT_RESTART_CONTEXT * SoftRestartContext;
+	/*0448*/ _ETW_SILODRIVERSTATE * SiloState;
+	/*0450*/ _WORK_QUEUE_ITEM CompressionWorkItem;
+	/*0470*/ LONG CompressionWorkItemState;
+	/*0478*/ _EX_PUSH_LOCK CompressionLock;
+	/*0480*/ _WMI_BUFFER_HEADER * CompressionTarget;
+	/*0488*/ void * CompressionWorkspace;
+	/*0490*/ LONG CompressionOn;
+	/*0494*/ ULONG CompressionRatioGuess;
+	/*0498*/ ULONG PartialBufferCompressionLevel;
+	/*049c*/ ETW_COMPRESSION_RESUMPTION_MODE CompressionResumptionMode;
+	/*04a0*/ _SINGLE_LIST_ENTRY PlaceholderList;
+	/*04a8*/ _KDPC CompressionDpc;
+	/*04e8*/ _LARGE_INTEGER LastBufferSwitchTime;
+	/*04f0*/ _LARGE_INTEGER BufferWriteDuration;
+	/*04f8*/ _LARGE_INTEGER BufferCompressDuration;
+	/*0500*/ LONGLONG ReferenceQpcDelta;
+	/*0508*/ _ETW_EVENT_CALLBACK_CONTEXT * CallbackContext;
+	/*0510*/ _LARGE_INTEGER * LastDroppedTime;
+	/*0518*/ _LARGE_INTEGER * FlushingLastDroppedTime;
+	/*0520*/ LONGLONG FlushingSequenceNumber;
+	/*0528*/ _ETW_PARTITION_CONTEXT PartitionContext;
+	/*0530*/ _MDL * BufferMdl;
+	/*0540*/
 };
 
 enum _WNF_DATA_SCOPE {
@@ -24122,7 +26765,7 @@ struct _WNF_NAME_INSTANCE {
 	/*0050*/ _WNF_LOCK StateDataLock;
 	/*0058*/ _WNF_STATE_DATA * StateData;
 	/*0060*/ ULONG CurrentChangeStamp;
-	/*0068*/ void * PermanentDataStore;
+	/*0068*/ _WNF_PERMANENT_DATA_STORE * PermanentDataStore;
 	/*0070*/ _WNF_LOCK StateSubscriptionListLock;
 	/*0078*/ _LIST_ENTRY StateSubscriptionListHead;
 	/*0088*/ _LIST_ENTRY TemporaryNameListEntry;
@@ -24136,6 +26779,16 @@ struct _WNF_NODE_HEADER {
 	/*0000*/ USHORT NodeTypeCode;
 	/*0002*/ USHORT NodeByteSize;
 	/*0004*/
+};
+
+struct _WNF_PERMANENT_DATA_STORE {
+	/*0000*/ _WNF_NODE_HEADER Header;
+	/*0008*/ _WNF_LOCK Lock;
+	/*0010*/ void * Handle;
+	/*0018*/ _LIST_ENTRY Links;
+	/*0028*/ _WNF_DATA_SCOPE DataScopeType;
+	/*002c*/ ULONG ScopeInstanceIdSize;
+	/*0030*/
 };
 
 struct _WNF_PROCESS_CONTEXT {
@@ -24162,8 +26815,8 @@ struct _WNF_SCOPE_INSTANCE {
 	/*0020*/ _LIST_ENTRY ResolverListEntry;
 	/*0030*/ _WNF_LOCK NameSetLock;
 	/*0038*/ _RTL_AVL_TREE NameSet;
-	/*0040*/ void * PermanentDataStore;
-	/*0048*/ void * VolatilePermanentDataStore;
+	/*0040*/ _WNF_PERMANENT_DATA_STORE * PermanentDataStore;
+	/*0048*/ _WNF_PERMANENT_DATA_STORE * VolatilePermanentDataStore;
 	/*0050*/
 };
 
@@ -24261,6 +26914,18 @@ struct _WNF_TYPE_ID {
 	/*0010*/
 };
 
+enum _WORKER_FUNCTION {
+	NoopFunction = 0x0,
+	ReadAhead = 0x1,
+	WriteBehind = 0x2,
+	LazyWriteScan = 0x3,
+	EventSet = 0x4,
+	AsyncRead = 0x5,
+	CompleteAsyncRead = 0x6,
+	AsyncWriteBehind = 0x7,
+	CompleteAsyncWriteBehind = 0x8
+};
+
 enum _WORKING_SET_TYPE {
 	WorkingSetTypeUser = 0x0,
 	WorkingSetTypeSession = 0x1,
@@ -24317,13 +26982,24 @@ struct _WORK_QUEUE_ENTRY {
 			/*0068*/ void * DiskIoAttribution;
 			/*0070*/ CHAR RequestorMode;
 			/*0074*/ ULONG NestingLevel;
-			/*0078*/
+			/*0078*/ _LARGE_INTEGER StartTime;
+			/*0080*/
 		} AsyncRead;
-		/*0078*/
+		struct {
+			/*0010*/ _CC_FLUSH_PACKET * FlushPacket;
+			/*0018*/ _SHARED_CACHE_MAP * SharedCacheMap;
+			/*0020*/ _KEVENT FlushEvent;
+			/*0038*/ _IO_STATUS_BLOCK IoStatus;
+			/*0048*/ UCHAR DoWriteBehindPostProcessing;
+			/*0050*/
+		} AsyncWriteBehind;
+		/*0080*/
 	} Parameters;
-	/*0078*/ UCHAR Function;
-	/*0080*/ _CC_PARTITION * Partition;
-	/*0088*/
+	/*0080*/ _WORKER_FUNCTION Function;
+	/*0088*/ _CC_PARTITION * Partition;
+	/*0090*/ _PRIVATE_VOLUME_CACHEMAP * PrivateVolumeCacheMap;
+	/*0098*/ _CC_NUMA_NODE * NumaNode;
+	/*00a0*/
 };
 
 struct _WORK_QUEUE_ITEM {
@@ -24460,6 +27136,38 @@ union _XPF_MC_BANK_FLAGS {
 	/*0001*/
 };
 
+struct _XPF_RECOVERY_INFO {
+	struct {
+		/*0000*/ UINT NotSupported : 01; // 0x00000001;
+		/*0000*/ UINT Overflow : 01; // 0x00000002;
+		/*0000*/ UINT ContextCorrupt : 01; // 0x00000004;
+		/*0000*/ UINT RestartIpErrorIpNotValid : 01; // 0x00000008;
+		/*0000*/ UINT NoRecoveryContext : 01; // 0x00000010;
+		/*0000*/ UINT MiscOrAddrNotValid : 01; // 0x00000020;
+		/*0000*/ UINT InvalidAddressMode : 01; // 0x00000040;
+		/*0000*/ UINT HighIrql : 01; // 0x00000080;
+		/*0000*/ UINT InterruptsDisabled : 01; // 0x00000100;
+		/*0000*/ UINT SwapBusy : 01; // 0x00000200;
+		/*0000*/ UINT StackOverflow : 01; // 0x00000400;
+		/*0000*/ UINT Reserved : 21; // 0xfffff800;
+		/*0004*/
+	} FailureReason;
+	struct {
+		/*0004*/ UINT RecoveryAttempted : 01; // 0x00000001;
+		/*0004*/ UINT HvHandled : 01; // 0x00000002;
+		/*0004*/ UINT Reserved : 30; // 0xfffffffc;
+		/*0008*/
+	} Action;
+	/*0008*/ UCHAR ActionRequired;
+	/*0009*/ UCHAR RecoverySucceeded;
+	/*000a*/ UCHAR RecoveryKernel;
+	/*000b*/ UCHAR Reserved;
+	/*000c*/ USHORT Reserved2;
+	/*000e*/ USHORT Reserved3;
+	/*0010*/ UINT Reserved4;
+	/*0014*/
+};
+
 struct _XSAVE_AREA {
 	/*0000*/ _XSAVE_FORMAT LegacyState;
 	/*0200*/ _XSAVE_AREA_HEADER Header;
@@ -24506,13 +27214,17 @@ struct _XSTATE_CONFIGURATION {
 	/*0014*/ ULONG ControlFlags;
 	/*0014*/ ULONG OptimizedSave : 01; // 0x00000001;
 	/*0014*/ ULONG CompactionEnabled : 01; // 0x00000002;
+	/*0014*/ ULONG ExtendedFeatureDisable : 01; // 0x00000004;
 	/*0018*/ _XSTATE_FEATURE Features[0x40];
 	/*0218*/ ULONGLONG EnabledSupervisorFeatures;
 	/*0220*/ ULONGLONG AlignedFeatures;
 	/*0228*/ ULONG AllFeatureSize;
 	/*022c*/ ULONG AllFeatures[0x40];
 	/*0330*/ ULONGLONG EnabledUserVisibleSupervisorFeatures;
-	/*0338*/
+	/*0338*/ ULONGLONG ExtendedFeatureDisableFeatures;
+	/*0340*/ ULONG AllNonLargeFeatureSize;
+	/*0344*/ ULONG Spare;
+	/*0348*/
 };
 
 struct _XSTATE_CONTEXT {
@@ -24548,8 +27260,6 @@ struct __WIL__WNF_TYPE_ID {
 	/*0010*/
 };
 
-struct __WIL__WNF_USER_SUBSCRIPTION;
-
 union __m128 {
 	/*0000*/ float m128_f32[0x4];
 	/*0000*/ ULONGLONG m128_u64[0x2];
@@ -24577,13 +27287,8 @@ union __m64 {
 };
 
 struct _flags {
-	/*0000*/ UCHAR Removable : 01; // 0x01;
-	/*0000*/ UCHAR GroupAssigned : 01; // 0x02;
-	/*0000*/ UCHAR GroupCommitted : 01; // 0x04;
-	/*0000*/ UCHAR GroupAssignmentFixed : 01; // 0x08;
-	/*0000*/ UCHAR ProcessorOnly : 01; // 0x10;
-	/*0000*/ UCHAR SmtSetsPresent : 01; // 0x20;
-	/*0000*/ UCHAR Fill : 02; // 0xc0;
+	/*0000*/ UCHAR SmtSetsPresent : 01; // 0x01;
+	/*0000*/ UCHAR Fill : 07; // 0xfe;
 	/*0001*/
 };
 
@@ -24628,12 +27333,6 @@ union _u {
 	/*0050*/
 };
 
-struct _wil_details_UsageSubscriptionData {
-	/*0000*/ UINT featureId;
-	/*0004*/ USHORT serviceReportingKind;
-	/*0008*/
-};
-
 struct tagSWITCH_CONTEXT {
 	/*0000*/ tagSWITCH_CONTEXT_ATTRIBUTE Attribute;
 	/*0018*/ tagSWITCH_CONTEXT_DATA Data;
@@ -24673,17 +27372,6 @@ enum wil_FeatureEnabledState {
 	wil_FeatureEnabledState_Enabled = 0x2
 };
 
-enum wil_FeatureEnabledStateKind {
-	wil_FeatureEnabledStateKind_Service = 0x1,
-	wil_FeatureEnabledStateKind_User = 0x2,
-	wil_FeatureEnabledStateKind_Test = 0x3
-};
-
-enum wil_FeatureEnabledStateOptions {
-	wil_FeatureEnabledStateOptions_None = 0x0,
-	wil_FeatureEnabledStateOptions_VariantConfig = 0x1
-};
-
 enum wil_FeatureStage {
 	wil_FeatureStage_AlwaysDisabled = 0x0,
 	wil_FeatureStage_DisabledByDefault = 0x1,
@@ -24697,7 +27385,7 @@ struct wil_FeatureState {
 	/*0008*/ wil_FeatureVariantPayloadKind payloadKind;
 	/*000c*/ UINT payload;
 	/*0010*/ INT hasNotification;
-	/*0014*/ INT isVariantConfiguration;
+	/*0014*/ INT isWexpConfiguration;
 	/*0018*/
 };
 
@@ -24723,8 +27411,6 @@ enum wil_ReportingKind {
 	wil_ReportingKind_PausedDuration = 0x6
 };
 
-struct wil_StagingConfig;
-
 enum wil_UsageReportingMode {
 	wil_UsageReportingMode_Default = 0x0,
 	wil_UsageReportingMode_SuppressPotential = 0x1,
@@ -24739,13 +27425,17 @@ enum wil_VariantReportingKind {
 
 struct wil_details_FeatureDescriptor {
 	/*0000*/ wil_details_FeatureStateCache * featureStateCache;
-	/*0008*/ UINT featureId;
-	/*000c*/ UCHAR changeTime;
-	/*000d*/ UCHAR isAlwaysDisabled;
-	/*000e*/ UCHAR isAlwaysEnabled;
-	/*000f*/ UCHAR isEnabledByDefault;
-	/*0010*/ wil_details_FeatureDescriptor const * const * requiresFeatures;
-	/*0018*/
+	/*0008*/ wil_details_FeatureReportingCache * featureReportingCache;
+	/*0010*/ UINT featureId;
+	/*0014*/ UCHAR changeTime;
+	/*0015*/ UCHAR isAlwaysDisabled;
+	/*0016*/ UCHAR isAlwaysEnabled;
+	/*0017*/ UCHAR isEnabledByDefault;
+	/*0018*/ wil_details_FeatureDescriptor const * const * requiresFeatures;
+	/*0020*/ UCHAR variant;
+	/*0024*/ wil_FeatureVariantPayloadKind payloadKind;
+	/*0028*/ UINT payload;
+	/*0030*/
 };
 
 struct wil_details_FeatureReportingCache {
@@ -24764,7 +27454,7 @@ union wil_details_FeatureStateCache {
 	/*0000*/ UINT configuredState : 02; // 0x00000060;
 	/*0000*/ UINT needsRefresh : 01; // 0x00000080;
 	/*0000*/ UINT hasNotification : 01; // 0x00000100;
-	/*0000*/ UINT isVariant : 01; // 0x00000200;
+	/*0000*/ UINT isWexpConfiguration : 01; // 0x00000200;
 	/*0000*/ UINT variant : 06; // 0x0000fc00;
 	/*0000*/ UINT unused : 16; // 0xffff0000;
 	/*0004*/ UINT payloadId;
@@ -24794,7 +27484,7 @@ struct wil_details_RecordUsageResult {
 	/*0008*/ wil_details_ServiceReportingKind kindImmediate;
 	/*000c*/ UINT payloadId;
 	/*0010*/ INT ignoredUse;
-	/*0014*/ INT isVariantConfiguration;
+	/*0014*/ INT isWexpConfiguration;
 	/*0018*/
 };
 
@@ -24846,84 +27536,4 @@ enum wil_details_ServiceReportingKind {
 	wil_details_ServiceReportingKind_VariantDeviceUsageBase = 0x140,
 	wil_details_ServiceReportingKind_VariantUniquePotentialBase = 0x180,
 	wil_details_ServiceReportingKind_VariantUniqueUsageBase = 0x1c0
-};
-
-enum wil_details_ServiceReportingOptions {
-	wil_details_ServiceReportingOptions_None = 0x0,
-	wil_details_ServiceReportingOptions_VariantConfig = 0x1
-};
-
-struct wil_details_StagingConfig {
-	/*0000*/ wil_FeatureStore store;
-	/*0004*/ INT forUpdate;
-	/*0008*/ ULONG readChangeStamp;
-	/*000c*/ UCHAR readVersion;
-	/*0010*/ INT modified;
-	/*0018*/ wil_details_StagingConfigHeader * header;
-	/*0020*/ wil_details_StagingConfigFeature * features;
-	/*0028*/ wil_details_StagingConfigUsageTrigger * triggers;
-	/*0030*/ INT changedInSession;
-	/*0038*/ void * buffer;
-	/*0040*/ ULONGLONG bufferSize;
-	/*0048*/ ULONGLONG bufferAlloc;
-	/*0050*/ INT bufferOwned;
-	/*0058*/
-};
-
-struct wil_details_StagingConfigFeature {
-	/*0000*/ UINT featureId;
-	/*0004*/ UINT changedInSession : 01; // 0x00000001;
-	/*0004*/ UINT isVariantConfig : 01; // 0x00000002;
-	/*0004*/ UINT unused1 : 06; // 0x000000fc;
-	/*0004*/ UINT serviceState : 02; // 0x00000300;
-	/*0004*/ UINT userState : 02; // 0x00000c00;
-	/*0004*/ UINT testState : 02; // 0x00003000;
-	/*0004*/ UINT unused2 : 02; // 0x0000c000;
-	/*0004*/ UINT unused3 : 08; // 0x00ff0000;
-	/*0004*/ UINT variant : 06; // 0x3f000000;
-	/*0004*/ UINT payloadKind : 02; // 0xc0000000;
-	/*0008*/ UINT payload;
-	/*000c*/
-};
-
-enum wil_details_StagingConfigFeatureFields {
-	wil_details_StagingConfigFeatureFields_None = 0x0,
-	wil_details_StagingConfigFeatureFields_ServiceState = 0x1,
-	wil_details_StagingConfigFeatureFields_UserState = 0x2,
-	wil_details_StagingConfigFeatureFields_TestState = 0x4,
-	wil_details_StagingConfigFeatureFields_Variant = 0x8
-};
-
-struct wil_details_StagingConfigHeader {
-	/*0000*/ UCHAR version;
-	/*0001*/ UCHAR versionMinor;
-	/*0002*/ USHORT headerSizeBytes;
-	/*0004*/ USHORT featureCount;
-	/*0006*/ USHORT featureUsageTriggerCount;
-	/*0008*/ wil_details_StagingConfigHeaderProperties sessionProperties;
-	/*000c*/ wil_details_StagingConfigHeaderProperties properties;
-	/*0010*/
-};
-
-struct wil_details_StagingConfigHeaderProperties {
-	/*0000*/ UINT ignoreServiceState : 01; // 0x00000001;
-	/*0000*/ UINT ignoreUserState : 01; // 0x00000002;
-	/*0000*/ UINT ignoreTestState : 01; // 0x00000004;
-	/*0000*/ UINT ignoreVariants : 01; // 0x00000008;
-	/*0000*/ UINT unused : 28; // 0xfffffff0;
-	/*0004*/
-};
-
-struct wil_details_StagingConfigUsageTrigger {
-	/*0000*/ UINT featureId;
-	/*0004*/ wil_details_StagingConfigWnfStateName trigger;
-	/*000c*/ UINT serviceReportingKind : 16; // 0x0000ffff;
-	/*000c*/ UINT isVariantConfig : 01; // 0x00010000;
-	/*000c*/ UINT unused : 15; // 0xfffe0000;
-	/*0010*/
-};
-
-struct wil_details_StagingConfigWnfStateName {
-	/*0000*/ UINT Data[0x2];
-	/*0008*/
 };

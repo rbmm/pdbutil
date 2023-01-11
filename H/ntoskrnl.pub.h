@@ -7,7 +7,6 @@ struct B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B
 	static long BTreeInsertEx(B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> > *,B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> >::SEARCH_RESULT *,_SM_PAGE_KEY *);
 	static long BTreeSearchKey(B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> > *,_SM_PAGE_KEY,B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> >::SEARCH_RESULT *);
 	static unsigned long BTreeFindSeperatorIndexEntry(B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> >::SEARCH_RESULT *,unsigned long,B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> >::PATH_ENTRY *);
-	static unsigned long BTreeNodeFindKey(B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> > *,B_TREE_HEADER<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY>::NODE *,_SM_PAGE_KEY);
 	static void BTreeIteratorFromSearchResult(B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> > *,B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> >::ITERATOR *,B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> >::SEARCH_RESULT *);
 	static void BTreeMergeNodes(B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> > *,B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> >::SEARCH_RESULT *,B_TREE_HEADER<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY>::NODE *);
 	static void BTreeNodeFree(B_TREE<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY,4096,B_TREE_DUMMY_NODE_POOL,B_TREE_KEY_COMPARATOR<_SM_PAGE_KEY> > *,B_TREE_HEADER<_SM_PAGE_KEY,SMKM_STORE_MGR<SM_TRAITS>::SMKM_FRONTEND_ENTRY>::NODE *);
@@ -51,6 +50,7 @@ struct B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,
 	static unsigned long BTreeFindSeperatorIndexEntry(B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR>::SEARCH_RESULT *,unsigned long,B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR>::PATH_ENTRY *);
 	static unsigned long BTreeNodeFindKey(B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR> *,B_TREE_HEADER<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY>::NODE *,unsigned long);
 	static void BTreeDeleteNode(B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR> *,B_TREE_HEADER<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY>::NODE *);
+	static void BTreeIteratorCleanup(B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR>::ITERATOR *,B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR> *);
 	static void BTreeIteratorFromSearchResult(B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR> *,B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR>::ITERATOR *,B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR>::SEARCH_RESULT *);
 	static void BTreeMergeNodes(B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR> *,B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR>::SEARCH_RESULT *,B_TREE_HEADER<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY>::NODE *);
 	static void BTreeNodeFree(B_TREE<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY,4096,NP_CONTEXT,ST_STORE<SM_TRAITS>::ST_HASH_ENTRY_COMPARATOR> *,B_TREE_HEADER<unsigned long,ST_STORE<SM_TRAITS>::_ST_HASH_ENTRY>::NODE *);
@@ -128,9 +128,20 @@ struct NT_DISK
 	virtual long Write(unsigned __int64,unsigned long,unsigned char *);
 };
 
+struct RTL_BINARY_ARRAY<RTLP_FLS_CALLBACK_ENTRY,4,4>
+{
+	static unsigned long SlotAllocate(RTL_BINARY_ARRAY<RTLP_FLS_CALLBACK_ENTRY,4,4> *);
+	static void SlotFree(RTL_BINARY_ARRAY<RTLP_FLS_CALLBACK_ENTRY,4,4> *,unsigned long);
+};
+
+struct RTL_BINARY_ARRAY<RTLP_FLS_SLOT,4,4>
+{
+	static RTL_BINARY_ARRAY<RTLP_FLS_SLOT,4,4>::RTL_BINARY_ARRAY_CHUNK * ChunkAllocate(RTL_BINARY_ARRAY<RTLP_FLS_SLOT,4,4> *,unsigned long);
+	static long SetValue(RTL_BINARY_ARRAY<RTLP_FLS_SLOT,4,4> *,unsigned long,RTLP_FLS_SLOT,unsigned long);
+};
+
 class SC_DEVICE
 {
-	long ExtractDeviceStrings();
 	long ExtractFaultDomainIds();
 protected:
 	virtual long GetStoragePropertyPost(_STORAGE_PROPERTY_ID,_STORAGE_DESCRIPTOR_HEADER *);
@@ -145,6 +156,8 @@ public:
 
 class SC_DISK
 {
+	long GenerateId();
+	long GetFruIdDescPost(_STORAGE_FRU_ID_DESCRIPTOR *);
 protected:
 	virtual long GetStoragePropertyPost(_STORAGE_PROPERTY_ID,_STORAGE_DESCRIPTOR_HEADER *);
 	virtual long GetStoragePropertyPre(_STORAGE_PROPERTY_ID,unsigned long *);
@@ -168,7 +181,7 @@ public:
 struct SC_ENV
 {
 	static long CreateGuid(_GUID *);
-	static void * Allocate(unsigned __int64);
+	static void * Allocate(unsigned __int64,unsigned long,unsigned char);
 	static void Free(void *);
 };
 
@@ -179,8 +192,8 @@ struct SC_ENV_ALLOCATOR
 
 class SC_GPT
 {
-	long ReadEntries(GPT_HEADER *,_GPT_ENTRY * *);
-	long ReadEntries(GPT_HEADER *,_GPT_ENTRY *);
+	long ReadEntries(GPT_HEADER *,GPT_ENTRY * *);
+	long ReadEntries(GPT_HEADER *,GPT_ENTRY *);
 	long ReadHeader(unsigned long,GPT_HEADER *);
 public:
 	long CreatePartitionTable(_CREATE_DISK *);
@@ -274,8 +287,9 @@ struct SMKM_STORE_MGR<SM_TRAITS>
 	static unsigned long SmFeReadInitiate(SMKM_STORE_MGR<SM_TRAITS> *,_SM_PAGE_KEY *,unsigned long *,unsigned __int64 *,unsigned long *);
 	static unsigned long SmIoCtxWorkItemComplete(_ST_WORK_ITEM_HDR *,SMKM_STORE_MGR<SM_TRAITS> *,SMKM_STORE<SM_TRAITS> *,long);
 	static unsigned long SmpPageEvict(SMKM_STORE_MGR<SM_TRAITS> *,_SM_PAGE_KEY *,unsigned long,void *);
-	static void SmAsyncReadQueueInsert(SMKM_STORE_MGR<SM_TRAITS>::_SM_ASYNC_READ_QUEUE *,SMKM_STORE_MGR<SM_TRAITS>::_SM_ASYNC_DIRECT_READ_CTX *,unsigned long);
+	static void SmAsyncReadQueueInsert(SMKM_STORE_MGR<SM_TRAITS> *,SMKM_STORE_MGR<SM_TRAITS>::_SM_ASYNC_READ_QUEUE *,SMKM_STORE_MGR<SM_TRAITS>::_SM_ASYNC_DIRECT_READ_CTX *,unsigned long);
 	static void SmAsyncReadQueueWorker(void *);
+	static void SmCleanup(SMKM_STORE_MGR<SM_TRAITS> *);
 	static void SmCompressContextDeleteThreadParams(SMKM_STORE_MGR<SM_TRAITS>::_SM_COMPRESS_THREAD_PARAMS *);
 	static void SmCompressContextQueueEntry(SMKM_STORE_MGR<SM_TRAITS>::_SM_COMPRESS_CONTEXT *,SMKM_STORE_MGR<SM_TRAITS>::_SM_COMPRESS_ENTRY *);
 	static void SmCompressContextUpdateMemoryCondition(SMKM_STORE_MGR<SM_TRAITS>::_SM_COMPRESS_CONTEXT *,_SMP_MEMORY_CONDITION,unsigned long);
@@ -298,7 +312,6 @@ struct SMKM_STORE_MGR<SM_TRAITS>
 	static void SmHighMemPriorityWatchdogWorker(void *);
 	static void SmInitialize(SMKM_STORE_MGR<SM_TRAITS> *,_SMKM_STORE_MGR_PARAMS *);
 	static void SmProcessAddCompletion(SMKM_STORE_MGR<SM_TRAITS> *,SMKM_STORE_MGR<SM_TRAITS>::_SM_WORK_ITEM *,unsigned long,SMKM_STORE<SM_TRAITS> *,long);
-	static void SmReInitialize(SMKM_STORE_MGR<SM_TRAITS> *);
 	static void SmUpdateMemoryConditions(SMKM_STORE_MGR<SM_TRAITS> *,_SMP_MEMORY_CONDITION,unsigned long);
 	static void SmWorkItemFree(SMKM_STORE_MGR<SM_TRAITS> *,SMKM_STORE<SM_TRAITS> *,_ST_WORK_ITEM_HDR *,long *);
 	static void SmWorkItemFreeResource(SMKM_STORE_MGR<SM_TRAITS> *,SMKM_STORE_MGR<SM_TRAITS>::_SM_WORK_ITEM *,SMKM_STORE_MGR<SM_TRAITS>::_SM_IO_CONTEXT *);
@@ -356,7 +369,6 @@ struct ST_STORE<SM_TRAITS>
 	static long StDmSinglePageRetrieveSync(ST_STORE<SM_TRAITS>::_ST_DATA_MGR *,void *,void *,unsigned long);
 	static long StDmSinglePageTransfer(ST_STORE<SM_TRAITS>::_ST_DATA_MGR *,void *,char *,void *,void *,ST_STORE<SM_TRAITS>::_ST_PAGE_LOCATION *,ST_STORE<SM_TRAITS>::_STDM_READ_CONTEXT *);
 	static long StDmStart(ST_STORE<SM_TRAITS> *,ST_STORE<SM_TRAITS>::_ST_DATA_MGR *,_STDM_PARAMETERS *,_RTL_BITMAP *,unsigned long *,unsigned long);
-	static long StDmpCurrentRegionWrite(ST_STORE<SM_TRAITS>::_ST_DATA_MGR *);
 	static long StDmpDummyPageRecordAllocate(ST_STORE<SM_TRAITS>::_ST_DATA_MGR *);
 	static long StDmpSinglePageAdd(ST_STORE<SM_TRAITS>::_ST_DATA_MGR *,ST_STORE<SM_TRAITS>::_ST_IO_PARAMS *,ST_STORE<SM_TRAITS>::_ST_WORK_ITEM *,unsigned long *);
 	static long StDmpSinglePageFindSpace(ST_STORE<SM_TRAITS>::_ST_DATA_MGR *,unsigned long,unsigned long,char * *,unsigned long *);
@@ -368,7 +380,6 @@ struct ST_STORE<SM_TRAITS>
 	static long StMetaRegionsUpdate(ST_STORE<SM_TRAITS> *,ST_STORE<SM_TRAITS>::_ST_WORK_ITEM *);
 	static long StNpEnumBTreeNodes(NP_CONTEXT::NP_CTX *,long (*)(void *,void *,unsigned __int64 *),void *);
 	static long StNpLeafPageIn(NP_CONTEXT::NP_CTX *,void *,unsigned __int64);
-	static long StStagingRegionIssueIo(ST_STORE<SM_TRAITS>::_ST_DATA_MGR *,ST_STORE<SM_TRAITS>::_ST_STAGING_REGION *,unsigned long);
 	static long StStart(ST_STORE<SM_TRAITS> *,_ST_CREATE_PARAMS *);
 	static long StWorkItemProcess(ST_STORE<SM_TRAITS> *,ST_STORE<SM_TRAITS>::_ST_WORK_ITEM *);
 	static unsigned __int64 StNpLeafPageOut(NP_CONTEXT::NP_CTX *,void *);
@@ -419,35 +430,61 @@ struct StEtaHelper
 };
 
 _EVENT_DESCRIPTOR const * * SmEtwDescriptorPtrs;
+_RTL_FUNCTION_OVERRIDE_INDEX const * RtlpGetFunctionOverrideIndex(_RTL_FUNCTION_OVERRIDE_INFORMATION const *,unsigned long);
 _SMKM_GLOBALS SmKmGlobals;
 _SM_GLOBALS SmGlobals;
+_SYMCRYPT_ECURVE * g_pEcurveP256;
+_SYMCRYPT_ECURVE * g_pEcurveP384;
 int CompareLangIDs(void const *,void const *);
 int CompareLangName(void const *,void const *);
 int IsNeutralLanguageItem(CultureDataType const *);
-int wil_details_FeatureReporting_ReportUsageToServiceDirect(wil_details_FeatureReportingCache *,unsigned int,int,int,wil_details_ServiceReportingKind,unsigned int,unsigned __int64);
+long MinCryptCopyAsn1IntToFixedBuffer(unsigned char const *,unsigned long,unsigned char *,unsigned long);
 long RtlStringCbCopyUnicodeString(unsigned short *,unsigned __int64,_UNICODE_STRING const *);
 long ScAnsiToUnicodeString(char *,_UNICODE_STRING *);
-long SmFirstTimeInit(unsigned long,unsigned long);
+long ScExtractDeviceStrings(_STORAGE_DEVICE_DESCRIPTOR *,_UNICODE_STRING *,_UNICODE_STRING *,_UNICODE_STRING *,_UNICODE_STRING *);
 long SmKeyConvert(_MM_STORE_KEY *,_SM_PAGE_KEY *);
 long SmKmIssueFileIo(_SMKM_FILE_INFO *,_SMKM_ISSUE_IO_PARAMS *,_LARGE_INTEGER *,void (*)(void *,_IO_STATUS_BLOCK *,unsigned long),void *);
 long SmKmProbeAndLockAddress(void *,unsigned __int64,_MDL *,unsigned long);
 long SmpDeviceIoCompletion(_DEVICE_OBJECT *,_IRP *,void *);
+long SmpProcessQueryStoreStats(_EPROCESS *,_ST_STATS *);
 long SmpStoreMgrCallback(_SMKM_STORE_LIST *,void *,_SMKM_CALLBACK_TYPE);
 long StringCchCopyNW(unsigned short *,unsigned __int64,unsigned short const *,unsigned __int64);
+unsigned char const * const rgb2005DMDPreviewReleaseRoot_Name;
+unsigned char const * const rgb2005DMDPreviewReleaseRoot_PubKeyInfo;
+unsigned char const * const rgb2005DMDRoot_Name;
+unsigned char const * const rgb2005DMDRoot_PubKeyInfo;
+unsigned char const * const rgbMFDMDTestRoot_Name;
+unsigned char const * const rgbMFDMDTestRoot_PubKeyInfo;
+unsigned char const * const rgbMicrosoftFlightRoot1_Name;
+unsigned char const * const rgbMicrosoftFlightRoot1_PubKeyInfo;
+unsigned char const * const rgbMicrosoftIdentityRoot2020_Name;
+unsigned char const * const rgbMicrosoftIdentityRoot2020_PubKeyInfo;
+unsigned char const * const rgbMicrosoftRoot0_Name;
+unsigned char const * const rgbMicrosoftRoot0_PubKeyInfo;
+unsigned char const * const rgbMicrosoftRoot1_Name;
+unsigned char const * const rgbMicrosoftRoot1_PubKeyInfo;
+unsigned char const * const rgbMicrosoftRoot2_Name;
+unsigned char const * const rgbMicrosoftRoot2_PubKeyInfo;
+unsigned char const * const rgbMicrosoftRoot3_Name;
+unsigned char const * const rgbMicrosoftRoot3_PubKeyInfo;
+unsigned char const * const rgbMicrosoftRoot4_Name;
+unsigned char const * const rgbMicrosoftRoot4_PubKeyInfo;
+unsigned char const * const rgbMicrosoftRoot5_Name;
+unsigned char const * const rgbMicrosoftRoot5_PubKeyInfo;
+unsigned char const * const rgbMicrosoftThirdPartyMarketplaceRoot_Name;
+unsigned char const * const rgbMicrosoftThirdPartyMarketplaceRoot_PubKeyInfo;
+unsigned char const * const rgbTestRoot0_Name;
+unsigned char const * const rgbTestRoot0_PubKeyInfo;
+unsigned char const * const rgbTestRoot1_Name;
+unsigned char const * const rgbTestRoot1_PubKeyInfo;
 unsigned long StLockTryAcquireExclusive(VLOCK *,unsigned long *);
-void (* g_wil_details_pfnFeatureLoggingHook)(unsigned int,FEATURE_LOGGED_TRAITS const *,FEATURE_ERROR const *,int,wil_ReportingKind const *,wil_VariantReportingKind const *,unsigned char,unsigned __int64);
-void (* g_wil_details_recordFeatureUsage)(unsigned int,wil_details_ServiceReportingKind,unsigned int,wil_details_FeatureReportingCache *,wil_details_RecordUsageResult *);
 void * SmAllocWrapper(unsigned __int64,void *);
 void ScTrimString(char *);
 void SmFatalHeapCorruptionDumpCallback(_KBUGCHECK_CALLBACK_REASON,_KBUGCHECK_REASON_CALLBACK_RECORD *,void *,unsigned long);
 void SmFatalPageErrorDumpCallback(_KBUGCHECK_CALLBACK_REASON,_KBUGCHECK_REASON_CALLBACK_RECORD *,void *,unsigned long);
 void SmFreeWrapper(void *,void *);
-void SmpFlushStorePages(void *);
 void SmpIoCompletionApc(void *,_IO_STATUS_BLOCK *,unsigned long);
 void TlgAggregateInternalFlushTimerCallbackKernelMode(_EX_TIMER *,void *);
 void TlgAggregateInternalFlushWorkItemRoutineKernelMode(void *);
 void TlgAggregateInternalProviderCallback(_GUID const *,unsigned long,unsigned char,unsigned __int64,unsigned __int64,_EVENT_FILTER_DESCRIPTOR *,void *);
 void TlgAggregateInternalRegisteredProviderEtwCallback(_GUID const *,unsigned long,unsigned char,unsigned __int64,unsigned __int64,_EVENT_FILTER_DESCRIPTOR *,void *);
-void wil_details_FeatureReporting_IncrementOpportunityInCache(wil_details_FeatureReportingCache *,wil_details_ServiceReportingKind,unsigned int,wil_details_RecordUsageResult *);
-void wil_details_FeatureReporting_IncrementUsageInCache(wil_details_FeatureReportingCache *,wil_details_ServiceReportingKind,unsigned int,wil_details_RecordUsageResult *);
-wil_details_RecordUsageResult wil_details_FeatureReporting_RecordUsageInCache(wil_details_FeatureReportingCache *,wil_details_ServiceReportingKind,unsigned int,unsigned int);
